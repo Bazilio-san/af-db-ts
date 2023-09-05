@@ -1,6 +1,8 @@
 import { ConnectionPool, IColumnMetadata, ISqlType } from 'mssql';
 import { DateTimeOptions } from 'luxon';
 
+export type IDialect = 'mssql' | 'pg';
+
 /**
  * Имя поля БД
  */
@@ -33,10 +35,14 @@ export interface IFieldSchema {
   escapeOnlySingleQuotes?: boolean,
 }
 
+export interface IDateTimeOptionsEx extends DateTimeOptions {
+  correctionMillis?: number,
+}
+
 /**
  * Массив объектов с метаинформацией о полях
  */
-export type TRecordSchema = IFieldSchema[]
+export type TRecordSchema = IFieldSchema[] & { dateTimeOptions?: IDateTimeOptionsEx, dialect?: IDialect }
 
 /**
  * Метаинформацией о полях, проиндексированная именами полей. (sql.recordset.columns)
@@ -112,6 +118,7 @@ export interface TGetRecordSchemaOptions {
   fieldTypeCorrection?: TFieldTypeCorrection,
   mergeRules?: TMergeRules,
   noReturnMergeResult?: boolean,
+  dateTimeOptions?: IDateTimeOptionsEx,
 }
 
 export interface TGetPoolConnectionOptions {
@@ -124,8 +131,6 @@ export interface TGetPoolConnectionOptions {
   onError?: 'exit' | 'throw'
   errorCode?: number
 }
-
-export type IDialect = 'mssql' | 'pg';
 
 interface IDBConfigCommon {
   dialect: IDialect,
@@ -172,12 +177,8 @@ export interface IPrepareSqlStringArgs {
   escapeOnlySingleQuotes?: boolean,
 }
 
-export interface DateTimeOptionsEx extends DateTimeOptions {
-  correctionMillis: number,
-}
-
 export interface IValueForSQLPartialArgs {
-  dateTimeOptions?: DateTimeOptionsEx,
+  dateTimeOptions?: IDateTimeOptionsEx,
   dialect?: IDialect
   escapeOnlySingleQuotes?: boolean,
   needValidate?: boolean, // Флаг необходимости валидации значения
@@ -204,6 +205,8 @@ export interface IGetMergeSQLOptions extends IValueForSQLPartialArgs, IPrepareRe
   isPrepareForSQL?: boolean,
 }
 
+export type ISchemaArray = ISchemaItem[] & { dateTimeOptions?: IDateTimeOptionsEx, dialect?: IDialect };
+
 export interface TGetRecordSchemaResult {
 
   connectionId: string,
@@ -212,7 +215,7 @@ export interface TGetRecordSchemaResult {
   dbSchemaAndTable: string,
   columns: IColumnMetadata,
   schemaAssoc: Partial<IColumnMetadata>,
-  schema: ISchemaItem[],
+  schema: ISchemaArray,
   fields: string[],
   insertFields: string[],
   insertFieldsList: string,

@@ -39,7 +39,7 @@ export {
   IPrepareSqlStringArgs,
   IGetValueForSQLArgs,
   IDialect,
-  DateTimeOptionsEx,
+  IDateTimeOptionsEx,
   IPrepareArgs,
   IPrepareRecordParams,
   ISchemaItem,

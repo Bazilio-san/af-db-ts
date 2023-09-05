@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { getBool, rn } from 'af-tools-ts';
-import { DateTimeOptionsEx, IGetValueForSQLArgs, IPrepareSqlStringArgs } from './interfaces';
+import { IDateTimeOptionsEx, IGetValueForSQLArgs, IPrepareSqlStringArgs } from './interfaces';
 import { prepareSqlString, sql } from './sql';
 import { mssqlEscape, q } from './utils';
 
@@ -59,7 +59,7 @@ const datetime = (
     type: any,
     nullable?: boolean,
     inputDateFormat?: string,
-    dateTimeOptions?: DateTimeOptionsEx,
+    dateTimeOptions?: IDateTimeOptionsEx,
     noQuotes?: boolean,
     scale?: number,
   },
@@ -103,7 +103,7 @@ const datetime = (
     }
   }
   millis = Math.max(millis + (dateTimeOptions?.correctionMillis || 0), 0);
-  const luxonDate = DateTime.fromMillis(millis);
+  const luxonDate = DateTime.fromMillis(millis, dateTimeOptions?.zone ? { zone: dateTimeOptions.zone } : undefined);
 
   switch (type) {
     case 'datetime':

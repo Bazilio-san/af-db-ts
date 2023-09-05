@@ -12,7 +12,6 @@ import { IDBConfig,
   IGetMergeSQLOptions,
   IGetValueForSQLArgs, IPrepareArgs,
   IPrepareSqlStringArgs,
-  ISchemaItem,
   TDBRecord,
   TFieldName,
   TFieldTypeCorrection,
@@ -20,7 +19,7 @@ import { IDBConfig,
   TGetRecordSchemaOptions,
   TRecordSchema,
   TRecordSchemaAssoc,
-  TRecordSet } from './interfaces';
+  TRecordSet, ISchemaArray } from './interfaces';
 
 export { sql };
 
@@ -102,12 +101,17 @@ export const correctRecordSchema = (
  * Все поля записи обрабатываются функцией getValueForSQL
  */
 export const prepareRecordForSQL = (record: TDBRecord, args: IPrepareArgs) => {
-  const { addValues4NotNullableFields, addMissingFields } = args;
+  const { recordSchema, addValues4NotNullableFields, addMissingFields } = args;
   const { dateTimeOptions, needValidate, escapeOnlySingleQuotes, dialect } = args;
   const options: IGetValueForSQLArgs = {
-    value: null, fieldSchema: '', dateTimeOptions, needValidate, escapeOnlySingleQuotes, dialect,
+    value: null,
+    fieldSchema: '',
+    needValidate,
+    escapeOnlySingleQuotes,
+    dialect,
+    dateTimeOptions: { ...(recordSchema.dateTimeOptions || {}), ...(dateTimeOptions || {}) },
   };
-  args.recordSchema.forEach((fieldSchema: IFieldSchema) => {
+  recordSchema.forEach((fieldSchema: IFieldSchema) => {
     const { name = '_#foo#_', readOnly } = fieldSchema;
     if (readOnly) {
       return;
@@ -147,7 +151,13 @@ export const getRecordValuesForSQL = (record: TDBRecord, recordSchema: TRecordSc
       return;
     }
     if (Object.prototype.hasOwnProperty.call(record, name)) {
-      recordValuesForSQL[name] = getValueForSQL({ value: record[name], fieldSchema, escapeOnlySingleQuotes: true });
+      recordValuesForSQL[name] = getValueForSQL({
+        value: record[name],
+        fieldSchema,
+        escapeOnlySingleQuotes: true,
+        dateTimeOptions: recordSchema.dateTimeOptions,
+        dialect: recordSchema.dialect,
+      });
     }
   });
   return recordValuesForSQL;
@@ -184,6 +194,7 @@ export const getRecordSchema = async (
       withClause,
     } = {},
     noReturnMergeResult,
+    dateTimeOptions,
   } = options;
   const cPool = await db.getPoolConnection(connectionId, { prefix: 'getRecordSchema' });
   const request = new sql.Request(cPool);
@@ -203,14 +214,16 @@ export const getRecordSchema = async (
   let schemaAssoc: Partial<IColumnMetadata> = _.omit<IColumnMetadata>(columns, omitFields2);
   schemaAssoc = Array.isArray(pickFields) ? _.pick(schemaAssoc, pickFields) : schemaAssoc;
   correctRecordSchema(schemaAssoc as TRecordSchemaAssoc, fieldTypeCorrection);
-  const schema: ISchemaItem[] = _.map(schemaAssoc, (fo) => (fo))
+  const schema: ISchemaArray = _.map(schemaAssoc, (fo) => (fo))
     .sort((a, b) => {
       const ai = (a?.index || 0);
       const bi = (b?.index || 0);
       if (ai > bi) return 1;
       if (ai < bi) return -1;
       return 0;
-    }) as ISchemaItem[];
+    }) as ISchemaArray;
+  schema.dateTimeOptions = dateTimeOptions;
+
   const fields = schema.map((o) => o?.name).filter(Boolean) as string[];
   const fieldsList = fields.map((fName) => `[${fName}]`)
     .join(', ');
@@ -357,8 +370,8 @@ END CATCH;`;
 /**
  * Возвращает проверенное и серилизованное значение
  */
-export const serialize = (value: any, fieldSchema: IFieldSchema): string | number | null => {
-  const val = getValueForSQL({ value, fieldSchema });
+export const serialize = (args: IGetValueForSQLArgs): string | number | null => {
+  const val = getValueForSQL(args);
   if (val == null || val === 'NULL') {
     return null;
   }
@@ -373,10 +386,16 @@ export const serialize = (value: any, fieldSchema: IFieldSchema): string | numbe
  */
 export const getSqlSetExpression = (record: TDBRecord, recordSchema: TRecordSchema): string => {
   const setArray: string[] = [];
+  const { dateTimeOptions } = recordSchema;
   recordSchema.forEach((fieldSchema) => {
     const { name = '_#foo#_' } = fieldSchema;
     if (Object.prototype.hasOwnProperty.call(record, name)) {
-      setArray.push(`[${name}] = ${getValueForSQL({ value: record[name], fieldSchema, escapeOnlySingleQuotes: true })}`);
+      setArray.push(`[${name}] = ${getValueForSQL({
+        value: record[name],
+        fieldSchema,
+        dateTimeOptions,
+        escapeOnlySingleQuotes: true,
+      })}`);
     }
   });
   return `SET ${setArray.join(', ')}`;
@@ -390,11 +409,18 @@ export const getSqlSetExpression = (record: TDBRecord, recordSchema: TRecordSche
 export const getSqlValuesExpression = (record: TDBRecord, recordSchema: TRecordSchema, addOutputInserted: boolean = false): string => {
   const fieldsArray: string[] = [];
   const valuesArray: string[] = [];
+  const { dateTimeOptions } = recordSchema;
   recordSchema.forEach((fieldSchema) => {
     const { name = '_#foo#_' } = fieldSchema;
     if (Object.prototype.hasOwnProperty.call(record, name)) {
       fieldsArray.push(name);
-      valuesArray.push(String(getValueForSQL({ value: record[name], fieldSchema, escapeOnlySingleQuotes: true })));
+      const val = getValueForSQL({
+        value: record[name],
+        fieldSchema,
+        dateTimeOptions,
+        escapeOnlySingleQuotes: true,
+      });
+      valuesArray.push(String(val));
     }
   });
   return `([${fieldsArray.join('], [')}]) ${addOutputInserted ? ' OUTPUT inserted.* ' : ''} VALUES (${valuesArray.join(', ')})`;
