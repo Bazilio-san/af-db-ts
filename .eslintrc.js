@@ -19,16 +19,5 @@ module.exports = {
     '**/*.json',
     '**/dist/**/*.*',
   ],
-  rules: {
-    '@typescript-eslint/no-unused-vars': 'warn',
-    'object-curly-newline': [
-      'error',
-      {
-        ObjectExpression: { multiline: true, minProperties: 8 },
-        ObjectPattern: { multiline: true, minProperties: 8 },
-        ImportDeclaration: { multiline: true, minProperties: 8 },
-        ExportDeclaration: { multiline: true, minProperties: 8 },
-      },
-    ],
-  },
+  rules: {},
 };

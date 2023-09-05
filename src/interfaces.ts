@@ -220,11 +220,11 @@ export interface TGetRecordSchemaResult {
   updateFields: string[],
   mergeIdentity: string[],
 
-  getMergeSQL: (packet: TRecordSet, prepareOptions?: IGetMergeSQLOptions) => string,
+  getMergeSQL: (_packet: TRecordSet, _prepareOptions?: IGetMergeSQLOptions) => string,
 
-  getInsertSQL: (packet: TRecordSet, addOutputInserted?: boolean) => string,
+  getInsertSQL: (_packet: TRecordSet, _addOutputInserted?: boolean) => string,
 
-  getUpdateSQL: (record: TRecordSet) => string,
+  getUpdateSQL: (_record: TRecordSet) => string,
 }
 
 export interface IConnectionPools {

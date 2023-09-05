@@ -73,7 +73,9 @@ export const getValueForSQL = (args: IGetValueForSQLArgs): string | number | nul
     return `${val}`;
   }
 
-  const prepareSqlStringArgs: IPrepareSqlStringArgs = { value, nullable, length, defaultValue, noQuotes, escapeOnlySingleQuotes };
+  const prepareSqlStringArgs: IPrepareSqlStringArgs = {
+    value, nullable, length, defaultValue, noQuotes, escapeOnlySingleQuotes,
+  };
   switch (type) {
     case 'json':
       if (Array.isArray(value) || typeof value === 'object') {

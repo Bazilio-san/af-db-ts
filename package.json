@@ -1,6 +1,6 @@
 {
   "name": "af-db-ts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A highly specialized function library",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -68,7 +68,7 @@
     "url": "git+https://github.com/Bazilio-san/af-db-ts.git"
   },
   "engines": {
-    "node": ">= 13",
+    "node": ">= 14",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   }

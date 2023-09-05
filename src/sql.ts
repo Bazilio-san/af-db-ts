@@ -7,8 +7,7 @@ import * as cache from 'memory-cache';
 import * as db from './db';
 import { q, mssqlEscape } from './utils';
 import { getValueForSQL } from './get-value-for-sql';
-import {
-  IDBConfig,
+import { IDBConfig,
   IFieldSchema,
   IGetMergeSQLOptions,
   IGetValueForSQLArgs, IPrepareArgs,
@@ -21,8 +20,7 @@ import {
   TGetRecordSchemaOptions,
   TRecordSchema,
   TRecordSchemaAssoc,
-  TRecordSet,
-} from './interfaces';
+  TRecordSet } from './interfaces';
 
 export { sql };
 
@@ -106,7 +104,9 @@ export const correctRecordSchema = (
 export const prepareRecordForSQL = (record: TDBRecord, args: IPrepareArgs) => {
   const { addValues4NotNullableFields, addMissingFields } = args;
   const { dateTimeOptions, needValidate, escapeOnlySingleQuotes, dialect } = args;
-  const options: IGetValueForSQLArgs = { value: null, fieldSchema: '', dateTimeOptions, needValidate, escapeOnlySingleQuotes, dialect };
+  const options: IGetValueForSQLArgs = {
+    value: null, fieldSchema: '', dateTimeOptions, needValidate, escapeOnlySingleQuotes, dialect,
+  };
   args.recordSchema.forEach((fieldSchema: IFieldSchema) => {
     const { name = '_#foo#_', readOnly } = fieldSchema;
     if (readOnly) {

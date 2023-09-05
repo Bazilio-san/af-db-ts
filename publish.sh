@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expected_branch="ts"
+expected_branch="master"
 
 c='\033[0;35m'
 y='\033[0;33m'
