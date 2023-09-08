@@ -12,6 +12,7 @@ export {
   prepareRecordForSQL,
   prepareDataForSQL,
   getRowsAffected,
+  sql,
 } from './sql';
 
 export {
