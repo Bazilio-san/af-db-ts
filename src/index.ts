@@ -108,3 +108,7 @@ export { prepareSqlStringPg, prepareSqlValuePg } from './pg/prepare-value';
 export { queryPg } from './pg/query-pg';
 
 export { getFieldsAndValuesPg, getTableSchemaPg } from './pg/table-schema';
+
+export { closeAllDb, graceExit, logSqlError } from './common';
+
+export { setLogger } from './logger-error';

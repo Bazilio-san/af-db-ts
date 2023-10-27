@@ -16,6 +16,11 @@ export const logSqlError = (err: Error | any, throwError?: boolean, textSQL?: st
   }
 };
 
+export const closeAllDb = async () => {
+  await closeAllPgConnectionsPg();
+  await closeAllDbConnectionsMs();
+};
+
 /**
  * Закрывает все соединения с БД и завершает работу скрипта
  */
