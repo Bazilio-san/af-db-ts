@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon';
 import { getBool, rn } from 'af-tools-ts';
-import { IDateTimeOptionsEx, IGetValueForSQLArgs, IPrepareSqlStringArgs } from './interfaces';
-import { prepareSqlString, sql } from './sql';
+import { prepareSqlStringMs, sql } from './sql';
 import { mssqlEscape, q } from './utils';
+import { IGetValueForSqlArgsMs, IPrepareSqlStringArgsMs } from '../@types/i-ms';
+import { IDateTimeOptionsEx } from '../@types/i-common';
 
 export const binToHexString = (value: any) => (value ? `0x${value.toString(16).toUpperCase()}` : null);
 
@@ -184,7 +185,7 @@ const array = (
 /**
  * Возвращает значение, готовое для использования в строке SQL запроса
  */
-export const getValueForSQL = (args: IGetValueForSQLArgs): string | number | null => {
+export const getValueForSqlMs = (args: IGetValueForSqlArgsMs): string | number | null => {
   let { value, fieldSchema, escapeOnlySingleQuotes } = args;
   const { dateTimeOptions, needValidate } = args;
   if (typeof fieldSchema === 'string') {
@@ -215,7 +216,7 @@ export const getValueForSQL = (args: IGetValueForSQLArgs): string | number | nul
     min, max, value: value_, type, nullable, defaultValue, needValidate, fieldName,
   });
 
-  const prepareSqlStringArgs: IPrepareSqlStringArgs = {
+  const prepareSqlStringArgs: IPrepareSqlStringArgsMs = {
     value, nullable, length, defaultValue, noQuotes, escapeOnlySingleQuotes,
   };
   switch (type) {
@@ -223,7 +224,7 @@ export const getValueForSQL = (args: IGetValueForSQLArgs): string | number | nul
       if (Array.isArray(value) || typeof value === 'object') {
         value = JSON.stringify(value);
       }
-      return prepareSqlString({ ...prepareSqlStringArgs, value });
+      return prepareSqlStringMs({ ...prepareSqlStringArgs, value });
 
     case 'string':
     case sql.Char:
@@ -233,7 +234,7 @@ export const getValueForSQL = (args: IGetValueForSQLArgs): string | number | nul
     case sql.VarChar:
     case sql.NVarChar:
     case sql.Xml:
-      return prepareSqlString(prepareSqlStringArgs);
+      return prepareSqlStringMs(prepareSqlStringArgs);
 
     case 'uid':
     case 'uuid':
@@ -244,7 +245,7 @@ export const getValueForSQL = (args: IGetValueForSQLArgs): string | number | nul
       } else {
         value = value.substring(0, 36).toUpperCase();
       }
-      return prepareSqlString({ ...prepareSqlStringArgs, value, length: 0 });
+      return prepareSqlStringMs({ ...prepareSqlStringArgs, value, length: 0 });
 
     case 'datetime':
     case 'date':
@@ -307,13 +308,18 @@ export const getValueForSQL = (args: IGetValueForSQLArgs): string | number | nul
     case sql.Geography:
     case sql.Geometry:
     case sql.Variant:
-      return prepareSqlString(prepareSqlStringArgs);
+      return prepareSqlStringMs(prepareSqlStringArgs);
     case 'array': {
       return array({
         value, defaultValue, type, arrayType, fieldName, nullable, needValidate,
       });
     }
     default:
-      return prepareSqlString(prepareSqlStringArgs);
+      return prepareSqlStringMs(prepareSqlStringArgs);
   }
 };
+
+/**
+ * @deprecated since version 2.0.0
+ */
+export const getValueForSQL = getValueForSqlMs;

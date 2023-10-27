@@ -1,24 +1,25 @@
-import * as config from 'config';
-import { magenta } from 'af-color';
+import config from 'config';
 import { echo } from 'af-echo-ts';
 import * as sql from 'mssql';
-import { ConnectionPool, IResult } from 'mssql';
-import * as _ from 'lodash';
+import { ConnectionPool } from 'mssql';
 import { sleep } from 'af-tools-ts';
-import { IConnectionPools, TGetPoolConnectionOptions } from './interfaces';
+import { IDbOptionsMs, IDbsMs } from '../@types/i-config';
+import { logSqlError } from '../common';
+import { IConnectionPoolsMs, TGetPoolConnectionOptionsMs } from '../@types/i-ms';
 
-export const getFirstConfigId = () => Object.keys(config.get<any>('database') || {}).filter((v) => !['dialect', '_common_'].includes(v))[0];
-export const getDbConfig = (connectionId: string) => config.get<any>(`database.${connectionId}`);
+const mssqlConfigs = config.get<{ options: IDbOptionsMs, dbs: IDbsMs }>('db.postgres');
 
-export const pools: IConnectionPools = {};
+export const getDbConfigMs = (connectionId: string) => mssqlConfigs.dbs[connectionId];
+
+export const poolsCacheMs: IConnectionPoolsMs = {};
 
 /**
  * Возвращает пул соединений для БД, соответствующей преданному ID соединения (borf|cep|hr|global)
  * В случае, если не удается создать пул или открыть соединение, прерывает работу скрипта
  */
-export const getPoolConnection = async (connectionId: string, options: TGetPoolConnectionOptions = {}): Promise<ConnectionPool | undefined> => {
+export const getPoolConnectionMs = async (connectionId: string, options: TGetPoolConnectionOptionsMs = {}): Promise<ConnectionPool | undefined> => {
   const { prefix = '', errorCode = 0 } = options;
-  let pool = pools[connectionId];
+  let pool = poolsCacheMs[connectionId];
   if (pool?.connected) {
     return pool;
   }
@@ -52,11 +53,11 @@ export const getPoolConnection = async (connectionId: string, options: TGetPoolC
     if (typeof pool !== 'object') {
       resume(`Can't create connection pool "${connectionId}"`);
     }
-    pools[connectionId] = pool;
+    poolsCacheMs[connectionId] = pool;
     // @ts-ignore
     pool._connectionId = connectionId;
     pool.on('close', () => {
-      delete pools[connectionId];
+      delete poolsCacheMs[connectionId];
     });
     pool.on('error', (err) => {
       echo.error('POOL-ERROR', err);
@@ -76,7 +77,7 @@ export const getPoolConnection = async (connectionId: string, options: TGetPoolC
  * prefix - Префикс в сообщении о закрытии пула (название синхронизации)
  * noEcho - подавление сообщений о закрытии соединения
  */
-export const closeDbConnections = async (poolsToClose: ConnectionPool | ConnectionPool[] | string | string[], prefix?: string, noEcho?: boolean) => {
+export const closeDbConnectionsMs = async (poolsToClose: ConnectionPool | ConnectionPool[] | string | string[], prefix?: string, noEcho?: boolean) => {
   if (!Array.isArray(poolsToClose)) {
     // @ts-ignore
     poolsToClose = [poolsToClose];
@@ -88,13 +89,13 @@ export const closeDbConnections = async (poolsToClose: ConnectionPool | Connecti
     if (pool) {
       if (typeof pool === 'string') {
         connectionId = pool;
-        pool = pools[connectionId];
+        pool = poolsCacheMs[connectionId];
       } else if (typeof pool === 'object') {
         // @ts-ignore
         connectionId = pool._connectionId;
       }
       if (connectionId) {
-        delete pools[connectionId];
+        delete poolsCacheMs[connectionId];
       }
       if (pool && pool.close) {
         try {
@@ -117,14 +118,30 @@ export const closeDbConnections = async (poolsToClose: ConnectionPool | Connecti
 };
 
 /**
+ * @deprecated since version 2.0.0
+ */
+export const closeAllDbConnections = async (prefix?: string, noEcho?: boolean) => {
+  const poolsToClose = Object.values(poolsCacheMs);
+  await closeDbConnectionsMs(poolsToClose, prefix, noEcho);
+};
+
+/**
  * Закрывает все соединения с БД
  *
  * prefix - Префикс в сообщении о закрытии пула (название синхронизации)
  * noEcho - подавление сообщений о закрытии соединения
  */
-export const closeAllDbConnections = async (prefix?: string, noEcho?: boolean) => {
-  const poolsToClose = _.map(pools, (p) => p);
-  await closeDbConnections(poolsToClose, prefix, noEcho);
+export const closeAllDbConnectionsMs = async (prefix?: string, noEcho?: boolean) => {
+  const poolsToClose = Object.values(poolsCacheMs);
+  await closeDbConnectionsMs(poolsToClose, prefix, noEcho);
+};
+
+/**
+ * @deprecated since version 2.0.0
+ */
+export const closeDbConnectionsAndExit = async (poolsToClose: ConnectionPool | ConnectionPool[], prefix?: string) => {
+  await closeDbConnectionsMs(poolsToClose, prefix);
+  process.exit(0);
 };
 
 /**
@@ -133,63 +150,15 @@ export const closeAllDbConnections = async (prefix?: string, noEcho?: boolean) =
  * poolsToClose - пул или массив пулов
  * prefix - Префикс в сообщении о закрытии пула (название синхронизации)
  */
-export const closeDbConnectionsAndExit = async (poolsToClose: ConnectionPool | ConnectionPool[], prefix?: string) => {
-  await closeDbConnections(poolsToClose, prefix);
+export const closeDbConnectionsAndExitMs = async (poolsToClose: ConnectionPool | ConnectionPool[], prefix?: string) => {
+  await closeDbConnectionsMs(poolsToClose, prefix);
   process.exit(0);
 };
 
-export const Request = async (connectionId: string, strSQL: string): Promise<any> => {
-  const pool = await getPoolConnection(connectionId, { onError: 'throw' });
-  const request = new sql.Request(pool);
-  if (strSQL) {
-    return request.query(strSQL);
-  }
-  return request;
-};
-
-interface IAsLogger {
-  error: Function,
-}
-
-let logger: IAsLogger = echo as IAsLogger;
-
-export const setLogger = (logger_: any) => {
-  logger = logger_ as IAsLogger;
-};
-
-export const logSqlError = (err: Error | any, noThrow?: boolean, textSQL?: string, prefix?: string) => {
-  if (prefix) {
-    logger.error(prefix);
-  }
-  if (textSQL) {
-    logger.error(`SQL Error:\n${magenta}${textSQL}`);
-  }
-  logger.error(err);
-  if (!noThrow) {
-    throw err;
-  }
-};
-
-export const getPool = async (dbId: string, noThrow: boolean = false) => {
+export const getPoolMs = async (connectionId: string, throwError?: boolean) => {
   try {
-    return getPoolConnection(dbId);
+    return getPoolConnectionMs(connectionId);
   } catch (err) {
-    logSqlError(err, noThrow, `Error while open connection to DB ${dbId}`);
-  }
-};
-
-export const query = async (dbId: string, textSQL: string, noThrow?: boolean, prefix?: string): Promise<IResult<any> | undefined> => {
-  const pool = await getPool(dbId, noThrow);
-  if (!pool?.connected && !pool?.connecting) {
-    await closeDbConnections(dbId);
-    return;
-  }
-  const request = new sql.Request(pool);
-  let res: IResult<any>;
-  try {
-    res = await request.query(textSQL);
-    return res;
-  } catch (err) {
-    logSqlError(err, noThrow, textSQL, prefix);
+    logSqlError(err, throwError, `Error while open connection to DB ${connectionId}`);
   }
 };

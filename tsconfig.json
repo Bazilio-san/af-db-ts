@@ -22,8 +22,10 @@
     "ignoreDeprecations": "5.0",
     "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "resolveJsonModule": true,
-    "outDir": "dist/cjs"
+    "outDir": "dist/cjs",
+    "rootDir": "./"
   },
   "include": [
     "src/**/*.ts",
@@ -40,7 +42,7 @@
     "docker",
     "i18n",
     "node_modules",
-    "src/sql",
+    "src/mssql/sql",
     "test",
     "**/dist",
     "**/_misc"

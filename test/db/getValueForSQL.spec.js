@@ -8,7 +8,7 @@
 const { expect } = require('chai');
 const { sql } = require('../../dist/cjs/index');
 
-describe('sql.getValueForSQL() should work properly', () => {
+describe('sql.getValueForSqlMs() should work properly', () => {
   before((next) => {
     sql.setTimeZone('Europe/Moscow');
     next();
@@ -32,7 +32,7 @@ describe('sql.getValueForSQL() should work properly', () => {
     ];
     testArr.forEach((pair) => {
       it(`- like '${pair[0]}'`, () => {
-        const dateStrOut = sql.getValueForSQL(pair[0], 'datetime');
+        const dateStrOut = sql.getValueForSqlMs(pair[0], 'datetime');
         expect(dateStrOut).to.equal(`'${pair[1]}'`);
       });
     });
@@ -47,7 +47,7 @@ describe('sql.getValueForSQL() should work properly', () => {
       ];
       testArr.forEach((pair) => {
         it(`- like '${pair[0]}'`, () => {
-          const dateStrOut = sql.getValueForSQL(pair[0], 'datetime');
+          const dateStrOut = sql.getValueForSqlMs(pair[0], 'datetime');
           expect(dateStrOut).to.equal(`'${pair[1]}'`);
         });
       });
@@ -65,7 +65,7 @@ describe('sql.getValueForSQL() should work properly', () => {
       ];
       testArr.forEach((pair) => {
         it(`- in date like '${pair[0]}'`, () => {
-          const dateStrOut = sql.getValueForSQL(pair[0], { type: 'datetime', ignoreTZ: true });
+          const dateStrOut = sql.getValueForSqlMs(pair[0], { type: 'datetime', ignoreTZ: true });
           expect(dateStrOut).to.equal(`'${pair[1]}'`);
         });
       });

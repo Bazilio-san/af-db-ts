@@ -19,5 +19,9 @@ module.exports = {
     '**/*.json',
     '**/dist/**/*.*',
   ],
-  rules: {},
+  rules: {
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': ['error'],
+    '@typescript-eslint/no-unused-vars': 'warn',
+  },
 };

@@ -1,48 +1,110 @@
-export * as db from './db';
+export {
+  TDBRecord,
+  TRecordSetAssoc,
+  IDialect,
+  TFieldName,
+  TRecordKey,
+  TRecordSet,
+  IDateTimeOptionsEx,
+} from './@types/i-common';
 
 export {
-  prepareSqlString,
-  correctRecordSchema,
-  getRecordSchema,
-  wrapTransaction,
-  serialize,
-  getRecordValuesForSQL,
-  getSqlSetExpression,
-  getSqlValuesExpression,
-  prepareRecordForSQL,
-  prepareDataForSQL,
-  getRowsAffected,
-  sql,
-} from './sql';
+  IAFDatabasesConfig,
+  IDBConfigCommon,
+  IDBConfigMs,
+  IDBConfigPg,
+  IDbsMs,
+  IDbsPg,
+  IDbOptionsPg,
+  IDbOptionsMs,
+} from './@types/i-config';
 
 export {
+  IFieldSchemaMs,
+  IGetValueForSqlArgsMs,
+  IConnectionPoolsMs,
+  IPrepareSqlStringArgsMs,
+  TRecordSchemaAssocMs,
+  IGetMergeSQLOptionsMs,
+  IPrepareRecordForSqlArgsMs,
+  IPrepareRecordParamsMs,
+  ISchemaArrayMs,
+  IValueForSQLPartialArgsMs,
+  TFieldTypeCorrectionMs,
+  ISchemaItemMs,
+  TGetRecordSchemaOptionsMs,
+  TGetRecordSchemaResultMs,
+  TMergeResultMs,
+  TMergeRulesMs,
+  TRecordSchemaMs,
+  TGetPoolConnectionOptionsMs,
+} from './@types/i-ms';
+
+export {
+  IFieldDefPg,
+  TRecordSchemaPg,
+  ITableSchemaPg,
+  EDataTypePg,
+  TUniqueConstraintsPg,
+  IPoolPg,
+  IConnectionPoolsPg,
+  IPoolClientPg,
+} from './@types/i-pg';
+
+export {
+  getValueForSqlMs,
   binToHexString,
   getValueForSQL,
-} from './get-value-for-sql';
+} from './mssql/get-value-for-sql';
 
 export {
-  IDBConfig,
-  IFieldSchema,
-  IGetMergeSQLOptions,
-  TDBRecord,
-  TFieldName,
-  TFieldTypeCorrection,
-  TGetRecordSchemaOptions,
-  TRecordSchema,
-  TRecordSchemaAssoc,
-  TRecordSet,
-  TRecordSetAssoc,
-  TMergeRules,
-  TMergeResult,
-  TRecordKey,
-  TGetPoolConnectionOptions,
-  TGetRecordSchemaResult,
-  IPrepareSqlStringArgs,
-  IGetValueForSQLArgs,
-  IDialect,
-  IDateTimeOptionsEx,
-  IPrepareArgs,
-  IPrepareRecordParams,
-  ISchemaItem,
-  IValueForSQLPartialArgs,
-} from './interfaces';
+  getPoolConnectionMs,
+  closeAllDbConnectionsMs,
+  closeDbConnectionsAndExitMs,
+  closeDbConnectionsMs,
+  getDbConfigMs,
+  getPoolMs,
+  poolsCacheMs,
+  closeAllDbConnections,
+  closeDbConnectionsAndExit,
+} from './mssql/pool-ms';
+
+export { queryMs } from './mssql/query-ms';
+
+export {
+  prepareSqlStringMs,
+  correctRecordSchemaMs,
+  getRecordSchemaMs,
+  wrapTransactionMs,
+  serializeMs,
+  getRecordValuesForSqlMs,
+  getSqlSetExpressionMs,
+  getSqlValuesExpressionMs,
+  prepareRecordForSqlMs,
+  prepareDataForSqlMs,
+  getRowsAffectedMs,
+  sql,
+} from './mssql/sql';
+
+export { mssqlEscape } from './mssql/utils';
+
+export { getMergeSqlPg } from './pg/get-merge-sql';
+
+export { getUpdateSqlPg } from './pg/get-update-sql';
+
+export { insertPg, EUpdateLevel } from './pg/insert';
+
+export { isTableOrViewExistsPg } from './pg/is-table-or-view-exists';
+
+export {
+  poolsCachePg,
+  getPoolPg,
+  closePoolPg,
+  closeAllPgConnectionsPg,
+} from './pg/pg-pool';
+
+export { prepareSqlStringPg, prepareSqlValuePg } from './pg/prepare-value';
+
+export { queryPg } from './pg/query-pg';
+
+export { getFieldsAndValuesPg, getTableSchemaPg } from './pg/table-schema';

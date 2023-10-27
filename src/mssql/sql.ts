@@ -1,32 +1,29 @@
 // noinspection SqlResolve
 import * as sql from 'mssql';
 import { IColumnMetadata, IResult } from 'mssql';
-import * as _ from 'lodash';
 import { echo } from 'af-echo-ts';
 import * as cache from 'memory-cache';
-import * as db from './db';
+import { each, omit, pick } from 'af-tools-ts';
+import * as db from './pool-ms';
 import { q, mssqlEscape } from './utils';
-import { getValueForSQL } from './get-value-for-sql';
-import { IDBConfig,
-  IFieldSchema,
-  IGetMergeSQLOptions,
-  IGetValueForSQLArgs, IPrepareArgs,
-  IPrepareSqlStringArgs,
-  TDBRecord,
-  TFieldName,
-  TFieldTypeCorrection,
-  TGetRecordSchemaResult,
-  TGetRecordSchemaOptions,
-  TRecordSchema,
-  TRecordSchemaAssoc,
-  TRecordSet, ISchemaArray } from './interfaces';
+import { getValueForSqlMs } from './get-value-for-sql';
+import { IFieldSchemaMs, IGetMergeSQLOptionsMs,
+  IGetValueForSqlArgsMs,
+  IPrepareRecordForSqlArgsMs,
+  IPrepareSqlStringArgsMs, ISchemaArrayMs,
+  TFieldTypeCorrectionMs,
+  TGetRecordSchemaOptionsMs, TGetRecordSchemaResultMs,
+  TRecordSchemaAssocMs,
+  TRecordSchemaMs } from '../@types/i-ms';
+import { TDBRecord, TFieldName, TRecordSet } from '../@types/i-common';
+import { IDBConfigMs } from '../@types/i-config';
 
 export { sql };
 
 /**
  * Подготовка строки для передачи в SQL
  */
-export const prepareSqlString = (args: IPrepareSqlStringArgs): string | null => {
+export const prepareSqlStringMs = (args: IPrepareSqlStringArgsMs): string | null => {
   const { value, defaultValue = null, length = 0, nullable = false, noQuotes = false, escapeOnlySingleQuotes = false } = args;
   if (value == null) {
     if (nullable) {
@@ -58,12 +55,12 @@ const FIELD_SCHEMA_PROPS = ['index', 'name', 'length', 'type', 'scale', 'precisi
  * Поля с суффиксом _json получают тип "json". Остальные корректировки берутся из fieldTypeCorrection
  * Например, для полей типа datetime можно передавать свойство inputDateFormat
  */
-export const correctRecordSchema = (
-  recordSchemaAssoc: TRecordSchemaAssoc,
+export const correctRecordSchemaMs = (
+  recordSchemaAssoc: TRecordSchemaAssocMs,
   // объект корректировок
-  fieldTypeCorrection?: TFieldTypeCorrection,
+  fieldTypeCorrection?: TFieldTypeCorrectionMs,
 ) => {
-  _.each(recordSchemaAssoc, (fieldSchema: IFieldSchema, fieldName: TFieldName) => {
+  each(recordSchemaAssoc, (fieldSchema: IFieldSchemaMs, fieldName: TFieldName) => {
     if (/_json$/i.test(fieldName)) {
       fieldSchema.type = 'json';
     }
@@ -82,11 +79,11 @@ export const correctRecordSchema = (
     }
   });
   if (fieldTypeCorrection && typeof fieldTypeCorrection === 'object') {
-    _.each(fieldTypeCorrection, (correction: IFieldSchema, fieldName: TFieldName) => {
+    each(fieldTypeCorrection, (correction: IFieldSchemaMs, fieldName: TFieldName) => {
       FIELD_SCHEMA_PROPS.forEach((prop) => {
         if (correction[prop] !== undefined) {
           if (!recordSchemaAssoc[fieldName]) {
-            recordSchemaAssoc[fieldName] = {} as IFieldSchema;
+            recordSchemaAssoc[fieldName] = {} as IFieldSchemaMs;
           }
           recordSchemaAssoc[fieldName][prop] = correction[prop];
         }
@@ -98,12 +95,12 @@ export const correctRecordSchema = (
 /**
  * Подготовка значений записи для использования в SQL
  *
- * Все поля записи обрабатываются функцией getValueForSQL
+ * Все поля записи обрабатываются функцией getValueForSqlMs
  */
-export const prepareRecordForSQL = (record: TDBRecord, args: IPrepareArgs) => {
+export const prepareRecordForSqlMs = (record: TDBRecord, args: IPrepareRecordForSqlArgsMs) => {
   const { recordSchema, addValues4NotNullableFields, addMissingFields } = args;
   const { dateTimeOptions, needValidate, escapeOnlySingleQuotes, dialect } = args;
-  const options: IGetValueForSQLArgs = {
+  const options: IGetValueForSqlArgsMs = {
     value: null,
     fieldSchema: '',
     needValidate,
@@ -111,15 +108,15 @@ export const prepareRecordForSQL = (record: TDBRecord, args: IPrepareArgs) => {
     dialect,
     dateTimeOptions: { ...(recordSchema.dateTimeOptions || {}), ...(dateTimeOptions || {}) },
   };
-  recordSchema.forEach((fieldSchema: IFieldSchema) => {
+  recordSchema.forEach((fieldSchema: IFieldSchemaMs) => {
     const { name = '_#foo#_', readOnly } = fieldSchema;
     if (readOnly) {
       return;
     }
     if (Object.prototype.hasOwnProperty.call(record, name)) {
-      record[name] = getValueForSQL({ ...options, value: record[name], fieldSchema });
+      record[name] = getValueForSqlMs({ ...options, value: record[name], fieldSchema });
     } else if ((!fieldSchema.nullable && addValues4NotNullableFields) || addMissingFields) {
-      record[name] = getValueForSQL({ ...options, value: null, fieldSchema });
+      record[name] = getValueForSqlMs({ ...options, value: null, fieldSchema });
     }
   });
 };
@@ -127,14 +124,14 @@ export const prepareRecordForSQL = (record: TDBRecord, args: IPrepareArgs) => {
 /**
  * Подготовка данных для SQL
  *
- * Все поля всех записей обрабатываются функцией getValueForSQL
+ * Все поля всех записей обрабатываются функцией getValueForSqlMs
  */
-export const prepareDataForSQL = (recordSet: TRecordSet, args: IPrepareArgs) => {
+export const prepareDataForSqlMs = (recordSet: TRecordSet, args: IPrepareRecordForSqlArgsMs) => {
   if (recordSet._isPreparedForSQL) {
     return;
   }
   recordSet.forEach((record) => {
-    prepareRecordForSQL(record, args);
+    prepareRecordForSqlMs(record, args);
   });
   recordSet._isPreparedForSQL = true;
 };
@@ -143,7 +140,7 @@ export const prepareDataForSQL = (recordSet: TRecordSet, args: IPrepareArgs) => 
  * Возвращает рекорд, в котором все значения преобразованы в строки и подготовлены для прямой вставки в SQL
  * В частности, если значение типа строка, то оно уже заключено в одинарные кавычки
  */
-export const getRecordValuesForSQL = (record: TDBRecord, recordSchema: TRecordSchema): TDBRecord => {
+export const getRecordValuesForSqlMs = (record: TDBRecord, recordSchema: TRecordSchemaMs): TDBRecord => {
   const recordValuesForSQL = {};
   recordSchema.forEach((fieldSchema) => {
     const { name = '_#foo#_', readOnly } = fieldSchema;
@@ -151,7 +148,7 @@ export const getRecordValuesForSQL = (record: TDBRecord, recordSchema: TRecordSc
       return;
     }
     if (Object.prototype.hasOwnProperty.call(record, name)) {
-      recordValuesForSQL[name] = getValueForSQL({
+      recordValuesForSQL[name] = getValueForSqlMs({
         value: record[name],
         fieldSchema,
         escapeOnlySingleQuotes: true,
@@ -165,20 +162,20 @@ export const getRecordValuesForSQL = (record: TDBRecord, recordSchema: TRecordSc
 
 /**
  * Возвращает схему полей таблицы БД. Либо в виде объекта, либо в виде массива
- * Если asArray = true, то вернет TRecordSchema, при этом удалит поля, указанные в omitFields
- * Иначе вернет TRecordSchemaAssoc
+ * Если asArray = true, то вернет TRecordSchemaMs, при этом удалит поля, указанные в omitFields
+ * Иначе вернет TRecordSchemaAssocMs
  */
-export const getRecordSchema = async (
+export const getRecordSchemaMs = async (
   // ID соединения (borf|cep|hr|global)
   connectionId: string,
   // Субъект в выражении FROM для таблицы, схему которой нужно вернуть
   schemaAndTable: string,
   // Массив имен полей, которые нужно удалить из схемы (не учитывается, если asArray = false)
-  options: TGetRecordSchemaOptions = {} as TGetRecordSchemaOptions,
-): Promise<TGetRecordSchemaResult | undefined> => {
+  options: TGetRecordSchemaOptionsMs = {} as TGetRecordSchemaOptionsMs,
+): Promise<TGetRecordSchemaResultMs | undefined> => {
   const propertyPath = `schemas.${connectionId}.${schemaAndTable}`;
 
-  let result: TGetRecordSchemaResult | undefined = cache.get(propertyPath) as TGetRecordSchemaResult | undefined;
+  let result: TGetRecordSchemaResultMs | undefined = cache.get(propertyPath) as TGetRecordSchemaResultMs | undefined;
   if (result) {
     return result;
   }
@@ -196,7 +193,7 @@ export const getRecordSchema = async (
     noReturnMergeResult,
     dateTimeOptions,
   } = options;
-  const cPool = await db.getPoolConnection(connectionId, { prefix: 'getRecordSchema' });
+  const cPool = await db.getPoolConnectionMs(connectionId, { prefix: 'getRecordSchemaMs' });
   const request = new sql.Request(cPool);
   request.stream = false;
   let res: IResult<any>;
@@ -204,24 +201,24 @@ export const getRecordSchema = async (
     res = await request.query(`SELECT TOP(1) *
                                FROM ${schemaAndTable}`);
   } catch (err) {
-    echo.error(`getRecordSchema SQL ERROR`);
+    echo.error(`getRecordSchemaMs SQL ERROR`);
     echo.error(err);
     throw err;
   }
   const { columns } = res.recordset;
   const readOnlyFields = Object.entries(columns).filter(([, { readOnly: ro }]) => ro).map(([f]) => f);
   const omitFields2 = [...readOnlyFields, ...(Array.isArray(omitFields) ? omitFields : [])];
-  let schemaAssoc: Partial<IColumnMetadata> = _.omit<IColumnMetadata>(columns, omitFields2);
-  schemaAssoc = Array.isArray(pickFields) ? _.pick(schemaAssoc, pickFields) : schemaAssoc;
-  correctRecordSchema(schemaAssoc as TRecordSchemaAssoc, fieldTypeCorrection);
-  const schema: ISchemaArray = _.map(schemaAssoc, (fo) => (fo))
+  let schemaAssoc: Partial<IColumnMetadata> = omit(columns, omitFields2);
+  schemaAssoc = Array.isArray(pickFields) ? pick(schemaAssoc, pickFields) : schemaAssoc;
+  correctRecordSchemaMs(schemaAssoc as TRecordSchemaAssocMs, fieldTypeCorrection);
+  const schema: ISchemaArrayMs = Object.values(schemaAssoc)
     .sort((a, b) => {
       const ai = (a?.index || 0);
       const bi = (b?.index || 0);
       if (ai > bi) return 1;
       if (ai < bi) return -1;
       return 0;
-    }) as ISchemaArray;
+    }) as ISchemaArrayMs;
   schema.dateTimeOptions = dateTimeOptions;
 
   const fields = schema.map((o) => o?.name).filter(Boolean) as string[];
@@ -242,7 +239,7 @@ export const getRecordSchema = async (
   } else {
     updateFieldsList = updateFields.map((fName) => (`target.[${fName}] = source.[${fName}]`)).join(', ');
   }
-  const dbConfig: IDBConfig = db.getDbConfig(connectionId) as IDBConfig;
+  const dbConfig: IDBConfigMs = db.getDbConfigMs(connectionId);
   const dbSchemaAndTable = `[${dbConfig.database}].${schemaAndTable}`;
 
   result = {
@@ -259,9 +256,9 @@ export const getRecordSchema = async (
     withClause,
     updateFields,
     mergeIdentity,
-    getMergeSQL (packet: TRecordSet, prepareOptions: IGetMergeSQLOptions = {}): string {
+    getMergeSQL (packet: TRecordSet, prepareOptions: IGetMergeSQLOptionsMs = {}): string {
       if (prepareOptions.isPrepareForSQL) {
-        prepareDataForSQL(packet, { recordSchema: this.schema, ...prepareOptions });
+        prepareDataForSqlMs(packet, { recordSchema: this.schema, ...prepareOptions });
       }
       const values = `(${packet.map((r) => (fields.map((fName) => (r[fName]))
         .join(',')))
@@ -320,7 +317,7 @@ SELECT @total as total, @i as inserted, @u as updated;
     },
 
     getUpdateSQL (record: TRecordSet) {
-      const recordForSQL = getRecordValuesForSQL(record, this.schema);
+      const recordForSQL = getRecordValuesForSqlMs(record, this.schema);
       const setArray: string[] = [];
       updateFields.forEach((fName) => {
         if (recordForSQL[fName] !== undefined) {
@@ -342,7 +339,7 @@ SELECT @total as total, @i as inserted, @u as updated;
 /**
  * Оборачивает инструкции SQL в транзакцию
  */
-export const wrapTransaction = (strSQL: string): string => `BEGIN TRY
+export const wrapTransactionMs = (strSQL: string): string => `BEGIN TRY
     BEGIN TRANSACTION;
 
     ${strSQL}
@@ -370,8 +367,8 @@ END CATCH;`;
 /**
  * Возвращает проверенное и серилизованное значение
  */
-export const serialize = (args: IGetValueForSQLArgs): string | number | null => {
-  const val = getValueForSQL(args);
+export const serializeMs = (args: IGetValueForSqlArgsMs): string | number | null => {
+  const val = getValueForSqlMs(args);
   if (val == null || val === 'NULL') {
     return null;
   }
@@ -384,13 +381,13 @@ export const serialize = (args: IGetValueForSQLArgs): string | number | null => 
 /**
  * Возвращает подготовленное выражение SET для использования в UPDATE
  */
-export const getSqlSetExpression = (record: TDBRecord, recordSchema: TRecordSchema): string => {
+export const getSqlSetExpressionMs = (record: TDBRecord, recordSchema: TRecordSchemaMs): string => {
   const setArray: string[] = [];
   const { dateTimeOptions } = recordSchema;
   recordSchema.forEach((fieldSchema) => {
     const { name = '_#foo#_' } = fieldSchema;
     if (Object.prototype.hasOwnProperty.call(record, name)) {
-      setArray.push(`[${name}] = ${getValueForSQL({
+      setArray.push(`[${name}] = ${getValueForSqlMs({
         value: record[name],
         fieldSchema,
         dateTimeOptions,
@@ -406,7 +403,7 @@ export const getSqlSetExpression = (record: TDBRecord, recordSchema: TRecordSche
  *
  * addOutputInserted - Если true, добавляется выражение OUTPUT inserted.* перед VALUES
  */
-export const getSqlValuesExpression = (record: TDBRecord, recordSchema: TRecordSchema, addOutputInserted: boolean = false): string => {
+export const getSqlValuesExpressionMs = (record: TDBRecord, recordSchema: TRecordSchemaMs, addOutputInserted: boolean = false): string => {
   const fieldsArray: string[] = [];
   const valuesArray: string[] = [];
   const { dateTimeOptions } = recordSchema;
@@ -414,7 +411,7 @@ export const getSqlValuesExpression = (record: TDBRecord, recordSchema: TRecordS
     const { name = '_#foo#_' } = fieldSchema;
     if (Object.prototype.hasOwnProperty.call(record, name)) {
       fieldsArray.push(name);
-      const val = getValueForSQL({
+      const val = getValueForSqlMs({
         value: record[name],
         fieldSchema,
         dateTimeOptions,
@@ -426,4 +423,4 @@ export const getSqlValuesExpression = (record: TDBRecord, recordSchema: TRecordS
   return `([${fieldsArray.join('], [')}]) ${addOutputInserted ? ' OUTPUT inserted.* ' : ''} VALUES (${valuesArray.join(', ')})`;
 };
 
-export const getRowsAffected = (qResult: any) => (qResult.rowsAffected && qResult.rowsAffected.reduce((a: number, v: number) => a + v, 0)) || 0;
+export const getRowsAffectedMs = (qResult: any) => (qResult.rowsAffected && qResult.rowsAffected.reduce((a: number, v: number) => a + v, 0)) || 0;
