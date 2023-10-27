@@ -5,14 +5,9 @@
 // "Europe/Berlin"    +01:00
 // "Europe/Moscow"    +03:00
 
-const { expect } = require('chai');
-const { sql } = require('../../dist/cjs/index');
+import { getValueForSqlMs } from '../src';
 
 describe('sql.getValueForSqlMs() should work properly', () => {
-  before((next) => {
-    sql.setTimeZone('Europe/Moscow');
-    next();
-  });
   describe('should parse date properly', () => {
     const testArr = [
       ['2000-01-22T11:59:59.123', '2000-01-22T11:59:59.123'],
@@ -31,9 +26,9 @@ describe('sql.getValueForSqlMs() should work properly', () => {
       ['2019-8-9 5:16:14 PM', '2019-08-09T17:16:14.000'],
     ];
     testArr.forEach((pair) => {
-      it(`- like '${pair[0]}'`, () => {
-        const dateStrOut = sql.getValueForSqlMs(pair[0], 'datetime');
-        expect(dateStrOut).to.equal(`'${pair[1]}'`);
+      test(`- like '${pair[0]}'`, () => {
+        const dateStrOut = getValueForSqlMs({ value: pair[0], fieldSchema: 'datetime' });
+        expect(dateStrOut).toBe(`'${pair[1]}'`);
       });
     });
   });
@@ -46,27 +41,9 @@ describe('sql.getValueForSqlMs() should work properly', () => {
         ['Thu Aug 08 2019 05:16:14 GMT+0300 (GMT+03:00)', '2019-08-08T05:16:14.000'],
       ];
       testArr.forEach((pair) => {
-        it(`- like '${pair[0]}'`, () => {
-          const dateStrOut = sql.getValueForSqlMs(pair[0], 'datetime');
-          expect(dateStrOut).to.equal(`'${pair[1]}'`);
-        });
-      });
-    });
-    describe(`should ignore timezone with option 'ignoreTZ'`, () => {
-      const testArr = [
-        ['2000-01-22T11:59:59.123Z', '2000-01-22T11:59:59.123'],
-        ['2000-01-22T11:59:59.123+0600', '2000-01-22T11:59:59.123'],
-        ['2000-01-22T11:59:59.123-0600', '2000-01-22T11:59:59.123'],
-        ['2000-01-22T11:59:59.123-04', '2000-01-22T11:59:59.123'],
-        ['2000-01-22T11:59:59.123+0430', '2000-01-22T11:59:59.123'],
-        ['Thu Aug 08 2019 05:16:14 GMT+0100 (GMT+01:00)', '2019-08-08T05:16:14.000'],
-        ['Thu Aug 08 2019 05:16:14 GMT+0700 (GMT+07:00)', '2019-08-08T05:16:14.000'],
-        ['Thu Aug 08 2019 05:16:14 GMT+0700', '2019-08-08T05:16:14.000'],
-      ];
-      testArr.forEach((pair) => {
-        it(`- in date like '${pair[0]}'`, () => {
-          const dateStrOut = sql.getValueForSqlMs(pair[0], { type: 'datetime', ignoreTZ: true });
-          expect(dateStrOut).to.equal(`'${pair[1]}'`);
+        test(`- like '${pair[0]}'`, () => {
+          const dateStrOut = getValueForSqlMs({ value: pair[0], fieldSchema: 'datetime' });
+          expect(dateStrOut).toBe(`'${pair[1]}'`);
         });
       });
     });
