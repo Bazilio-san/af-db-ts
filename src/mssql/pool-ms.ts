@@ -32,12 +32,24 @@ export const getPoolConnectionMs = async (connectionId: string, options: TGetPoo
     }
   };
   try {
-    const cfg: any = config.get<any>('database');
-    const namedDbConfig = cfg[connectionId];
+    const { database, db } = config as any;
+    let dbOptions: any;
+    let namedDbConfig: any;
+    if (database) {
+      namedDbConfig = database[connectionId];
+      if (!namedDbConfig) {
+        resume(`Missing configuration for DB id "${connectionId}"`);
+      }
+      dbOptions = database._common_ || {};
+    } else if (db) {
+      namedDbConfig = db?.mssql?.dbs?.[connectionId];
+      dbOptions = db?.mssql?.options || {};
+    }
     if (!namedDbConfig) {
       resume(`Missing configuration for DB id "${connectionId}"`);
     }
-    const dbConfig = config.util.extendDeep({}, cfg._common_ || {}, cfg[connectionId]);
+    const dbConfig = config.util.extendDeep({}, dbOptions, namedDbConfig);
+
     if (pool?.connecting) {
       const startTs = Date.now();
       while (pool?.connecting && (Date.now() - startTs < dbConfig.connectionTimeout)) {
