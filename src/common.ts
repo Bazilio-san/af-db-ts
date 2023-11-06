@@ -29,3 +29,6 @@ export const graceExit = async () => {
   await closeAllDbConnectionsMs();
   process.exit(0);
 };
+
+export const _3_HOURS = 3_600_000 * 3; // 3 ч
+export const _1_HOUR = 3_600_000; // 1 ч

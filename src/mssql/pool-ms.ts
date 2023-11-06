@@ -4,7 +4,7 @@ import * as sql from 'mssql';
 import { ConnectionPool } from 'mssql';
 import { sleep } from 'af-tools-ts';
 import { IDbOptionsMs, IDbsMs } from '../@types/i-config';
-import { logSqlError } from '../common';
+import { logSqlError, _3_HOURS, _1_HOUR } from '../common';
 import { IConnectionPoolsMs, TGetPoolConnectionOptionsMs } from '../@types/i-ms';
 
 const mssqlConfigs = config.get<{ options: IDbOptionsMs, dbs: IDbsMs }>('db.postgres');
@@ -12,6 +12,26 @@ const mssqlConfigs = config.get<{ options: IDbOptionsMs, dbs: IDbsMs }>('db.post
 export const getDbConfigMs = (connectionId: string) => mssqlConfigs.dbs[connectionId];
 
 export const poolsCacheMs: IConnectionPoolsMs = {};
+
+const defaultOptions: IDbOptionsMs = {
+  // node_modules/tedious/lib/connection.js:284
+  options: { enableArithAbort: false },
+  pool: {
+    max: 100,
+    min: 1,
+    idleTimeoutMillis: _3_HOURS,
+    acquireTimeoutMillis: _3_HOURS,
+    createTimeoutMillis: _3_HOURS,
+    destroyTimeoutMillis: _3_HOURS,
+    reapIntervalMillis: _3_HOURS,
+    createRetryIntervalMillis: _3_HOURS,
+  },
+  trustServerCertificate: true,
+  stream: false,
+  parseJSON: false,
+  requestTimeout: _1_HOUR,
+  connectionTimeout: 2 * 60_000, // 2 min
+};
 
 /**
  * Возвращает пул соединений для БД, соответствующей преданному ID соединения (borf|cep|hr|global)
@@ -48,11 +68,11 @@ export const getPoolConnectionMs = async (connectionId: string, options: TGetPoo
     if (!namedDbConfig) {
       resume(`Missing configuration for DB id "${connectionId}"`);
     }
-    const dbConfig = config.util.extendDeep({}, dbOptions, namedDbConfig);
+    const dbConfig: sql.config = config.util.extendDeep(defaultOptions, dbOptions, namedDbConfig);
 
     if (pool?.connecting) {
       const startTs = Date.now();
-      while (pool?.connecting && (Date.now() - startTs < dbConfig.connectionTimeout)) {
+      while (pool?.connecting && (Date.now() - startTs < (dbConfig.connectionTimeout || defaultOptions.connectionTimeout))) {
         // eslint-disable-next-line no-await-in-loop
         await sleep(100);
       }
