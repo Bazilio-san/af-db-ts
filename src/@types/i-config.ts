@@ -63,11 +63,11 @@ export interface IDbsPg {
 
 export interface IAFDatabasesConfig {
   db: {
-    mssql: {
+    mssql?: {
       options?: IDbOptionsMs,
       dbs: IDbsMs,
     },
-    postgres: {
+    postgres?: {
       options?: IDbOptionsPg,
       dbs: IDbsPg,
     },
