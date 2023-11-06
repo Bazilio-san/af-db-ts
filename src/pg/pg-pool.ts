@@ -29,8 +29,8 @@ export const poolsCachePg: IConnectionPoolsPg = {};
 
 export const getPoolPg = async (connectionId: string): Promise<IPoolPg> => {
   if (!poolsCachePg[connectionId]) {
-    const namedDbConfig = pgConfigs.dbs[connectionId];
-    const poolConfig: PoolConfig = config.util.extendDeep(defaultOptions, pgConfigs.options || {}, namedDbConfig);
+    const namedDbConfig = { ...pgConfigs.dbs[connectionId] };
+    const poolConfig: PoolConfig = config.util.extendDeep(defaultOptions, { ...(pgConfigs.options || {}) }, namedDbConfig);
     const pool = new Pool(poolConfig) as IPoolPg;
     poolsCachePg[connectionId] = pool;
     pool.on('error', (err: Error, client: PoolClient) => {

@@ -56,14 +56,14 @@ export const getPoolConnectionMs = async (connectionId: string, options: TGetPoo
     let dbOptions: any;
     let namedDbConfig: any;
     if (database) {
-      namedDbConfig = database[connectionId];
+      namedDbConfig = { ...database[connectionId]};
       if (!namedDbConfig) {
         resume(`Missing configuration for DB id "${connectionId}"`);
       }
-      dbOptions = database._common_ || {};
+      dbOptions = { ...(database._common_ || {})};
     } else if (db) {
-      namedDbConfig = db?.mssql?.dbs?.[connectionId];
-      dbOptions = db?.mssql?.options || {};
+      namedDbConfig = { ...(db?.mssql?.dbs?.[connectionId] || {}) };
+      dbOptions = { ...(db?.mssql?.options || {}) };
     }
     if (!namedDbConfig) {
       resume(`Missing configuration for DB id "${connectionId}"`);
