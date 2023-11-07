@@ -2,12 +2,12 @@ import config from 'config';
 import { echo } from 'af-echo-ts';
 import * as sql from 'mssql';
 import { ConnectionPool } from 'mssql';
-import { sleep } from 'af-tools-ts';
+import { cloneDeep, sleep } from 'af-tools-ts';
 import { IDbOptionsMs, IDbsMs } from '../@types/i-config';
 import { logSqlError, _3_HOURS, _1_HOUR } from '../common';
 import { IConnectionPoolsMs, TGetPoolConnectionOptionsMs } from '../@types/i-ms';
 
-const cfg = config as any;
+const cfg = cloneDeep(config.util.toObject(config)) as any;
 
 let dbs: IDbsMs = {};
 let dbOptions: any = {};

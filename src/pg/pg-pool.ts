@@ -1,12 +1,13 @@
 import config from 'config';
 import { Pool, PoolClient, PoolConfig } from 'pg';
 import { echo } from 'af-echo-ts';
+import { cloneDeep } from 'af-tools-ts';
 import { logger } from '../logger-error';
 import { IDbOptionsPg, IDbsPg } from '../@types/i-config';
 import { IConnectionPoolsPg, IPoolClientPg, IPoolPg } from '../@types/i-pg';
 import { _3_HOURS } from '../common';
 
-const cfg = config as any;
+const cfg = cloneDeep(config.util.toObject(config)) as any;
 
 let dbs: IDbsPg = {};
 let dbOptions: any = {};
