@@ -239,7 +239,7 @@ export const getRecordSchemaMs = async (
   } else {
     updateFieldsList = updateFields.map((fName) => (`target.[${fName}] = source.[${fName}]`)).join(', ');
   }
-  const dbConfig: IDBConfigMs = db.getDbConfigMs(connectionId);
+  const dbConfig = db.getDbConfigMs<IDBConfigMs>(connectionId, false, true) as IDBConfigMs;
   const dbSchemaAndTable = `[${dbConfig.database}].${schemaAndTable}`;
 
   result = {

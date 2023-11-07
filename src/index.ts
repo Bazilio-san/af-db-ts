@@ -100,6 +100,7 @@ export {
   poolsCachePg,
   getPoolPg,
   closePoolPg,
+  getDbConfigPg,
   closeAllPgConnectionsPg,
 } from './pg/pg-pool';
 

@@ -6,7 +6,17 @@ import { IDbOptionsPg, IDbsPg } from '../@types/i-config';
 import { IConnectionPoolsPg, IPoolClientPg, IPoolPg } from '../@types/i-pg';
 import { _3_HOURS } from '../common';
 
-const pgConfigs = config.get<{ options: IDbOptionsPg, dbs: IDbsPg }>('db.postgres');
+const cfg = config as any;
+
+let dbs: IDbsPg = {};
+let dbOptions: any = {};
+if (cfg.database) {
+  dbs = { ...cfg.database } as IDbsPg;
+  dbOptions = {};
+} else if (cfg.db?.postgres?.dbs) {
+  dbs = { ...cfg.db.postgres.dbs };
+  dbOptions = { ...(cfg.db.postgres.options || {}) };
+}
 
 const defaultOptions: IDbOptionsPg = {
   // all valid client config options are also valid here
@@ -22,15 +32,27 @@ const defaultOptions: IDbOptionsPg = {
   // by default this is set to 10.
   max: 10,
   statement_timeout: _3_HOURS, // number of milliseconds before a statement in query will time out, default is no timeout
-  query_timeout: _3_HOURS, // number of milliseconds before a query call will timeout, default is no timeout
+  query_timeout: _3_HOURS, // number of milliseconds until the request call times out, no timeout by default
+};
+
+dbOptions = config.util.extendDeep(defaultOptions, dbOptions);
+
+export const getDbConfigPg = <T> (connectionId: string, includeOptions?: boolean, throwError?: boolean): T | undefined => {
+  const namedDbConfig = dbs[connectionId];
+  if (!namedDbConfig) {
+    if (throwError) {
+      throw new Error(`Missing configuration for DB id "${connectionId}"`);
+    }
+    return undefined;
+  }
+  return includeOptions ? config.util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig;
 };
 
 export const poolsCachePg: IConnectionPoolsPg = {};
 
 export const getPoolPg = async (connectionId: string): Promise<IPoolPg> => {
   if (!poolsCachePg[connectionId]) {
-    const namedDbConfig = { ...pgConfigs.dbs[connectionId] };
-    const poolConfig: PoolConfig = config.util.extendDeep(defaultOptions, { ...(pgConfigs.options || {}) }, namedDbConfig);
+    const poolConfig = getDbConfigPg<PoolConfig>(connectionId, true, true);
     const pool = new Pool(poolConfig) as IPoolPg;
     poolsCachePg[connectionId] = pool;
     pool.on('error', (err: Error, client: PoolClient) => {

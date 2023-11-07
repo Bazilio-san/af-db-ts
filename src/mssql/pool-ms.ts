@@ -7,11 +7,17 @@ import { IDbOptionsMs, IDbsMs } from '../@types/i-config';
 import { logSqlError, _3_HOURS, _1_HOUR } from '../common';
 import { IConnectionPoolsMs, TGetPoolConnectionOptionsMs } from '../@types/i-ms';
 
-const mssqlConfigs = config.get<{ options: IDbOptionsMs, dbs: IDbsMs }>('db.postgres');
+const cfg = config as any;
 
-export const getDbConfigMs = (connectionId: string) => mssqlConfigs.dbs[connectionId];
-
-export const poolsCacheMs: IConnectionPoolsMs = {};
+let dbs: IDbsMs = {};
+let dbOptions: any = {};
+if (cfg.database) {
+  dbs = { ...cfg.database } as IDbsMs;
+  dbOptions = { ...(cfg.database._common_ || {}) };
+} else if (cfg.db?.mssql?.dbs) {
+  dbs = { ...cfg.db.mssql.dbs };
+  dbOptions = { ...(cfg.db.mssql.options || {}) };
+}
 
 const defaultOptions: IDbOptionsMs = {
   // node_modules/tedious/lib/connection.js:284
@@ -33,6 +39,21 @@ const defaultOptions: IDbOptionsMs = {
   connectionTimeout: 2 * 60_000, // 2 min
 };
 
+dbOptions = config.util.extendDeep(defaultOptions, dbOptions);
+
+export const getDbConfigMs = <T> (connectionId: string, includeOptions?: boolean, throwError?: boolean): T | undefined => {
+  const namedDbConfig = dbs[connectionId];
+  if (!namedDbConfig) {
+    if (throwError) {
+      throw new Error(`Missing configuration for DB id "${connectionId}"`);
+    }
+    return undefined;
+  }
+  return includeOptions ? config.util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig;
+};
+
+export const poolsCacheMs: IConnectionPoolsMs = {};
+
 /**
  * Возвращает пул соединений для БД, соответствующей преданному ID соединения (borf|cep|hr|global)
  * В случае, если не удается создать пул или открыть соединение, прерывает работу скрипта
@@ -52,23 +73,10 @@ export const getPoolConnectionMs = async (connectionId: string, options: TGetPoo
     }
   };
   try {
-    const { database, db } = config as any;
-    let dbOptions: any;
-    let namedDbConfig: any;
-    if (database) {
-      namedDbConfig = { ...database[connectionId]};
-      if (!namedDbConfig) {
-        resume(`Missing configuration for DB id "${connectionId}"`);
-      }
-      dbOptions = { ...(database._common_ || {})};
-    } else if (db) {
-      namedDbConfig = { ...(db?.mssql?.dbs?.[connectionId] || {}) };
-      dbOptions = { ...(db?.mssql?.options || {}) };
+    const dbConfig = getDbConfigMs<sql.config>(connectionId, true, true);
+    if (!dbConfig) {
+      return;
     }
-    if (!namedDbConfig) {
-      resume(`Missing configuration for DB id "${connectionId}"`);
-    }
-    const dbConfig: sql.config = config.util.extendDeep(defaultOptions, dbOptions, namedDbConfig);
 
     if (pool?.connecting) {
       const startTs = Date.now();
