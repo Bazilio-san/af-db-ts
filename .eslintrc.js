@@ -12,7 +12,7 @@ module.exports = {
   globals: {},
   parser: '@typescript-eslint/parser',
   parserOptions: { sourceType: 'module' },
-  plugins: ['prefer-arrow', 'import', '@typescript-eslint'],
+  plugins: ['prefer-arrow', 'import'],
   ignorePatterns: [
     '_tmp/',
     'node_modules/',

@@ -9,16 +9,14 @@ export const queryMs = async (
   throwError?: boolean,
   prefix?: string,
 ): Promise<IResult<any> | undefined> => {
-  const pool = await getPoolMs(connectionId, throwError);
-  if (!pool?.connected && !pool?.connecting) {
-    await closeDbConnectionsMs(connectionId);
-    return;
-  }
-  const request = new sql.Request(pool);
-  let res: IResult<any>;
   try {
-    res = await request.query(sqlText);
-    return res;
+    const pool = await getPoolMs(connectionId, throwError);
+    if (!pool?.connected && !pool?.connecting) {
+      await closeDbConnectionsMs(connectionId);
+      return;
+    }
+    const request = new sql.Request(pool);
+    return request.query(sqlText);
   } catch (err) {
     logSqlError(err, !throwError, sqlText, prefix);
   }
