@@ -7,6 +7,8 @@ import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TRecordSchemaPg, TUniqueConst
 
 const tableSchemaHash: { [schemaAndTable: string]: ITableSchemaPg } = {};
 
+const trimDoubleQuoteMarks = (s: string): string => s.replace(/^"?(.+?)"?$/, '$1');
+
 const getRecordSchemaMs = async (connectionId: string, schemaAndTable: string): Promise<TRecordSchemaPg> => {
   const [schema, table] = schemaAndTable.split('.');
   const sql = `SELECT column_name,
@@ -20,8 +22,8 @@ const getRecordSchemaMs = async (connectionId: string, schemaAndTable: string): 
                       udt_name,
                       is_generated
                FROM information_schema.columns
-               WHERE table_name = '${table}'
-                 AND table_schema = '${schema}';`;
+               WHERE table_name = '${trimDoubleQuoteMarks(table)}'
+                 AND table_schema = '${trimDoubleQuoteMarks(schema)}';`;
   const result = await queryPg(connectionId, sql);
   const fields = result?.rows || [];
   const recordSchema: TRecordSchemaPg = {};
@@ -78,8 +80,8 @@ const getUniqueConstraints = async (connectionId: string, schemaAndTable: string
                                          JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)
                                          JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
                                     AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
-                                WHERE tc.table_schema = '${schema}'
-                                  AND tc.table_name = '${table}'
+                                WHERE tc.table_schema = '${trimDoubleQuoteMarks(schema)}'
+                                  AND tc.table_name = '${trimDoubleQuoteMarks(table)}'
                                   AND constraint_type = 'UNIQUE'
                                 GROUP BY ccu.constraint_name) AS UC ON UC.cn = UI.cn
       ORDER BY CASE WHEN UC.cn IS NULL THEN 2 ELSE 1 END

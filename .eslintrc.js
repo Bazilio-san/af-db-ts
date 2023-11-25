@@ -8,13 +8,15 @@ module.exports = {
     commonjs: true,
     es2021: true,
     jest: true,
+    node: true,
   },
   globals: {},
   parser: '@typescript-eslint/parser',
   parserOptions: { sourceType: 'module' },
-  plugins: ['prefer-arrow', 'import'],
+  plugins: ['prefer-arrow', 'import', '@typescript-eslint'],
   ignorePatterns: [
     '_tmp/',
+    '_misc/',
     'node_modules/',
     '**/*.json',
     '**/dist/**/*.*',
@@ -22,6 +24,10 @@ module.exports = {
   rules: {
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': ['error'],
-    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-unused-vars': ['warn', {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^_',
+    }],
   },
 };
