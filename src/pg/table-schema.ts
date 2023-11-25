@@ -53,19 +53,21 @@ const getRecordSchemaMs = async (connectionId: string, schemaAndTable: string): 
 };
 
 const getPrimaryKey = async (connectionId: string, schemaAndTable: string): Promise<string[]> => {
-  const result = await queryPg(connectionId, `SELECT a.attname as f
-                                              FROM pg_index i
-                                                       JOIN pg_attribute a
-                                                            ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
-                                              WHERE i.indrelid = '${schemaAndTable}'::regclass
-                                              AND i.indisprimary;`);
+  const sql = `
+      SELECT a.attname as f
+      FROM pg_index i
+               JOIN pg_attribute a
+                    ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
+      WHERE i.indrelid = '${schemaAndTable}'::regclass
+    AND i.indisprimary;`;
+  const result = await queryPg(connectionId, sql);
 
   return (result?.rows || []).map(({ f }) => f);
 };
 
 const getUniqueConstraints = async (connectionId: string, schemaAndTable: string): Promise<TUniqueConstraintsPg> => {
   const [schema, table] = schemaAndTable.split('.');
-  const result = await queryPg(connectionId, `
+  const sql = `
       SELECT UI.cn as cn, UI.cols as cols, CASE WHEN UC.cn IS NULL THEN 'UX' ELSE 'UC' END AS typ
       FROM (SELECT c.relname as cn, array_to_json(array_agg(a.attname ORDER BY a.attname)) AS cols
             FROM pg_index i
@@ -82,10 +84,11 @@ const getUniqueConstraints = async (connectionId: string, schemaAndTable: string
                                     AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
                                 WHERE tc.table_schema = '${trimDoubleQuoteMarks(schema)}'
                                   AND tc.table_name = '${trimDoubleQuoteMarks(table)}'
-                                  AND constraint_type = 'UNIQUE'
+                                  AND tc.constraint_type = 'UNIQUE'
                                 GROUP BY ccu.constraint_name) AS UC ON UC.cn = UI.cn
       ORDER BY CASE WHEN UC.cn IS NULL THEN 2 ELSE 1 END
-  `);
+  `;
+  const result = await queryPg(connectionId, sql);
   const uc: TUniqueConstraintsPg = {};
   result?.rows?.forEach(({ cn, cols }) => {
     uc[cn] = cols;
@@ -94,7 +97,7 @@ const getUniqueConstraints = async (connectionId: string, schemaAndTable: string
 };
 
 const getSerials = async (connectionId: string, schemaAndTable: string): Promise<string[]> => {
-  const result = await queryPg(connectionId, `
+  const sql = `
       WITH fq_objects AS (SELECT c.oid,
                                  n.nspname || '.' || c.relname AS fqname,
                                  c.relkind,
@@ -111,7 +114,8 @@ const getSerials = async (connectionId: string, schemaAndTable: string): Promise
       WHERE d.deptype = 'a'
         AND t.fqname = '${schemaAndTable}'
       GROUP BY t.fqname
-  `);
+  `;
+  const result = await queryPg(connectionId, sql);
   return result?.rows?.[0]?.cols || [];
 };
 
