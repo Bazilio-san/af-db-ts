@@ -97,6 +97,8 @@ const getUniqueConstraints = async (connectionId: string, schemaAndTable: string
 };
 
 const getSerials = async (connectionId: string, schemaAndTable: string): Promise<string[]> => {
+  const [schema, table] = schemaAndTable.split('.');
+  const fqName = `${trimDoubleQuoteMarks(schema)}.${trimDoubleQuoteMarks(table)}`
   const sql = `
       WITH fq_objects AS (SELECT c.oid,
                                  n.nspname || '.' || c.relname AS fqname,
@@ -112,7 +114,7 @@ const getSerials = async (connectionId: string, schemaAndTable: string): Promise
                JOIN tables t ON t.oid = d.refobjid
                JOIN pg_attribute a ON a.attrelid = d.refobjid and a.attnum = d.refobjsubid
       WHERE d.deptype = 'a'
-        AND t.fqname = '${schemaAndTable}'
+        AND t.fqname = '${fqName}'
       GROUP BY t.fqname
   `;
   const result = await queryPg(connectionId, sql);
