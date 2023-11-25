@@ -50,7 +50,7 @@ export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (
 
   // noinspection UnnecessaryLocalVariableJS
   const mergeSQL = `${'INSERT'} INTO ${targetSchemaAndTable}
-  (${insertFieldsList.join(', ')})
+  (${insertFieldsList.map((f) => `"${f}"`).join(', ')})
   VALUES ${insertValues}
    ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')}) 
    DO UPDATE SET ${upsertFields}
