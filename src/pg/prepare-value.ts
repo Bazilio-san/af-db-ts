@@ -82,7 +82,9 @@ export const prepareSqlValuePg = (arg: {
       return prepareSqlStringPg(value);
 
     case EDataTypePg.ARRAY: {
-      return prepareSqlStringPg(JSON.stringify(value));
+      let v = JSON.stringify(value);
+      v = v.replace(/^\[(.+?)]$/, '{$1}');
+      return prepareSqlStringPg(v);
     }
     default:
       return prepareSqlStringPg(value);
