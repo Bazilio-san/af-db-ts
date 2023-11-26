@@ -2,6 +2,7 @@ import { QueryResultRow } from 'pg';
 import { getTableSchemaPg } from './table-schema';
 import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
+import { schemaTable } from '../utils';
 
 export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (arg: {
   connectionId: string,
@@ -14,6 +15,7 @@ export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (
   if (!recordset?.length) {
     return '';
   }
+  const schemaTablePg = schemaTable.to.pg(targetSchemaAndTable);
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, targetSchemaAndTable);
   const { recordSchema, pk, fieldsWoSerials, defaults } = tableSchema;
 
@@ -40,7 +42,7 @@ export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (
   const upsertFields = insertFieldsList.map((f) => {
     const vArr = [`EXCLUDED."${f}"`];
     if (noUpdateIfNull) {
-      vArr.push(`${targetSchemaAndTable}."${f}"`);
+      vArr.push(`${schemaTablePg}."${f}"`);
     }
     if (defaults[f]) {
       vArr.push(defaults[f]);
@@ -49,7 +51,7 @@ export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (
   }).join(',\n');
 
   // noinspection UnnecessaryLocalVariableJS
-  const mergeSQL = `${'INSERT'} INTO ${targetSchemaAndTable}
+  const mergeSQL = `${'INSERT'} INTO ${schemaTablePg}
   (${insertFieldsList.map((f) => `"${f}"`).join(', ')})
   VALUES ${insertValues}
    ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')}) 

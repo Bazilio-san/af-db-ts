@@ -17,6 +17,7 @@ import { IFieldSchemaMs, IGetMergeSQLOptionsMs,
   TRecordSchemaMs } from '../@types/i-ms';
 import { TDBRecord, TFieldName, TRecordSet } from '../@types/i-common';
 import { IDBConfigMs } from '../@types/i-config';
+import { schemaTable } from '../utils';
 
 export { sql };
 
@@ -169,11 +170,13 @@ export const getRecordSchemaMs = async (
   // ID соединения (borf|cep|hr|global)
   connectionId: string,
   // Субъект в выражении FROM для таблицы, схему которой нужно вернуть
-  schemaAndTable: string,
+  commonSchemaAndTable: string,
   // Массив имен полей, которые нужно удалить из схемы (не учитывается, если asArray = false)
   options: TGetRecordSchemaOptionsMs = {} as TGetRecordSchemaOptionsMs,
 ): Promise<TGetRecordSchemaResultMs | undefined> => {
-  const propertyPath = `schemas.${connectionId}.${schemaAndTable}`;
+  commonSchemaAndTable = schemaTable.to.common(commonSchemaAndTable);
+  const propertyPath = `schemas.${connectionId}.${commonSchemaAndTable}`;
+  const schemaTableMs = schemaTable.to.pg(commonSchemaAndTable);
 
   let result: TGetRecordSchemaResultMs | undefined = cache.get(propertyPath) as TGetRecordSchemaResultMs | undefined;
   if (result) {
@@ -199,7 +202,7 @@ export const getRecordSchemaMs = async (
   let res: IResult<any>;
   try {
     res = await request.query(`SELECT TOP(1) *
-                               FROM ${schemaAndTable}`);
+                               FROM ${schemaTableMs}`);
   } catch (err) {
     echo.error(`getRecordSchemaMs SQL ERROR`);
     echo.error(err);
@@ -240,12 +243,13 @@ export const getRecordSchemaMs = async (
     updateFieldsList = updateFields.map((fName) => (`target.[${fName}] = source.[${fName}]`)).join(', ');
   }
   const dbConfig = db.getDbConfigMs<IDBConfigMs>(connectionId, false, true) as IDBConfigMs;
-  const dbSchemaAndTable = `[${dbConfig.database}].${schemaAndTable}`;
+  const dbSchemaAndTable = `[${dbConfig.database}].${schemaTableMs}`;
 
   result = {
     connectionId,
     dbConfig,
-    schemaAndTable,
+    schemaAndTable: commonSchemaAndTable,
+    schemaTableMs,
     dbSchemaAndTable,
     columns,
     schemaAssoc,
@@ -264,7 +268,7 @@ export const getRecordSchemaMs = async (
         .join(',')))
         .join(`)\n,(`)})`;
       let mergeSQL = `
-MERGE ${schemaAndTable} ${withClause || ''} AS target
+MERGE ${schemaTableMs} ${withClause || ''} AS target
 USING
 (
     SELECT * FROM
@@ -313,7 +317,7 @@ SELECT @total as total, @i as inserted, @u as updated;
       const values = `(${packet.map((r) => (insertFields.map((fName) => (r[fName] === undefined ? 'NULL' : r[fName]))
         .join(',')))
         .join(`)\n,(`)})`;
-      return `INSERT INTO ${schemaAndTable} (${insertFieldsList}) ${addOutputInserted ? ' OUTPUT inserted.* ' : ''} VALUES ${values}`;
+      return `INSERT INTO ${schemaTableMs} (${insertFieldsList}) ${addOutputInserted ? ' OUTPUT inserted.* ' : ''} VALUES ${values}`;
     },
 
     getUpdateSQL (record: TRecordSet) {
@@ -326,7 +330,7 @@ SELECT @total as total, @i as inserted, @u as updated;
       });
       const where = `(${mergeIdentity.map((fName) => (`[${fName}] = ${recordForSQL[fName]}`))
         .join(' AND ')})`;
-      return `UPDATE ${schemaAndTable}
+      return `UPDATE ${schemaTableMs}
               SET ${setArray.join(', ')}
               WHERE ${where};`;
     },

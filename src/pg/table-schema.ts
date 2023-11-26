@@ -4,13 +4,15 @@ import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
 import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TRecordSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
+import { schemaTable } from '../utils';
 
-const tableSchemaHash: { [schemaAndTable: string]: ITableSchemaPg } = {};
+// commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
+// schemaAndTablePg: "<schema>"."<table>" :  "Staff"."nnPersones-personGuid"
 
-const trimDoubleQuoteMarks = (s: string): string => s.replace(/^"?(.+?)"?$/, '$1');
+const tableSchemaHash: { [commonSchemaAndTable: string]: ITableSchemaPg } = {};
 
-const getRecordSchemaMs = async (connectionId: string, schemaAndTable: string): Promise<TRecordSchemaPg> => {
-  const [schema, table] = schemaAndTable.split('.');
+const getRecordSchemaMs = async (connectionId: string, commonSchemaAndTable: string): Promise<TRecordSchemaPg> => {
+  const [schema, table] = schemaTable.to.common(commonSchemaAndTable).split('.');
   const sql = `SELECT column_name,
                       column_default,
                       is_nullable,
@@ -22,8 +24,8 @@ const getRecordSchemaMs = async (connectionId: string, schemaAndTable: string): 
                       udt_name,
                       is_generated
                FROM information_schema.columns
-               WHERE table_name = '${trimDoubleQuoteMarks(table)}'
-                 AND table_schema = '${trimDoubleQuoteMarks(schema)}';`;
+               WHERE table_name = '${table}'
+                 AND table_schema = '${schema}';`;
   const result = await queryPg(connectionId, sql);
   const fields = result?.rows || [];
   const recordSchema: TRecordSchemaPg = {};
@@ -52,28 +54,30 @@ const getRecordSchemaMs = async (connectionId: string, schemaAndTable: string): 
   return recordSchema;
 };
 
-const getPrimaryKey = async (connectionId: string, schemaAndTable: string): Promise<string[]> => {
+const getPrimaryKey = async (connectionId: string, commonSchemaAndTable: string): Promise<string[]> => {
+  const schemaTablePg = schemaTable.to.pg(commonSchemaAndTable);
   const sql = `
       SELECT a.attname as f
       FROM pg_index i
                JOIN pg_attribute a
                     ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
-      WHERE i.indrelid = '${schemaAndTable}'::regclass
+      WHERE i.indrelid = '${schemaTablePg}'::regclass
     AND i.indisprimary;`;
   const result = await queryPg(connectionId, sql);
 
   return (result?.rows || []).map(({ f }) => f);
 };
 
-const getUniqueConstraints = async (connectionId: string, schemaAndTable: string): Promise<TUniqueConstraintsPg> => {
-  const [schema, table] = schemaAndTable.split('.');
+const getUniqueConstraints = async (connectionId: string, commonSchemaAndTable: string): Promise<TUniqueConstraintsPg> => {
+  const schemaTablePg = schemaTable.to.pg(commonSchemaAndTable);
+  const [schema, table] = schemaTable.to.common(commonSchemaAndTable).split('.');
   const sql = `
       SELECT UI.cn as cn, UI.cols as cols, CASE WHEN UC.cn IS NULL THEN 'UX' ELSE 'UC' END AS typ
       FROM (SELECT c.relname as cn, array_to_json(array_agg(a.attname ORDER BY a.attname)) AS cols
             FROM pg_index i
                      JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
                      JOIN pg_class AS c ON c.oid = i.indexrelid
-            WHERE i.indrelid = '${schemaAndTable}'::regclass
+            WHERE i.indrelid = '${schemaTablePg}'::regclass
               AND i.indisunique
               AND NOT i.indisprimary
             GROUP BY c.relname) AS UI
@@ -82,8 +86,8 @@ const getUniqueConstraints = async (connectionId: string, schemaAndTable: string
                                          JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)
                                          JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
                                     AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
-                                WHERE tc.table_schema = '${trimDoubleQuoteMarks(schema)}'
-                                  AND tc.table_name = '${trimDoubleQuoteMarks(table)}'
+                                WHERE tc.table_schema = '${schema}'
+                                  AND tc.table_name = '${table}'
                                   AND tc.constraint_type = 'UNIQUE'
                                 GROUP BY ccu.constraint_name) AS UC ON UC.cn = UI.cn
       ORDER BY CASE WHEN UC.cn IS NULL THEN 2 ELSE 1 END
@@ -96,9 +100,8 @@ const getUniqueConstraints = async (connectionId: string, schemaAndTable: string
   return uc;
 };
 
-const getSerials = async (connectionId: string, schemaAndTable: string): Promise<string[]> => {
-  const [schema, table] = schemaAndTable.split('.');
-  const fqName = `${trimDoubleQuoteMarks(schema)}.${trimDoubleQuoteMarks(table)}`
+const getSerials = async (connectionId: string, commonSchemaAndTable: string): Promise<string[]> => {
+  const fqName = schemaTable.to.common(commonSchemaAndTable);
   const sql = `
       WITH fq_objects AS (SELECT c.oid,
                                  n.nspname || '.' || c.relname AS fqname,
@@ -121,16 +124,16 @@ const getSerials = async (connectionId: string, schemaAndTable: string): Promise
   return result?.rows?.[0]?.cols || [];
 };
 
-export const getTableSchemaPg = async (connectionId: string, schemaAndTable: string): Promise<ITableSchemaPg> => {
-  let tableSchema = tableSchemaHash[schemaAndTable];
+export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTable: string): Promise<ITableSchemaPg> => {
+  let tableSchema = tableSchemaHash[commonSchemaAndTable];
   if (tableSchema) {
     return tableSchema;
   }
   try {
-    const recordSchema = await getRecordSchemaMs(connectionId, schemaAndTable);
-    const pk = await getPrimaryKey(connectionId, schemaAndTable);
-    const uc = await getUniqueConstraints(connectionId, schemaAndTable);
-    const serials = await getSerials(connectionId, schemaAndTable);
+    const recordSchema = await getRecordSchemaMs(connectionId, commonSchemaAndTable);
+    const pk = await getPrimaryKey(connectionId, commonSchemaAndTable);
+    const uc = await getUniqueConstraints(connectionId, commonSchemaAndTable);
+    const serials = await getSerials(connectionId, commonSchemaAndTable);
     const defaults: { [fieldName: string]: string } = {};
     Object.values(recordSchema).forEach((fieldDef) => {
       const { name: f, columnDefault, hasDefault } = fieldDef;
@@ -144,9 +147,9 @@ export const getTableSchemaPg = async (connectionId: string, schemaAndTable: str
     tableSchema = {
       recordSchema, pk, uc, defaults, serials, fieldsList, fieldsWoSerials,
     };
-    tableSchemaHash[schemaAndTable] = tableSchema;
+    tableSchemaHash[commonSchemaAndTable] = tableSchema;
   } catch (err) {
-    logger.error(`Failed to get schema for table ${schemaAndTable}`);
+    logger.error(`Failed to get schema for table ${commonSchemaAndTable}`);
     logger.error(err);
     await graceExit();
   }

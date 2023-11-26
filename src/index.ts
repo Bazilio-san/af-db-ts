@@ -113,3 +113,4 @@ export { getFieldsAndValuesPg, getTableSchemaPg } from './pg/table-schema';
 export { closeAllDb, graceExit, logSqlError } from './common';
 
 export { setLogger } from './logger-error';
+export { schemaTable } from './utils';

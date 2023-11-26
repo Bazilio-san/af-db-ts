@@ -155,6 +155,7 @@ export interface TGetRecordSchemaResultMs {
   connectionId: string,
   dbConfig: IDBConfigMs,
   schemaAndTable: string,
+  schemaTableMs: string,
   dbSchemaAndTable: string,
   columns: IColumnMetadata,
   schemaAssoc: Partial<IColumnMetadata>,
