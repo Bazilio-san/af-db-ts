@@ -42,7 +42,7 @@ export {
 
 export {
   IFieldDefPg,
-  TRecordSchemaPg,
+  TColumnsSchemaPg,
   ITableSchemaPg,
   EDataTypePg,
   TUniqueConstraintsPg,

@@ -17,7 +17,7 @@ export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (
   }
   const schemaTablePg = schemaTable.to.pg(targetSchemaAndTable);
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, targetSchemaAndTable);
-  const { recordSchema, pk, fieldsWoSerials, defaults } = tableSchema;
+  const { columnsSchema, pk, fieldsWoSerials, defaults } = tableSchema;
 
   let insertFieldsList: string[] = fieldsWoSerials;
   if (omitFields.length) {
@@ -30,7 +30,7 @@ export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (
 
     insertFieldsList.forEach((fieldName) => {
       const value = record[fieldName];
-      let pgSqlValue = prepareSqlValuePg({ value, fieldDef: recordSchema[fieldName] });
+      let pgSqlValue = prepareSqlValuePg({ value, fieldDef: columnsSchema[fieldName] });
       if (defaults[fieldName] != null && pgSqlValue === 'null') {
         pgSqlValue = defaults[fieldName];
       }

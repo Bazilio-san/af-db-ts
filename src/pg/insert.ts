@@ -57,9 +57,9 @@ export const insertPg = async <T extends QueryResultRow, R extends QueryResultRo
     updateLevel?: EUpdateLevel, // Flag: Update entry when unique constraints conflict.
   },
 ): Promise<R | undefined> => {
-  const { recordSchema, pk = [], serials = [], uc = [] } = await getTableSchemaPg(connectionId, target);
+  const { columnsSchema, pk = [], serials = [], uc = [] } = await getTableSchemaPg(connectionId, target);
   // Cleaning the record: deleting properties not included in the set of fields, with the value undefined and auto-incrementing fields
-  const recordWoSerials: T = omitBy(record, (fieldValue: any, fieldName: string) => !recordSchema[fieldName] || fieldValue === undefined || serials.includes(fieldName)) as T;
+  const recordWoSerials: T = omitBy(record, (fieldValue: any, fieldName: string) => !columnsSchema[fieldName] || fieldValue === undefined || serials.includes(fieldName)) as T;
 
   // We form all possible sets of fields, which we then use to search for an added (or already existing) record
   // Normalize (sort) sets
@@ -85,7 +85,7 @@ export const insertPg = async <T extends QueryResultRow, R extends QueryResultRo
     }
 
     // There is no suitable record in the database, we insert it
-    const { values, positionsList, fieldsList, upsertFields } = getFieldsAndValuesPg(recordWoSerials, recordSchema);
+    const { values, positionsList, fieldsList, upsertFields } = getFieldsAndValuesPg(recordWoSerials, columnsSchema);
     const insertSQL = `INSERT INTO ${target} (${fieldsList})
                        VALUES (${positionsList}) ON CONFLICT ${
                                updateLevel === EUpdateLevel.NEVER_UPDATE

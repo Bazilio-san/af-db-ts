@@ -3,7 +3,7 @@ import { QueryResultRow } from 'pg';
 import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
-import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TRecordSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
+import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
 import { schemaTable } from '../utils';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
@@ -11,7 +11,7 @@ import { schemaTable } from '../utils';
 
 const tableSchemaHash: { [commonSchemaAndTable: string]: ITableSchemaPg } = {};
 
-const getRecordSchemaMs = async (connectionId: string, commonSchemaAndTable: string): Promise<TRecordSchemaPg> => {
+const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: string): Promise<TColumnsSchemaPg> => {
   const [schema, table] = schemaTable.to.common(commonSchemaAndTable).split('.');
   const sql = `SELECT column_name,
                       column_default,
@@ -28,7 +28,7 @@ const getRecordSchemaMs = async (connectionId: string, commonSchemaAndTable: str
                  AND table_schema = '${schema}';`;
   const result = await queryPg(connectionId, sql);
   const fields = result?.rows || [];
-  const recordSchema: TRecordSchemaPg = {};
+  const columnsSchema: TColumnsSchemaPg = {};
   fields.forEach((fieldDef) => {
     const fieldSchema: IFieldDefPg = {
       name: fieldDef.column_name,
@@ -48,10 +48,10 @@ const getRecordSchemaMs = async (connectionId: string, commonSchemaAndTable: str
           delete fieldSchema[prop as keyof IFieldDefPg];
         }
       });
-      recordSchema[fieldDef.column_name] = fieldSchema;
+      columnsSchema[fieldDef.column_name] = fieldSchema;
     }
   });
-  return recordSchema;
+  return columnsSchema;
 };
 
 const getPrimaryKey = async (connectionId: string, commonSchemaAndTable: string): Promise<string[]> => {
@@ -130,22 +130,22 @@ export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTabl
     return tableSchema;
   }
   try {
-    const recordSchema = await getRecordSchemaMs(connectionId, commonSchemaAndTable);
+    const columnsSchema = await getColumnsSchemaPg_(connectionId, commonSchemaAndTable);
     const pk = await getPrimaryKey(connectionId, commonSchemaAndTable);
     const uc = await getUniqueConstraints(connectionId, commonSchemaAndTable);
     const serials = await getSerials(connectionId, commonSchemaAndTable);
     const defaults: { [fieldName: string]: string } = {};
-    Object.values(recordSchema).forEach((fieldDef) => {
+    Object.values(columnsSchema).forEach((fieldDef) => {
       const { name: f, columnDefault, hasDefault } = fieldDef;
       if (hasDefault && !serials.includes(f)) {
         defaults[f] = `${columnDefault}`;
       }
     });
-    const fieldsList: string[] = Object.keys(recordSchema);
+    const fieldsList: string[] = Object.keys(columnsSchema);
     const fieldsWoSerials: string[] = fieldsList.filter((fieldName) => !serials.includes(fieldName));
 
     tableSchema = {
-      recordSchema, pk, uc, defaults, serials, fieldsList, fieldsWoSerials,
+      columnsSchema, pk, uc, defaults, serials, fieldsList, fieldsWoSerials,
     };
     tableSchemaHash[commonSchemaAndTable] = tableSchema;
   } catch (err) {
@@ -156,7 +156,7 @@ export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTabl
   return tableSchema;
 };
 
-export const getFieldsAndValuesPg = <U extends QueryResultRow = QueryResultRow> (record: U, recordSchema: TRecordSchemaPg):
+export const getFieldsAndValuesPg = <U extends QueryResultRow = QueryResultRow> (record: U, columnsSchema: TColumnsSchemaPg):
   {
     fields: string[],
     fieldsList: string,
@@ -167,7 +167,7 @@ export const getFieldsAndValuesPg = <U extends QueryResultRow = QueryResultRow> 
   } => {
   const recordNormalized: QueryResultRow = {};
   Object.entries(record).forEach(([f, v]) => {
-    const { dataType } = recordSchema[f] || {};
+    const { dataType } = columnsSchema[f] || {};
     if (!dataType) {
       return;
     }

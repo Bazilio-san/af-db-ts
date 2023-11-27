@@ -33,7 +33,7 @@ export interface IFieldDefPg {
   udtName?: string,
 }
 
-export interface TRecordSchemaPg {
+export interface TColumnsSchemaPg {
   [fieldName: string]: IFieldDefPg,
 }
 
@@ -42,7 +42,7 @@ export interface TUniqueConstraintsPg {
 }
 
 export interface ITableSchemaPg {
-  recordSchema: TRecordSchemaPg,
+  columnsSchema: TColumnsSchemaPg,
   pk: string[],
   uc: TUniqueConstraintsPg,
   serials: string[],

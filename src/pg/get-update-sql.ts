@@ -11,8 +11,8 @@ export const getUpdateSqlPg = async (
   customSets: TDBRecord = {},
 ): Promise<string> => {
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, commonSchemaAndTable);
-  const { recordSchema, pk, fieldsWoSerials } = tableSchema;
-  const sqlValue = (fieldName: string) => prepareSqlValuePg({ value: record[fieldName], fieldDef: recordSchema[fieldName] });
+  const { columnsSchema, pk, fieldsWoSerials } = tableSchema;
+  const sqlValue = (fieldName: string) => prepareSqlValuePg({ value: record[fieldName], fieldDef: columnsSchema[fieldName] });
   const preparedRecord: TDBRecord = {};
   fieldsWoSerials.forEach((f) => {
     if (pk.includes(f)) {
