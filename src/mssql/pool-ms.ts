@@ -5,7 +5,8 @@ import { ConnectionPool } from 'mssql';
 import { cloneDeep, sleep } from 'af-tools-ts';
 import { IDbOptionsMs, IDbsMs } from '../@types/i-config';
 import { logSqlError, _3_HOURS, _1_HOUR } from '../common';
-import { IConnectionPoolsMs, TGetPoolConnectionOptionsMs } from '../@types/i-ms';
+import { TGetPoolConnectionOptionsMs } from '../@types/i-ms';
+import { IConnectionPoolsMs } from '../@types/i-ms-new';
 
 const cfg = cloneDeep(config.util.toObject(config)) as any;
 

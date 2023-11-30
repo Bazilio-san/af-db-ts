@@ -22,7 +22,6 @@ export {
 export {
   IFieldSchemaMs,
   IGetValueForSqlArgsMs,
-  IConnectionPoolsMs,
   IPrepareSqlStringArgsMs,
   TRecordSchemaAssocMs,
   IGetMergeSQLOptionsMs,
@@ -39,6 +38,14 @@ export {
   TRecordSchemaMs,
   TGetPoolConnectionOptionsMs,
 } from './@types/i-ms';
+
+export {
+  IConnectionPoolsMs,
+  TUniqueConstraintsMs,
+  IFieldDefMs,
+  ITableSchemaMs,
+  TColumnsSchemaMs,
+} from './@types/i-ms-new';
 
 export {
   IFieldDefPg,
@@ -88,9 +95,9 @@ export {
 
 export { mssqlEscape } from './mssql/utils';
 
-export { getMergeSqlPg } from './pg/get-merge-sql';
+export { getSqlMergePg } from './pg/get-sql-merge-pg';
 
-export { getUpdateSqlPg } from './pg/get-update-sql';
+export { getUpdateSqlPg } from './pg/get-sql-update-pg';
 
 export { insertPg, EUpdateLevel } from './pg/insert';
 
@@ -102,13 +109,13 @@ export {
   closePoolPg,
   getDbConfigPg,
   closeAllPgConnectionsPg,
-} from './pg/pg-pool';
+} from './pg/pool-pg';
 
 export { prepareSqlStringPg, prepareSqlValuePg } from './pg/prepare-value';
 
 export { queryPg } from './pg/query-pg';
 
-export { getFieldsAndValuesPg, getTableSchemaPg } from './pg/table-schema';
+export { getFieldsAndValuesPg, getTableSchemaPg } from './pg/table-schema-pg';
 
 export { closeAllDb, graceExit, logSqlError } from './common';
 

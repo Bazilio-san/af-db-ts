@@ -1,5 +1,5 @@
 import { QueryResult, QueryResultRow } from 'pg';
-import { getPoolPg } from './pg-pool';
+import { getPoolPg } from './pool-pg';
 import { logSqlError } from '../common';
 import { IPoolPg } from '../@types/i-pg';
 

@@ -1,6 +1,7 @@
 import { ConnectionPool, IColumnMetadata, ISqlType } from 'mssql';
 import { IDateTimeOptionsEx, IDialect, TFieldName, TRecordSet } from './i-common';
 import { IDBConfigMs } from './i-config';
+import { TColumnsSchemaPg, TUniqueConstraintsPg } from "./i-pg";
 
 /**
  * Метаинформация о поле БД
@@ -174,6 +175,3 @@ export interface TGetRecordSchemaResultMs {
   getUpdateSQL: (_record: TRecordSet) => string,
 }
 
-export interface IConnectionPoolsMs {
-  [poolId: string]: ConnectionPool
-}

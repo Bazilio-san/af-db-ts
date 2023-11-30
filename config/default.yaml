@@ -5,3 +5,20 @@ logger:
 timezone: Europe/Moscow
 #timezone: America/Toronto
 
+db:
+  mssql:
+    dbs:
+      test:
+        server: test
+        port: 1433
+        database: test
+        user: test
+        password: '***'
+  postgres:
+    dbs:
+      test:
+        host: test
+        port: 5432
+        database: test
+        user: test
+        password: '***'

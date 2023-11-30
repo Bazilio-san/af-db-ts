@@ -1,7 +1,7 @@
 // noinspection SqlResolve
 import { QueryResultRow } from 'pg';
 import { omitBy } from 'af-tools-ts';
-import { getFieldsAndValuesPg, getTableSchemaPg } from './table-schema';
+import { getFieldsAndValuesPg, getTableSchemaPg } from './table-schema-pg';
 import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
 

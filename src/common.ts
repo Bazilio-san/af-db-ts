@@ -1,5 +1,5 @@
 import { magenta } from 'af-color';
-import { closeAllPgConnectionsPg } from './pg/pg-pool';
+import { closeAllPgConnectionsPg } from './pg/pool-pg';
 import { closeAllDbConnectionsMs } from './mssql/pool-ms';
 import { logger } from './logger-error';
 

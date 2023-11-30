@@ -1,4 +1,4 @@
-import { getTableSchemaPg } from './table-schema';
+import { getTableSchemaPg } from './table-schema-pg';
 import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
 import { TDBRecord } from '../@types/i-common';

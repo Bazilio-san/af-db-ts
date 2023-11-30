@@ -1,0 +1,81 @@
+{
+  "ser1": {
+    "name": "ser1",
+    "isNullable": false,
+    "columnDefault": "nextval('test.table_schema_ser1_seq'::regclass)",
+    "hasDefault": true,
+    "dataType": "integer",
+    "precision": 32,
+    "radix": 2,
+    "udtName": "int4"
+  },
+  "ser2": {
+    "name": "ser2",
+    "isNullable": false,
+    "columnDefault": "nextval('test.table_schema_ser2_seq'::regclass)",
+    "hasDefault": true,
+    "dataType": "integer",
+    "precision": 32,
+    "radix": 2,
+    "udtName": "int4"
+  },
+  "i1": {
+    "name": "i1",
+    "isNullable": false,
+    "columnDefault": "25",
+    "hasDefault": true,
+    "dataType": "integer",
+    "precision": 32,
+    "radix": 2,
+    "udtName": "int4"
+  },
+  "si1": {
+    "name": "si1",
+    "isNullable": false,
+    "hasDefault": false,
+    "dataType": "smallint",
+    "precision": 16,
+    "radix": 2,
+    "udtName": "int2"
+  },
+  "vc1": {
+    "name": "vc1",
+    "isNullable": false,
+    "hasDefault": false,
+    "dataType": "character varying",
+    "maxLen": 20,
+    "udtName": "varchar"
+  },
+  "dtz1": {
+    "name": "dtz1",
+    "isNullable": false,
+    "columnDefault": "CURRENT_TIMESTAMP",
+    "hasDefault": true,
+    "dataType": "timestamp with time zone",
+    "dtPrecision": 6,
+    "udtName": "timestamptz"
+  },
+  "time1": {
+    "name": "time1",
+    "isNullable": false,
+    "hasDefault": false,
+    "dataType": "time without time zone",
+    "dtPrecision": 6,
+    "udtName": "time"
+  },
+  "bool1": {
+    "name": "bool1",
+    "isNullable": false,
+    "hasDefault": false,
+    "dataType": "boolean",
+    "udtName": "bool"
+  },
+  "permanent": {
+    "name": "permanent",
+    "isNullable": true,
+    "columnDefault": "false",
+    "hasDefault": true,
+    "dataType": "boolean",
+    "udtName": "bool"
+  }
+}

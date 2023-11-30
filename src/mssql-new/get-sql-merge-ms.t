@@ -4,7 +4,7 @@ import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
 import { schemaTable } from '../utils';
 
-export const getMergeSqlPg = async <U extends QueryResultRow = QueryResultRow> (arg: {
+export const getMergeSqlMs = async <U extends QueryResultRow = QueryResultRow> (arg: {
   connectionId: string,
   targetSchemaAndTable: string,
   recordset: U[],

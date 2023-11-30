@@ -176,7 +176,7 @@ export const getRecordSchemaMs = async (
 ): Promise<TGetRecordSchemaResultMs | undefined> => {
   commonSchemaAndTable = schemaTable.to.common(commonSchemaAndTable);
   const propertyPath = `schemas.${connectionId}.${commonSchemaAndTable}`;
-  const schemaTableMs = schemaTable.to.pg(commonSchemaAndTable);
+  const schemaTableMs = schemaTable.to.ms(commonSchemaAndTable);
 
   let result: TGetRecordSchemaResultMs | undefined = cache.get(propertyPath) as TGetRecordSchemaResultMs | undefined;
   if (result) {
