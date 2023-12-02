@@ -1,12 +1,12 @@
 // noinspection SqlResolve
+import * as sql from 'mssql';
 import { QueryResultRow } from 'pg';
 import { each } from 'af-tools-ts';
 import { removePairBrackets, schemaTable } from '../utils';
-import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } from '../@types/i-ms-new';
+import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } from '../@types/i-ms';
 import { queryMs } from './query-ms';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
-import { sql } from '../mssql/sql';
 import { TFieldName } from '../@types/i-common';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
@@ -196,7 +196,7 @@ const getSerials = async (connectionId: string, commonSchemaAndTable: string): P
 };
 
 export const getTableSchemaMs = async (connectionId: string, commonSchemaAndTable: string): Promise<ITableSchemaMs> => {
-  let tableSchema = tableSchemaHash[commonSchemaAndTable];
+  let tableSchema: ITableSchemaMs = tableSchemaHash[commonSchemaAndTable];
   if (tableSchema) {
     return tableSchema;
   }
@@ -212,11 +212,11 @@ export const getTableSchemaMs = async (connectionId: string, commonSchemaAndTabl
         defaults[f] = `${columnDefault}`;
       }
     });
-    const fieldsList: string[] = Object.keys(columnsSchema);
-    const fieldsWoSerials: string[] = fieldsList.filter((fieldName) => !serials.includes(fieldName));
+    const fieldsArray: string[] = Object.keys(columnsSchema);
+    const fieldsWoSerials: string[] = fieldsArray.filter((fieldName) => !serials.includes(fieldName));
 
     tableSchema = {
-      columnsSchema, pk, uc, defaults, serials, fieldsList, fieldsWoSerials,
+      columnsSchema, pk, uc, defaults, serials, fieldsArray, fieldsWoSerials,
     };
     tableSchemaHash[commonSchemaAndTable] = tableSchema;
   } catch (err) {

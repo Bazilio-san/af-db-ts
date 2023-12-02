@@ -2,11 +2,15 @@
 import { DateTime } from 'luxon';
 import { echo } from 'af-echo-ts';
 import { getBool, rn } from 'af-tools-ts';
-import { IFieldDefMs } from '../@types/i-ms-new';
-import { sql } from '../mssql/sql';
-import { q } from '../mssql/utils';
+import * as sql from 'mssql';
+import { IFieldDefMs } from '../@types/i-ms';
 
 const NULL = 'null';
+
+/**
+ * Оборачивает строку в одинарные кавычки, если второй аргумент не true
+ */
+export const q = (val: string, noQuotes?: boolean): string => (noQuotes ? val : `'${val}'`);
 
 /**
  * Подготовка строки для передачи в SQL

@@ -26,32 +26,13 @@ export { schemaTable } from './utils';
 // ######################### MS #####################################
 
 export {
-  IFieldSchemaMs,
-  IGetValueForSqlArgsMs,
-  IPrepareSqlStringArgsMs,
-  TRecordSchemaAssocMs,
-  IGetMergeSQLOptionsMs,
-  IPrepareRecordForSqlArgsMs,
-  IPrepareRecordParamsMs,
-  ISchemaArrayMs,
-  IValueForSQLPartialArgsMs,
-  TFieldTypeCorrectionMs,
-  ISchemaItemMs,
-  TGetRecordSchemaOptionsMs,
-  TGetRecordSchemaResultMs,
-  TMergeResultMs,
-  TMergeRulesMs,
-  TRecordSchemaMs,
-} from './@types/i-ms';
-
-export {
   IFieldDefMs,
   TColumnsSchemaMs,
   ITableSchemaMs,
   TUniqueConstraintsMs,
   IConnectionPoolsMs,
   TGetPoolConnectionOptionsMs,
-} from './@types/i-ms-new';
+} from './@types/i-ms';
 
 export {
   poolsCacheMs,
@@ -79,19 +60,19 @@ export {
 export { getSqlMergeMs } from './ms/get-sql-merge-ms';
 
 // VVR ##############################################################
-
-export {
-  getRecordSchemaMs,
-  wrapTransactionMs,
-  serializeMs,
-  getRecordValuesForSqlMs,
-  getSqlSetExpressionMs,
-  getSqlValuesExpressionMs,
-  prepareRecordForSqlMs,
-  prepareDataForSqlMs,
-  getRowsAffectedMs,
-  sql,
-} from './mssql/sql';
+//
+// export {
+//   getRecordSchemaMs,
+//   wrapTransactionMs,
+//   serializeMs,
+//   getRecordValuesForSqlMs,
+//   getSqlSetExpressionMs,
+//   getSqlValuesExpressionMs,
+//   prepareRecordForSqlMs,
+//   prepareDataForSqlMs,
+//   getRowsAffectedMs,
+//   sql,
+// } from './mssql/sql';
 
 // ######################### PG #####################################
 

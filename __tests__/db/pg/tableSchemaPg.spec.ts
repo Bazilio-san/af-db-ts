@@ -45,7 +45,7 @@ describe('getTableSchemaPg()', () => {
   });
 
   test('fieldsList', async () => {
-    expect(tableSchema.fieldsList).toEqual([
+    expect(tableSchema.fieldsArray).toEqual([
       'ser1',
       'ser2',
       'i1',

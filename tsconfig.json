@@ -43,7 +43,6 @@
     "docker",
     "i18n",
     "node_modules",
-    "src/mssql/sql",
     "test",
     "**/dist",
     "**/_misc"

@@ -1,7 +1,7 @@
 import { QueryResultRow } from 'pg';
 import { getTableSchemaMs } from './table-schema-ms';
 import { prepareSqlValueMs } from './prepare-value';
-import { ITableSchemaMs } from '../@types/i-ms-new';
+import { ITableSchemaMs } from '../@types/i-ms';
 import { schemaTable } from '../utils';
 
 export const getSqlMergeMs = async <U extends QueryResultRow = QueryResultRow> (arg: {

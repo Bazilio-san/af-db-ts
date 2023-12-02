@@ -1,11 +1,11 @@
 /* eslint-disable no-await-in-loop */
 import * as path from 'path';
 import * as fs from 'fs';
+import * as sql from 'mssql';
 import { echo } from 'af-echo-ts';
-import { IFieldDefMs } from '../@types/i-ms-new';
+import { IFieldDefMs } from '../@types/i-ms';
 import { getTableSchemaMs } from './table-schema-ms';
 import { closeAllDbConnectionsMs } from './pool-ms';
-import { sql } from '../mssql/sql';
 import { schemaTable } from '../utils';
 
 const getJsTypeByFieldDef = (fieldDef: IFieldDefMs): string => {
