@@ -2,9 +2,8 @@
 
 import * as path from 'path';
 import fs from 'fs';
-import { getTableSchemaMs, ITableSchemaMs, queryMs } from '../../../src';
+import { genTableInterfaceMs, getTableSchemaMs, ITableSchemaMs, queryMs } from '../../../src';
 import columnsSchema from './ddl/column-schema-for-test-table-schema-ms.json';
-import { genTableInterfaceMs } from '../../../src/ms/gen-table-interfaces-ms';
 
 const connectionId = 'test';
 
@@ -49,6 +48,7 @@ describe('getTableSchemaMs()', () => {
     expect(tableSchema.fieldsArray).toEqual([
       'ser1',
       'i1',
+      'i2',
       'si1',
       'vc1',
       'dtz1',
@@ -58,22 +58,22 @@ describe('getTableSchemaMs()', () => {
       'pers1',
     ]);
   });
-  test('fieldsWoSerials', async () => {
-    expect(tableSchema.fieldsWoSerials).toEqual([
+  test('fieldsWoSerialsAndRO', async () => {
+    expect(tableSchema.fieldsWoSerialsAndRO).toEqual([
       'i1',
+      'i2',
       'si1',
       'vc1',
       'dtz1',
       'time1',
       'bool1',
-      'comp1',
-      'pers1',
     ]);
   });
-  test('serials', async () => {
-    expect(tableSchema.serials).toEqual(['ser1']);
+  test('serialsFields', async () => {
+    expect(tableSchema.serialsFields).toEqual(['ser1']);
   });
   test('columnsSchema', async () => {
-    expect(tableSchema.columnsSchema).toMatchObject(columnsSchema);
+    const json = JSON.parse(JSON.stringify(tableSchema.columnsSchema, (k, v) => (k === 'dataType' ? v.name.toLowerCase() : v)));
+    expect(json).toStrictEqual(columnsSchema);
   });
 });

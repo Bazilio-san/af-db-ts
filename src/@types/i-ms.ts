@@ -47,10 +47,11 @@ export interface ITableSchemaMs {
   columnsSchema: TColumnsSchemaMs,
   pk: TFieldName[],
   uc: TUniqueConstraintsMs,
-  serials: TFieldName[],
   defaults: { [fieldName: TFieldName]: string },
-  fieldsArray: TFieldName[],
-  fieldsWoSerials: TFieldName[],
+  fieldsArray: TFieldName[], // массив имен всех полей
+  serialsFields: TFieldName[], // массив имен полей типа identity
+  readOnlyFields: TFieldName[], // массив имен полей ReadOnly
+  fieldsWoSerialsAndRO: TFieldName[], // массив имен полей без полей identity и ReadOnly
 }
 
 export interface IConnectionPoolsMs {

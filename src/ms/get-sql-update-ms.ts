@@ -18,11 +18,11 @@ export const getUpdateSqlMs = async (arg: {
     customSets = {},
   } = arg;
   const tableSchema: ITableSchemaMs = await getTableSchemaMs(connectionId, commonSchemaAndTable);
-  const { columnsSchema, pk, fieldsWoSerials } = tableSchema;
+  const { columnsSchema, pk, fieldsWoSerialsAndRO } = tableSchema;
 
   const { updateIdentity = pk } = arg;
 
-  const updateFields = fieldsWoSerials.filter((f) => (!updateIdentity.includes(f)));
+  const updateFields = fieldsWoSerialsAndRO.filter((f) => (!updateIdentity.includes(f)));
 
   const getPreparedSqlValue = (f: string) => prepareSqlValueMs({ value: record[f], fieldDef: columnsSchema[f] });
 

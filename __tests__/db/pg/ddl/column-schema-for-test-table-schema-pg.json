@@ -7,7 +7,8 @@
     "dataType": "integer",
     "precision": 32,
     "radix": 2,
-    "udtName": "int4"
+    "udtName": "int4",
+    "readOnly": false
   },
   "ser2": {
     "name": "ser2",
@@ -17,7 +18,8 @@
     "dataType": "integer",
     "precision": 32,
     "radix": 2,
-    "udtName": "int4"
+    "udtName": "int4",
+    "readOnly": false
   },
   "i1": {
     "name": "i1",
@@ -27,7 +29,8 @@
     "dataType": "integer",
     "precision": 32,
     "radix": 2,
-    "udtName": "int4"
+    "udtName": "int4",
+    "readOnly": false
   },
   "si1": {
     "name": "si1",
@@ -36,7 +39,8 @@
     "dataType": "smallint",
     "precision": 16,
     "radix": 2,
-    "udtName": "int2"
+    "udtName": "int2",
+    "readOnly": false
   },
   "vc1": {
     "name": "vc1",
@@ -44,7 +48,8 @@
     "hasDefault": false,
     "dataType": "character varying",
     "maxLen": 20,
-    "udtName": "varchar"
+    "udtName": "varchar",
+    "readOnly": false
   },
   "dtz1": {
     "name": "dtz1",
@@ -53,7 +58,8 @@
     "hasDefault": true,
     "dataType": "timestamp with time zone",
     "dtPrecision": 6,
-    "udtName": "timestamptz"
+    "udtName": "timestamptz",
+    "readOnly": false
   },
   "time1": {
     "name": "time1",
@@ -61,21 +67,33 @@
     "hasDefault": false,
     "dataType": "time without time zone",
     "dtPrecision": 6,
-    "udtName": "time"
+    "udtName": "time",
+    "readOnly": false
   },
   "bool1": {
     "name": "bool1",
     "isNullable": false,
     "hasDefault": false,
     "dataType": "boolean",
-    "udtName": "bool"
+    "udtName": "bool",
+    "readOnly": false
   },
-  "permanent": {
-    "name": "permanent",
+  "bool2": {
+    "name": "bool2",
     "isNullable": true,
     "columnDefault": "false",
     "hasDefault": true,
     "dataType": "boolean",
-    "udtName": "bool"
+    "udtName": "bool",
+    "readOnly": false
+  },
+  "gen1": {
+    "name": "gen1",
+    "isNullable": true,
+    "hasDefault": false,
+    "dataType": "numeric",
+    "radix": 10,
+    "udtName": "numeric",
+    "readOnly": true
   }
 }

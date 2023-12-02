@@ -27,11 +27,11 @@ export const getSqlMergeMs = async <U extends TDBRecord = TDBRecord> (arg: {
   }
   const schemaTableMs = schemaTable.to.ms(commonSchemaAndTable);
   const tableSchema: ITableSchemaMs = await getTableSchemaMs(connectionId, commonSchemaAndTable);
-  const { columnsSchema, pk, fieldsWoSerials, defaults, uc } = tableSchema;
-  let mergeFieldsList: string[] = fieldsWoSerials;
+  const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults, uc } = tableSchema;
+  let mergeFieldsList: string[] = fieldsWoSerialsAndRO;
   if (omitFields.length) {
     const set = new Set(omitFields);
-    mergeFieldsList = fieldsWoSerials.filter((fieldName) => !set.has(fieldName));
+    mergeFieldsList = fieldsWoSerialsAndRO.filter((fieldName) => !set.has(fieldName));
   }
 
   const mergeValues = recordset.map((record: U) => {

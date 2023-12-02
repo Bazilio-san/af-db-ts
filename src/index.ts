@@ -63,7 +63,6 @@ export {
 export { queryMs } from './ms/query-ms';
 
 export {
-  getFieldsAndValuesMs,
   getTableSchemaMs,
   correctRecordSchemaMs,
 } from './ms/table-schema-ms';

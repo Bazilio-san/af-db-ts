@@ -1,4 +1,5 @@
 import { Pool, PoolClient } from 'pg';
+import { TFieldName } from './i-common';
 
 export enum EDataTypePg {
   'USER_DEFINED' = 'USER-DEFINED',
@@ -31,6 +32,7 @@ export interface IFieldDefPg {
   radix?: number,
   dtPrecision?: number,
   udtName?: string,
+  readOnly?: boolean, // VVQ Задействовать!
 }
 
 export interface TColumnsSchemaPg {
@@ -45,10 +47,11 @@ export interface ITableSchemaPg {
   columnsSchema: TColumnsSchemaPg,
   pk: string[],
   uc: TUniqueConstraintsPg,
-  serials: string[],
   defaults: { [fieldName: string]: string },
-  fieldsArray: string[],
-  fieldsWoSerials: string[],
+  fieldsArray: TFieldName[], // массив имен всех полей
+  serialsFields: TFieldName[], // массив имен полей типа identity
+  readOnlyFields: TFieldName[], // массив имен полей ReadOnly
+  fieldsWoSerialsAndRO: TFieldName[], // массив имен полей без полей identity и ReadOnly
 }
 
 export interface IPoolClientPg extends PoolClient {

@@ -14,15 +14,23 @@ export const getInsertSqlMs = async (arg: {
   const { commonSchemaAndTable } = arg;
 
   const tableSchema: ITableSchemaMs = await getTableSchemaMs(arg.connectionId, commonSchemaAndTable);
-  const { columnsSchema, fieldsWoSerials } = tableSchema;
+  const { columnsSchema, fieldsWoSerialsAndRO, defaults } = tableSchema;
 
-  const insertFieldsArray = fieldsWoSerials.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
+  const insertFieldsArray = fieldsWoSerialsAndRO.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
   const insertFieldsList = insertFieldsArray.map((f) => `[${f}]`).join(', ');
 
   const preparedRowsArray = arg.packet.map((record) => {
     const preparedRecordValuesArray = insertFieldsArray.map((f) => {
       const value = record[f];
-      return value == null ? 'NULL' : prepareSqlValueMs({ value, fieldDef: columnsSchema[f] });
+      const fieldDef = columnsSchema[f];
+      if (value != null) {
+        return prepareSqlValueMs({ value, fieldDef });
+      }
+      const defVal = defaults[f];
+      if (!fieldDef.isNullable && defVal != null) {
+        return defVal;
+      }
+      return 'NULL';
     });
     return preparedRecordValuesArray.join(',');
   });
@@ -31,7 +39,7 @@ export const getInsertSqlMs = async (arg: {
   const out = arg.addOutputInserted ? ' OUTPUT inserted.* ' : '';
   const target = schemaTable.to.ms(commonSchemaAndTable);
   // noinspection UnnecessaryLocalVariableJS
-  const insertSQL = `INSERT INTO ${target} ${out} (${insertFieldsList})
+  const insertSQL = `INSERT INTO ${target} (${insertFieldsList}) ${out}
                      VALUES ${values}`;
   return insertSQL;
 };

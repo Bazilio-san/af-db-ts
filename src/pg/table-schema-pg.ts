@@ -41,15 +41,14 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
       radix: fieldDef.numeric_precision_radix,
       dtPrecision: fieldDef.datetime_precision,
       udtName: fieldDef.udt_name,
+      readOnly: fieldDef.is_generated === 'ALWAYS', // boolean;
     };
-    if (fieldDef.is_generated === 'NEVER') {
-      Object.entries(fieldSchema).forEach(([prop, value]) => {
-        if (value == null) {
-          delete fieldSchema[prop as keyof IFieldDefPg];
-        }
-      });
-      columnsSchema[fieldDef.column_name] = fieldSchema;
-    }
+    Object.entries(fieldSchema).forEach(([prop, value]) => {
+      if (value == null) {
+        delete fieldSchema[prop as keyof IFieldDefPg];
+      }
+    });
+    columnsSchema[fieldDef.column_name] = fieldSchema;
   });
   return columnsSchema;
 };
@@ -133,19 +132,20 @@ export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTabl
     const columnsSchema = await getColumnsSchemaPg_(connectionId, commonSchemaAndTable);
     const pk = await getPrimaryKey(connectionId, commonSchemaAndTable);
     const uc = await getUniqueConstraints(connectionId, commonSchemaAndTable);
-    const serials = await getSerials(connectionId, commonSchemaAndTable);
+    const serialsFields = await getSerials(connectionId, commonSchemaAndTable);
     const defaults: { [fieldName: string]: string } = {};
     Object.values(columnsSchema).forEach((fieldDef) => {
-      const { name: f, columnDefault, hasDefault } = fieldDef;
-      if (hasDefault && !serials.includes(f)) {
+      const { name: f = '', columnDefault, hasDefault } = fieldDef;
+      if (hasDefault && !serialsFields.includes(f)) {
         defaults[f] = `${columnDefault}`;
       }
     });
     const fieldsArray: string[] = Object.keys(columnsSchema);
-    const fieldsWoSerials: string[] = fieldsArray.filter((fieldName) => !serials.includes(fieldName));
+    const readOnlyFields: string[] = Object.values(columnsSchema).filter((s) => s.readOnly).map((s) => s.name as string);
+    const fieldsWoSerialsAndRO: string[] = fieldsArray.filter((f) => !serialsFields.includes(f) && !readOnlyFields.includes(f));
 
     tableSchema = {
-      columnsSchema, pk, uc, defaults, serials, fieldsArray, fieldsWoSerials,
+      columnsSchema, pk, uc, defaults, serialsFields, fieldsArray, fieldsWoSerialsAndRO, readOnlyFields,
     };
     tableSchemaHash[commonSchemaAndTable] = tableSchema;
   } catch (err) {

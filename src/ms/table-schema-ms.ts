@@ -6,7 +6,7 @@ import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } f
 import { queryMs } from './query-ms';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
-import { TDBRecord, TFieldName } from '../@types/i-common';
+import { TFieldName } from '../@types/i-common';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
 // schemaAndTableMs: "<schema>"."<table>" :  "Staff"."nnPersones-personGuid"
@@ -203,19 +203,20 @@ export const getTableSchemaMs = async (connectionId: string, commonSchemaAndTabl
     const columnsSchema = await getColumnsSchemaMs_(connectionId, commonSchemaAndTable);
     const pk = await getPrimaryKey(connectionId, commonSchemaAndTable);
     const uc = await getUniqueConstraints(connectionId, commonSchemaAndTable);
-    const serials = await getSerials(connectionId, commonSchemaAndTable);
+    const serialsFields = await getSerials(connectionId, commonSchemaAndTable);
     const defaults: { [fieldName: string]: string } = {};
     Object.values(columnsSchema).forEach((fieldDef) => {
       const { name: f = '', columnDefault, hasDefault } = fieldDef;
-      if (hasDefault && !serials.includes(f)) {
+      if (hasDefault && !serialsFields.includes(f)) {
         defaults[f] = `${columnDefault}`;
       }
     });
     const fieldsArray: string[] = Object.keys(columnsSchema);
-    const fieldsWoSerials: string[] = fieldsArray.filter((fieldName) => !serials.includes(fieldName));
+    const readOnlyFields: string[] = Object.values(columnsSchema).filter((s) => s.readOnly).map((s) => s.name as string);
+    const fieldsWoSerialsAndRO: string[] = fieldsArray.filter((f) => !serialsFields.includes(f) && !readOnlyFields.includes(f));
 
     tableSchema = {
-      columnsSchema, pk, uc, defaults, serials, fieldsArray, fieldsWoSerials,
+      columnsSchema, pk, uc, defaults, serialsFields, fieldsArray, fieldsWoSerialsAndRO, readOnlyFields,
     };
     tableSchemaHash[commonSchemaAndTable] = tableSchema;
   } catch (err) {
@@ -225,64 +226,3 @@ export const getTableSchemaMs = async (connectionId: string, commonSchemaAndTabl
   }
   return tableSchema;
 };
-
-export const getFieldsAndValuesMs = <U extends TDBRecord = TDBRecord> (record: U, columnsSchema: TColumnsSchemaMs):
-  {
-    fields: string[],
-    fieldsList: string,
-    values: any[],
-    setFields: string,
-    upsertFields: string
-  } => {
-  const recordNormalized: TDBRecord = {};
-  Object.entries(record).forEach(([f, v]) => {
-    const { dataType } = columnsSchema[f] || {};
-    if (!dataType) {
-      return;
-    }
-    recordNormalized[f] = v;
-  });
-  const fields: string[] = Object.keys(recordNormalized);
-  const fieldsList: string = fields.map((f) => `[${f}]`).join(', ');
-  // const mergeIdentity =
-  // const onClause = `(${mergeIdentity.map((fName) => (`target.[${fName}] = source.[${fName}]`))
-  //   .join(' AND ')})`;
-
-  const values: any[] = Object.values(recordNormalized);
-  const setFields: string = fields.map((f, i) => `${f} = $${++i}`).join(', ');
-  const upsertFields: string = fields.map((f) => `${f} = EXCLUDED.${f}`).join(',\n');
-  return {
-    fields, fieldsList, values, setFields, upsertFields,
-  };
-};
-
-// const insertFields = fields.filter((fName) => (!excludeFromInsert.includes(fName)));
-// const insertSourceList = insertFields.map((fName) => (`source.[${fName}]`))
-//   .join(', ');
-// const insertFieldsList = insertFields.map((fName) => `[${fName}]`)
-//   .join(', ');
-// const updateFields = fields.filter((fName) => (!mergeIdentity.includes(fName)));
-// let updateFieldsList: string;
-// if (noUpdateIfNull) {
-//   updateFieldsList = updateFields.map((fName) => (`target.[${fName}] = COALESCE(source.[${fName}], target.[${fName}])`)).join(', ');
-// } else {
-//   updateFieldsList = updateFields.map((fName) => (`target.[${fName}] = source.[${fName}]`)).join(', ');
-// }
-// const dbConfig = db.getDbConfigMs<IDBConfigMs>(connectionId, false, true) as IDBConfigMs;
-// const dbSchemaAndTable = `[${dbConfig.database}].${schemaTableMs}`;
-
-// getColumnsSchemaMs_('test', 'test.table_schema');
-
-/*
-https://www.c-sharpcorner.com/blogs/get-primary-key-column-in-sql-server
-How to get Primary Key Column Name Programmatically?
-Here are a few lines of SQL query using which we can get the primary column name.
-
-select C.COLUMN_NAME FROM
-INFORMATION_SCHEMA.TABLE_CONSTRAINTS T
-JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE C
-ON C.CONSTRAINT_NAME=T.CONSTRAINT_NAME
-WHERE
-C.TABLE_NAME='Employee'
-and T.CONSTRAINT_TYPE='PRIMARY KEY'
-*/

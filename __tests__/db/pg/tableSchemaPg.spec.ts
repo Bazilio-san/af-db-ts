@@ -2,8 +2,7 @@
 
 import * as path from 'path';
 import fs from 'fs';
-import { getTableSchemaPg, ITableSchemaPg, queryPg } from '../../../src';
-import { genTableInterfacePg } from '../../../src/pg/gen-table-interfaces-pg';
+import { genTableInterfacePg, getTableSchemaPg, ITableSchemaPg, queryPg } from '../../../src';
 import columnsSchema from './ddl/column-schema-for-test-table-schema-pg.json';
 
 const connectionId = 'test';
@@ -38,9 +37,9 @@ describe('getTableSchemaPg()', () => {
   });
   test('defaults', async () => {
     expect(tableSchema.defaults).toEqual({
-      i1: '25',
+      bool2: 'false',
       dtz1: 'CURRENT_TIMESTAMP',
-      permanent: 'false',
+      i1: '25',
     });
   });
 
@@ -54,22 +53,23 @@ describe('getTableSchemaPg()', () => {
       'dtz1',
       'time1',
       'bool1',
-      'permanent',
+      'bool2',
+      'gen1',
     ]);
   });
-  test('fieldsWoSerials', async () => {
-    expect(tableSchema.fieldsWoSerials).toEqual([
+  test('fieldsWoSerialsAndRO', async () => {
+    expect(tableSchema.fieldsWoSerialsAndRO).toEqual([
       'i1',
       'si1',
       'vc1',
       'dtz1',
       'time1',
       'bool1',
-      'permanent',
+      'bool2',
     ]);
   });
-  test('serials', async () => {
-    expect(tableSchema.serials).toEqual(['ser1', 'ser2']);
+  test('serialsFields', async () => {
+    expect(tableSchema.serialsFields).toEqual(['ser1', 'ser2']);
   });
   test('columnsSchema', async () => {
     expect(tableSchema.columnsSchema).toMatchObject(columnsSchema);

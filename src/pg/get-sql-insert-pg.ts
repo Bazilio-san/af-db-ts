@@ -14,9 +14,9 @@ export const getInsertSqlPg = async (arg: {
   const { commonSchemaAndTable } = arg;
 
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(arg.connectionId, commonSchemaAndTable);
-  const { columnsSchema, fieldsWoSerials } = tableSchema;
+  const { columnsSchema, fieldsWoSerialsAndRO } = tableSchema;
 
-  const insertFieldsArray = fieldsWoSerials.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
+  const insertFieldsArray = fieldsWoSerialsAndRO.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
   const insertFieldsList = insertFieldsArray.map((f) => `"${f}"`).join(', ');
 
   const preparedRowsArray = arg.packet.map((record) => {

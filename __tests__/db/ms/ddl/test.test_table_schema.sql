@@ -4,6 +4,7 @@ CREATE TABLE [test].[table_schema]
 (
     [ser1]  [int] IDENTITY (1,1)                  NOT NULL,
     [i1]    [int]               default 123       NOT NULL,
+    [i2]    [int]                                 NULL,
     [si1]   [smallint]                            NOT NULL,
     [vc1]   [varchar](20)       default 'aaa'     NOT NULL,
     [dtz1]  [datetimeoffset](3) default GETDATE() NOT NULL,

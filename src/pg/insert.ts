@@ -57,13 +57,13 @@ export const insertPg = async <T extends TDBRecord, R extends TDBRecord = T> (
     updateLevel?: EUpdateLevel, // Flag: Update entry when unique constraints conflict.
   },
 ): Promise<R | undefined> => {
-  const { columnsSchema, pk = [], serials = [], uc = [] } = await getTableSchemaPg(connectionId, target);
+  const { columnsSchema, pk = [], serialsFields = [], uc = [] } = await getTableSchemaPg(connectionId, target);
   // Cleaning the record: deleting properties not included in the set of fields, with the value undefined and auto-incrementing fields
-  const recordWoSerials: T = omitBy(record, (fieldValue: any, fieldName: string) => !columnsSchema[fieldName] || fieldValue === undefined || serials.includes(fieldName)) as T;
+  const recordWoSerials: T = omitBy(record, (fieldValue: any, fieldName: string) => !columnsSchema[fieldName] || fieldValue === undefined || serialsFields.includes(fieldName)) as T;
 
   // We form all possible sets of fields, which we then use to search for an added (or already existing) record
   // Normalize (sort) sets
-  let identities: string[][] = [pk, ...serials.map((f) => [f]), ...Object.values(uc)].filter((a) => a.length).map((a) => a.sort());
+  let identities: string[][] = [pk, ...serialsFields.map((f) => [f]), ...Object.values(uc)].filter((a) => a.length).map((a) => a.sort());
   // Removing duplicates
   identities = [...(new Set(identities.map((a) => a.join('|'))))].map((s) => s.split('|'));
   source = source || target;

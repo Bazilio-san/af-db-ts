@@ -7,5 +7,6 @@ export interface ITestTableSchemaRecord {
   dtz1?: string | Date | number,
   time1: string,
   bool1: boolean,
-  permanent?: boolean | null,
+  bool2?: boolean | null,
+  gen1?: number | null,
 }

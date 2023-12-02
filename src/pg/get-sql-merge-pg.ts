@@ -17,12 +17,12 @@ export const getSqlMergePg = async <U extends TDBRecord = TDBRecord> (arg: {
   }
   const schemaTablePg = schemaTable.to.pg(targetSchemaAndTable);
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, targetSchemaAndTable);
-  const { columnsSchema, pk, fieldsWoSerials, defaults } = tableSchema;
+  const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults } = tableSchema;
 
-  let insertFieldsList: string[] = fieldsWoSerials;
+  let insertFieldsList: string[] = fieldsWoSerialsAndRO;
   if (omitFields.length) {
     const set = new Set(omitFields);
-    insertFieldsList = fieldsWoSerials.filter((fieldName) => !set.has(fieldName));
+    insertFieldsList = fieldsWoSerialsAndRO.filter((fieldName) => !set.has(fieldName));
   }
 
   const insertValues = recordset.map((record: U) => {
