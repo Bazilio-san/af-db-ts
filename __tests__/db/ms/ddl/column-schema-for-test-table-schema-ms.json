@@ -18,8 +18,8 @@
   "i1": {
     "name": "i1",
     "isNullable": false,
-    "columnDefault": null,
-    "hasDefault": false,
+    "columnDefault": "123",
+    "hasDefault": true,
     "length": null,
     "octetLength": null,
     "precision": 10,
@@ -50,8 +50,8 @@
   "vc1": {
     "name": "vc1",
     "isNullable": false,
-    "columnDefault": null,
-    "hasDefault": false,
+    "columnDefault": "'aaa'",
+    "hasDefault": true,
     "length": 20,
     "octetLength": 20,
     "precision": null,
@@ -66,8 +66,8 @@
   "dtz1": {
     "name": "dtz1",
     "isNullable": false,
-    "columnDefault": null,
-    "hasDefault": false,
+    "columnDefault": "getdate()",
+    "hasDefault": true,
     "length": null,
     "octetLength": null,
     "precision": null,
@@ -81,7 +81,7 @@
   },
   "time1": {
     "name": "time1",
-    "isNullable": false,
+    "isNullable": true,
     "columnDefault": null,
     "hasDefault": false,
     "length": null,
@@ -98,8 +98,8 @@
   "bool1": {
     "name": "bool1",
     "isNullable": false,
-    "columnDefault": null,
-    "hasDefault": false,
+    "columnDefault": "0",
+    "hasDefault": true,
     "length": null,
     "octetLength": null,
     "precision": null,

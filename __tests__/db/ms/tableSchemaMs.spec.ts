@@ -38,10 +38,10 @@ describe('getTableSchemaMs()', () => {
   });
   test('defaults', async () => {
     expect(tableSchema.defaults).toEqual({
-      bool1: '((0))',
-      dtz1: '(getdate())',
-      i1: '((123))',
-      vc1: '(\'aaa\')',
+      bool1: '0',
+      dtz1: 'getdate()',
+      i1: '123',
+      vc1: `'aaa'`,
     });
   });
 

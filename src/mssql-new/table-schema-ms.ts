@@ -1,7 +1,7 @@
 // noinspection SqlResolve
 import { QueryResultRow } from 'pg';
 import { each } from 'af-tools-ts';
-import { schemaTable } from '../utils';
+import { removePairBrackets, schemaTable } from '../utils';
 import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } from '../@types/i-ms-new';
 import { queryMs } from './query-ms';
 import { logger } from '../logger-error';
@@ -114,7 +114,7 @@ const getColumnsSchemaMs_ = async (
     const fieldSchema: IFieldDefMs = {
       name: fieldName,
       isNullable: /YES/i.test(fieldDef.IS_NULLABLE || ''),
-      columnDefault: fieldDef.COLUMN_DEFAULT,
+      columnDefault: removePairBrackets(fieldDef.COLUMN_DEFAULT),
       hasDefault: fieldDef.COLUMN_DEFAULT !== null,
       dataType: fieldDef.DATA_TYPE,
       length: fieldDef.CHARACTER_MAXIMUM_LENGTH,
