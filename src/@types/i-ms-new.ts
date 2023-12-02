@@ -1,22 +1,28 @@
 import { ConnectionPool } from 'mssql';
-import { IDateTimeOptionsEx } from './i-common';
+import { IDateTimeOptionsEx, TFieldName } from './i-common';
 
 /**
  * Метаинформация о поле БД
  */
 export interface IFieldDefMs { // ранее IFieldSchemaMs
   /* Свойства 1-го элемента IColumnMetadata */
-  name: string,
-  isNullable: boolean, // nullable
+  name?: string,
+  isNullable?: boolean, // nullable
   length?: number,
+  octetLength?: number,
   dataType?: any, // type
-  scale?: number,
   precision?: number,
-  caseSensitive?: boolean,
+  radix?: number,
+  scale?: number,
+  dtPrecision?: boolean,
+  charSetName?: string,
+  collation?: string,
+  udtName?: any; // udt
+  caseSensitive?: boolean, // VVQ
+
   identity?: boolean,
   readOnly?: boolean,
   arrayType?: any,
-  udt?: any;
   index?: number,
 
   /* Дополнительные свойства */
@@ -25,12 +31,12 @@ export interface IFieldDefMs { // ранее IFieldSchemaMs
   noQuotes?: boolean,
   escapeOnlySingleQuotes?: boolean,
 
-  columnDefault: any, // VVQ ITableSchemaMs.defaults defaultValue
-  hasDefault: boolean
+  columnDefault?: any, // VVQ ITableSchemaMs.defaults defaultValue
+  hasDefault?: boolean
 }
 
 export interface TColumnsSchemaMs { // ранее TRecordSchemaAssocMs
-  [fieldName: string]: IFieldDefMs,
+  [fieldName: TFieldName]: IFieldDefMs,
 }
 
 export interface TUniqueConstraintsMs {
@@ -39,14 +45,25 @@ export interface TUniqueConstraintsMs {
 
 export interface ITableSchemaMs {
   columnsSchema: TColumnsSchemaMs,
-  pk: string[],
+  pk: TFieldName[],
   uc: TUniqueConstraintsMs,
-  serials: string[],
-  defaults: { [fieldName: string]: string },
-  fieldsList: string[],
-  fieldsWoSerials: string[],
+  serials: TFieldName[],
+  defaults: { [fieldName: TFieldName]: string },
+  fieldsList: TFieldName[],
+  fieldsWoSerials: TFieldName[],
 }
 
 export interface IConnectionPoolsMs {
   [poolId: string]: ConnectionPool
+}
+
+export interface TGetPoolConnectionOptionsMs {
+  // Префикс в сообщении о закрытии пула (название синхронизации)
+  prefix?: string,
+  // Что делать при ошибке соединения:
+  // 'exit' - завершить скрипт,
+  // 'throw' - бросить исключение.
+  // Если не задано - только сообщать в консоль.
+  onError?: 'exit' | 'throw'
+  errorCode?: number
 }

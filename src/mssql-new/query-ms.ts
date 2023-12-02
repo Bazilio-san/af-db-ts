@@ -3,12 +3,12 @@ import * as sql from 'mssql';
 import { logSqlError } from '../common';
 import { closeDbConnectionsMs, getPoolMs } from './pool-ms';
 
-export const queryMs = async (
+export const queryMs = async <ColumnSetDescription = any>(
   connectionId: string,
   sqlText: string,
   throwError?: boolean,
   prefix?: string,
-): Promise<IResult<any> | undefined> => {
+): Promise<IResult<ColumnSetDescription> | undefined> => {
   try {
     const pool = await getPoolMs(connectionId, throwError);
     if (!pool?.connected && !pool?.connecting) {

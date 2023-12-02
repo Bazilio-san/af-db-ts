@@ -1,6 +1,6 @@
 import { magenta } from 'af-color';
 import { closeAllPgConnectionsPg } from './pg/pool-pg';
-import { closeAllDbConnectionsMs } from './mssql/pool-ms';
+import { closeAllDbConnectionsMs } from './mssql-new/pool-ms';
 import { logger } from './logger-error';
 
 export const logSqlError = (err: Error | any, throwError?: boolean, textSQL?: string, prefix?: string) => {

@@ -11,7 +11,7 @@ const NULL = 'null';
 /**
  * Подготовка строки для передачи в SQL
  */
-const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string => {
+export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string => {
   const { length = 0, noQuotes } = fieldDef;
   let v = String(value);
   v = v.replace(/'/g, `''`);

@@ -5,8 +5,7 @@ import { ConnectionPool } from 'mssql';
 import { cloneDeep, sleep } from 'af-tools-ts';
 import { IDbOptionsMs, IDbsMs } from '../@types/i-config';
 import { logSqlError, _3_HOURS, _1_HOUR } from '../common';
-import { TGetPoolConnectionOptionsMs } from '../@types/i-ms';
-import { IConnectionPoolsMs } from '../@types/i-ms-new';
+import { IConnectionPoolsMs, TGetPoolConnectionOptionsMs } from '../@types/i-ms-new';
 
 const cfg = cloneDeep(config.util.toObject(config)) as any;
 
@@ -159,14 +158,6 @@ export const closeDbConnectionsMs = async (poolsToClose: ConnectionPool | Connec
 };
 
 /**
- * @deprecated since version 2.0.0
- */
-export const closeAllDbConnections = async (prefix?: string, noEcho?: boolean) => {
-  const poolsToClose = Object.values(poolsCacheMs);
-  await closeDbConnectionsMs(poolsToClose, prefix, noEcho);
-};
-
-/**
  * Закрывает все соединения с БД
  *
  * prefix - Префикс в сообщении о закрытии пула (название синхронизации)
@@ -175,14 +166,6 @@ export const closeAllDbConnections = async (prefix?: string, noEcho?: boolean) =
 export const closeAllDbConnectionsMs = async (prefix?: string, noEcho?: boolean) => {
   const poolsToClose = Object.values(poolsCacheMs);
   await closeDbConnectionsMs(poolsToClose, prefix, noEcho);
-};
-
-/**
- * @deprecated since version 2.0.0
- */
-export const closeDbConnectionsAndExit = async (poolsToClose: ConnectionPool | ConnectionPool[], prefix?: string) => {
-  await closeDbConnectionsMs(poolsToClose, prefix);
-  process.exit(0);
 };
 
 /**

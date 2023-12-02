@@ -1,22 +1,82 @@
 import { QueryResultRow } from 'pg';
-import { getTableSchemaPg } from './table-schema';
-import { prepareSqlValuePg } from './prepare-value';
-import { ITableSchemaPg } from '../@types/i-pg';
+import { getTableSchemaMs } from './table-schema-ms';
+import { prepareSqlValueMs } from './prepare-value';
+import { ITableSchemaMs } from '../@types/i-ms-new';
 import { schemaTable } from '../utils';
+import { prepareDataForSqlMs } from "../mssql/sql";
 
-export const getMergeSqlMs = async <U extends QueryResultRow = QueryResultRow> (arg: {
+export const getSqlMergeMs = async <U extends QueryResultRow = QueryResultRow> (arg: {
   connectionId: string,
-  targetSchemaAndTable: string,
+  commonSchemaAndTable: string,
   recordset: U[],
   omitFields?: string[],
   noUpdateIfNull?: boolean,
 }): Promise<string> => {
-  const { connectionId, targetSchemaAndTable, recordset, omitFields = [], noUpdateIfNull } = arg;
+  const { connectionId, commonSchemaAndTable, recordset, omitFields = [], noUpdateIfNull } = arg;
   if (!recordset?.length) {
     return '';
   }
-  const schemaTablePg = schemaTable.to.pg(targetSchemaAndTable);
-  const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, targetSchemaAndTable);
+  if (prepareOptions.isPrepareForSQL) {
+    prepareDataForSqlMs(packet, { recordSchema: this.schema, ...prepareOptions });
+  }
+  const values = `(${packet.map((r) => (fields.map((fName) => (r[fName]))
+    .join(',')))
+    .join(`)\n,(`)})`;
+  let mergeSQL = `
+MERGE ${schemaTableMs} ${withClause || ''} AS target
+USING
+(
+    SELECT * FROM
+    ( VALUES
+        ${values}
+    )
+    AS s (
+    ${fieldsList}
+    )
+)
+AS source
+ON ${onClause}
+WHEN MATCHED THEN
+    UPDATE SET
+        ${updateFieldsList}
+    WHEN NOT MATCHED THEN
+        INSERT (
+        ${insertFieldsList}
+        )
+        VALUES (
+        ${insertSourceList}
+        )`;
+  if (!noReturnMergeResult) {
+    mergeSQL = `
+${'DECLARE'} @t TABLE ( act VARCHAR(20));
+DECLARE @total AS INTEGER;
+DECLARE @i AS INTEGER;
+DECLARE @u AS INTEGER;
+${mergeSQL}
+OUTPUT $action INTO @t;
+SET @total = @@ROWCOUNT;
+SELECT @i = COUNT(*) FROM @t WHERE act = 'INSERT';
+SELECT @u = COUNT(*) FROM @t WHERE act != 'INSERT';
+SELECT @total as total, @i as inserted, @u as updated;
+`;
+  } else {
+    mergeSQL += `;\n`;
+  }
+  return typeof mergeCorrection === 'function' ? mergeCorrection(mergeSQL) : mergeSQL;
+
+
+
+
+
+
+
+
+
+
+
+
+  const schemaTableMs = schemaTable.to.ms(commonSchemaAndTable);
+  const tableSchema: ITableSchemaMs = await getTableSchemaMs(connectionId, commonSchemaAndTable);
   const { columnsSchema, pk, fieldsWoSerials, defaults } = tableSchema;
 
   let insertFieldsList: string[] = fieldsWoSerials;
@@ -30,7 +90,7 @@ export const getMergeSqlMs = async <U extends QueryResultRow = QueryResultRow> (
 
     insertFieldsList.forEach((fieldName) => {
       const value = record[fieldName];
-      let pgSqlValue = prepareSqlValuePg({ value, fieldDef: columnsSchema[fieldName] });
+      let pgSqlValue = prepareSqlValueMs({ value, fieldDef: columnsSchema[fieldName] });
       if (defaults[fieldName] != null && pgSqlValue === 'null') {
         pgSqlValue = defaults[fieldName];
       }
@@ -42,7 +102,7 @@ export const getMergeSqlMs = async <U extends QueryResultRow = QueryResultRow> (
   const upsertFields = insertFieldsList.map((f) => {
     const vArr = [`EXCLUDED."${f}"`];
     if (noUpdateIfNull) {
-      vArr.push(`${schemaTablePg}."${f}"`);
+      vArr.push(`${schemaTableMs}."${f}"`);
     }
     if (defaults[f]) {
       vArr.push(defaults[f]);
@@ -51,7 +111,7 @@ export const getMergeSqlMs = async <U extends QueryResultRow = QueryResultRow> (
   }).join(',\n');
 
   // noinspection UnnecessaryLocalVariableJS
-  const mergeSQL = `${'INSERT'} INTO ${schemaTablePg}
+  const mergeSQL = `${'INSERT'} INTO ${schemaTableMs}
   (${insertFieldsList.map((f) => `"${f}"`).join(', ')})
   VALUES ${insertValues}
    ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')}) 

@@ -318,8 +318,3 @@ export const getValueForSqlMs = (args: IGetValueForSqlArgsMs): string | number |
       return prepareSqlStringMs(prepareSqlStringArgs);
   }
 };
-
-/**
- * @deprecated since version 2.0.0
- */
-export const getValueForSQL = getValueForSqlMs;

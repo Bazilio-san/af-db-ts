@@ -83,16 +83,6 @@ export interface TGetRecordSchemaOptionsMs {
   dateTimeOptions?: IDateTimeOptionsEx,
 }
 
-export interface TGetPoolConnectionOptionsMs {
-  // Префикс в сообщении о закрытии пула (название синхронизации)
-  prefix?: string,
-  // Что делать при ошибке соединения:
-  // 'exit' - завершить скрипт,
-  // 'throw' - бросить исключение.
-  // Если не задано - только сообщать в консоль.
-  onError?: 'exit' | 'throw'
-  errorCode?: number
-}
 
 export interface ISchemaItemMs {
   index: number;

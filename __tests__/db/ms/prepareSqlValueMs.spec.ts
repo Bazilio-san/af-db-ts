@@ -5,9 +5,9 @@
 // "Europe/Berlin"    +01:00
 // "Europe/Moscow"    +03:00
 
-import { getValueForSqlMs } from '../src';
+import { prepareSqlValueMs } from '../../../src';
 
-describe('sql.getValueForSqlMs() should work properly', () => {
+describe('sql.prepareSqlValueMs() should work properly', () => {
   describe('should parse date properly', () => {
     const testArr = [
       ['2000-01-22T11:59:59.123', '2000-01-22T11:59:59.123'],
@@ -27,7 +27,7 @@ describe('sql.getValueForSqlMs() should work properly', () => {
     ];
     testArr.forEach((pair) => {
       test(`- like '${pair[0]}'`, () => {
-        const dateStrOut = getValueForSqlMs({ value: pair[0], fieldSchema: 'datetime' });
+        const dateStrOut = prepareSqlValueMs({ value: pair[0], fieldDef: { dataType: 'datetime' } });
         expect(dateStrOut).toBe(`'${pair[1]}'`);
       });
     });
@@ -42,7 +42,7 @@ describe('sql.getValueForSqlMs() should work properly', () => {
       ];
       testArr.forEach((pair) => {
         test(`- like '${pair[0]}'`, () => {
-          const dateStrOut = getValueForSqlMs({ value: pair[0], fieldSchema: 'datetime' });
+          const dateStrOut = prepareSqlValueMs({ value: pair[0], fieldDef: { dataType: 'datetime' } });
           expect(dateStrOut).toBe(`'${pair[1]}'`);
         });
       });
