@@ -4,7 +4,7 @@ import { IColumnMetadata, IResult } from 'mssql';
 import { echo } from 'af-echo-ts';
 import * as cache from 'memory-cache';
 import { each, omit, pick } from 'af-tools-ts';
-import * as db from '../mssql-new/pool-ms';
+import * as db from '../ms/pool-ms';
 import { q, mssqlEscape } from './utils';
 import { getValueForSqlMs } from './get-value-for-sql';
 import { IFieldSchemaMs, IGetMergeSQLOptionsMs,

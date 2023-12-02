@@ -49,7 +49,7 @@ export interface ITableSchemaMs {
   uc: TUniqueConstraintsMs,
   serials: TFieldName[],
   defaults: { [fieldName: TFieldName]: string },
-  fieldsList: TFieldName[],
+  fieldsArray: TFieldName[],
   fieldsWoSerials: TFieldName[],
 }
 

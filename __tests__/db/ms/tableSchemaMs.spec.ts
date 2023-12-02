@@ -4,7 +4,7 @@ import * as path from 'path';
 import fs from 'fs';
 import { getTableSchemaMs, ITableSchemaMs, queryMs } from '../../../src';
 import columnsSchema from './ddl/column-schema-for-test-table-schema-ms.json';
-import { genTableInterfaceMs } from '../../../src/mssql-new/gen-table-interfaces-ms';
+import { genTableInterfaceMs } from '../../../src/ms/gen-table-interfaces-ms';
 
 const connectionId = 'test';
 
@@ -46,7 +46,7 @@ describe('getTableSchemaMs()', () => {
   });
 
   test('fieldsList', async () => {
-    expect(tableSchema.fieldsList).toEqual([
+    expect(tableSchema.fieldsArray).toEqual([
       'ser1',
       'i1',
       'si1',

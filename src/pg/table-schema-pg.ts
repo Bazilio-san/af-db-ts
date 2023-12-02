@@ -141,11 +141,11 @@ export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTabl
         defaults[f] = `${columnDefault}`;
       }
     });
-    const fieldsList: string[] = Object.keys(columnsSchema);
-    const fieldsWoSerials: string[] = fieldsList.filter((fieldName) => !serials.includes(fieldName));
+    const fieldsArray: string[] = Object.keys(columnsSchema);
+    const fieldsWoSerials: string[] = fieldsArray.filter((fieldName) => !serials.includes(fieldName));
 
     tableSchema = {
-      columnsSchema, pk, uc, defaults, serials, fieldsList, fieldsWoSerials,
+      columnsSchema, pk, uc, defaults, serials, fieldsArray, fieldsWoSerials,
     };
     tableSchemaHash[commonSchemaAndTable] = tableSchema;
   } catch (err) {

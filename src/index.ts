@@ -61,20 +61,22 @@ export {
   closeDbConnectionsMs,
   getDbConfigMs,
   getPoolMs,
-} from './mssql-new/pool-ms';
+} from './ms/pool-ms';
 
 export {
   prepareSqlValueMs,
   prepareSqlStringMs,
-} from './mssql-new/prepare-value';
+} from './ms/prepare-value';
 
-export { queryMs } from './mssql-new/query-ms';
+export { queryMs } from './ms/query-ms';
 
 export {
   getFieldsAndValuesMs,
   getTableSchemaMs,
   correctRecordSchemaMs,
-} from './mssql-new/table-schema-ms';
+} from './ms/table-schema-ms';
+
+export { getSqlMergeMs } from './ms/get-sql-merge-ms';
 
 // VVR ##############################################################
 
@@ -104,12 +106,6 @@ export {
   IPoolClientPg,
 } from './@types/i-pg';
 
-export { getSqlMergePg } from './pg/get-sql-merge-pg';
-
-export { getUpdateSqlPg } from './pg/get-sql-update-pg';
-
-export { insertPg, EUpdateLevel } from './pg/insert';
-
 export { isTableOrViewExistsPg } from './pg/is-table-or-view-exists';
 
 export {
@@ -128,3 +124,9 @@ export {
 export { queryPg } from './pg/query-pg';
 
 export { getFieldsAndValuesPg, getTableSchemaPg } from './pg/table-schema-pg';
+
+export { getSqlMergePg } from './pg/get-sql-merge-pg';
+
+export { getUpdateSqlPg } from './pg/get-sql-update-pg';
+
+export { insertPg, EUpdateLevel } from './pg/insert';

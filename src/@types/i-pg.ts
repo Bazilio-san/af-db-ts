@@ -47,7 +47,7 @@ export interface ITableSchemaPg {
   uc: TUniqueConstraintsPg,
   serials: string[],
   defaults: { [fieldName: string]: string },
-  fieldsList: string[],
+  fieldsArray: string[],
   fieldsWoSerials: string[],
 }
 
