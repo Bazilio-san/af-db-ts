@@ -38,7 +38,9 @@ export const getUpdateSqlMs = async (arg: {
 
   const where = updateIdentity.map((f) => `[${f}] = ${getPreparedSqlValue(f)}`).join(' AND ');
 
-  return `${'UPDATE'} ${schemaTable.to.ms(commonSchemaAndTable)} SET
+  // noinspection UnnecessaryLocalVariableJS
+  const updateSql = `${'UPDATE'} ${schemaTable.to.ms(commonSchemaAndTable)} SET
     ${sets}
   WHERE ${where};`;
+  return updateSql;
 };
