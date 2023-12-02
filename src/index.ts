@@ -35,6 +35,17 @@ export {
 } from './@types/i-ms';
 
 export {
+  genTableInterfaceMs,
+  genTableInterfacesMs,
+} from './ms/gen-table-interfaces-ms';
+
+export { getInsertSqlMs } from './ms/get-sql-insert-ms';
+
+export { getSqlMergeMs } from './ms/get-sql-merge-ms';
+
+export { getUpdateSqlMs } from './ms/get-sql-update-ms';
+
+export {
   poolsCacheMs,
   getPoolConnectionMs,
   closeAllDbConnectionsMs,
@@ -57,22 +68,7 @@ export {
   correctRecordSchemaMs,
 } from './ms/table-schema-ms';
 
-export { getSqlMergeMs } from './ms/get-sql-merge-ms';
-
-// VVR ##############################################################
-//
-// export {
-//   getRecordSchemaMs,
-//   wrapTransactionMs,
-//   serializeMs,
-//   getRecordValuesForSqlMs,
-//   getSqlSetExpressionMs,
-//   getSqlValuesExpressionMs,
-//   prepareRecordForSqlMs,
-//   prepareDataForSqlMs,
-//   getRowsAffectedMs,
-//   sql,
-// } from './mssql/sql';
+export { wrapTransactionMs } from './ms/wrap-transaction-ms';
 
 // ######################### PG #####################################
 
@@ -86,6 +82,19 @@ export {
   IConnectionPoolsPg,
   IPoolClientPg,
 } from './@types/i-pg';
+
+export {
+  genTableInterfacePg,
+  genTableInterfacesPg,
+} from './pg/gen-table-interfaces-pg';
+
+export { getInsertSqlPg } from './pg/get-sql-insert-pg';
+
+export { getSqlMergePg } from './pg/get-sql-merge-pg';
+
+export { getUpdateSqlPg } from './pg/get-sql-update-pg';
+
+export { insertPg, EUpdateLevel } from './pg/insert';
 
 export { isTableOrViewExistsPg } from './pg/is-table-or-view-exists';
 
@@ -104,10 +113,7 @@ export {
 
 export { queryPg } from './pg/query-pg';
 
-export { getFieldsAndValuesPg, getTableSchemaPg } from './pg/table-schema-pg';
-
-export { getSqlMergePg } from './pg/get-sql-merge-pg';
-
-export { getUpdateSqlPg } from './pg/get-sql-update-pg';
-
-export { insertPg, EUpdateLevel } from './pg/insert';
+export {
+  getFieldsAndValuesPg,
+  getTableSchemaPg,
+} from './pg/table-schema-pg';
