@@ -1,10 +1,10 @@
-import { QueryResultRow } from 'pg';
 import { getTableSchemaPg } from './table-schema-pg';
 import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
 import { schemaTable } from '../utils';
+import { TDBRecord } from '../@types/i-common';
 
-export const getSqlMergePg = async <U extends QueryResultRow = QueryResultRow> (arg: {
+export const getSqlMergePg = async <U extends TDBRecord = TDBRecord> (arg: {
   connectionId: string,
   targetSchemaAndTable: string,
   recordset: U[],

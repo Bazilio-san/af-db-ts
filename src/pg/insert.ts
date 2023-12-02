@@ -1,9 +1,9 @@
 // noinspection SqlResolve
-import { QueryResultRow } from 'pg';
 import { omitBy } from 'af-tools-ts';
 import { getFieldsAndValuesPg, getTableSchemaPg } from './table-schema-pg';
 import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
+import { TDBRecord } from '../@types/i-common';
 
 export enum EUpdateLevel {
   NEVER_UPDATE,
@@ -11,9 +11,9 @@ export enum EUpdateLevel {
   UPDATE_ALWAYS
 }
 
-const hasAllValues = <T extends QueryResultRow> (fieldList: string[] | undefined, record: T) => fieldList?.length && fieldList.every((f) => record[f] !== undefined);
+const hasAllValues = <T extends TDBRecord> (fieldList: string[] | undefined, record: T) => fieldList?.length && fieldList.every((f) => record[f] !== undefined);
 
-const selectByAnyIdentity = async <T extends QueryResultRow, R extends QueryResultRow = T> (
+const selectByAnyIdentity = async <T extends TDBRecord, R extends TDBRecord = T> (
   connectionId: string,
   identities: string[][],
   record: T,
@@ -40,7 +40,7 @@ const selectByAnyIdentity = async <T extends QueryResultRow, R extends QueryResu
   }
 };
 
-export const insertPg = async <T extends QueryResultRow, R extends QueryResultRow = T> (
+export const insertPg = async <T extends TDBRecord, R extends TDBRecord = T> (
   {
     connectionId,
     record,

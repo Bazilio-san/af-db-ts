@@ -1,10 +1,10 @@
 // noinspection SqlResolve
-import { QueryResultRow } from 'pg';
 import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
 import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
 import { schemaTable } from '../utils';
+import { TDBRecord } from '../@types/i-common';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
 // schemaAndTablePg: "<schema>"."<table>" :  "Staff"."nnPersones-personGuid"
@@ -156,7 +156,7 @@ export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTabl
   return tableSchema;
 };
 
-export const getFieldsAndValuesPg = <U extends QueryResultRow = QueryResultRow> (record: U, columnsSchema: TColumnsSchemaPg):
+export const getFieldsAndValuesPg = <U extends TDBRecord = TDBRecord> (record: U, columnsSchema: TColumnsSchemaPg):
   {
     fields: string[],
     fieldsList: string,
@@ -165,7 +165,7 @@ export const getFieldsAndValuesPg = <U extends QueryResultRow = QueryResultRow> 
     setFields: string,
     upsertFields: string
   } => {
-  const recordNormalized: QueryResultRow = {};
+  const recordNormalized: TDBRecord = {};
   Object.entries(record).forEach(([f, v]) => {
     const { dataType } = columnsSchema[f] || {};
     if (!dataType) {

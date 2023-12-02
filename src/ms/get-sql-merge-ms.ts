@@ -1,10 +1,10 @@
-import { QueryResultRow } from 'pg';
 import { getTableSchemaMs } from './table-schema-ms';
 import { prepareSqlValueMs } from './prepare-value';
 import { ITableSchemaMs } from '../@types/i-ms';
 import { schemaTable } from '../utils';
+import { TDBRecord } from '../@types/i-common';
 
-export const getSqlMergeMs = async <U extends QueryResultRow = QueryResultRow> (arg: {
+export const getSqlMergeMs = async <U extends TDBRecord = TDBRecord> (arg: {
   connectionId: string,
   commonSchemaAndTable: string,
   recordset: U[],

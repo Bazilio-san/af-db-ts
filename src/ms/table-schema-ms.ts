@@ -1,13 +1,12 @@
 // noinspection SqlResolve
 import * as sql from 'mssql';
-import { QueryResultRow } from 'pg';
 import { each } from 'af-tools-ts';
 import { removePairBrackets, schemaTable } from '../utils';
 import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } from '../@types/i-ms';
 import { queryMs } from './query-ms';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
-import { TFieldName } from '../@types/i-common';
+import { TDBRecord, TFieldName } from '../@types/i-common';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
 // schemaAndTableMs: "<schema>"."<table>" :  "Staff"."nnPersones-personGuid"
@@ -227,7 +226,7 @@ export const getTableSchemaMs = async (connectionId: string, commonSchemaAndTabl
   return tableSchema;
 };
 
-export const getFieldsAndValuesMs = <U extends QueryResultRow = QueryResultRow> (record: U, columnsSchema: TColumnsSchemaMs):
+export const getFieldsAndValuesMs = <U extends TDBRecord = TDBRecord> (record: U, columnsSchema: TColumnsSchemaMs):
   {
     fields: string[],
     fieldsList: string,
@@ -235,7 +234,7 @@ export const getFieldsAndValuesMs = <U extends QueryResultRow = QueryResultRow> 
     setFields: string,
     upsertFields: string
   } => {
-  const recordNormalized: QueryResultRow = {};
+  const recordNormalized: TDBRecord = {};
   Object.entries(record).forEach(([f, v]) => {
     const { dataType } = columnsSchema[f] || {};
     if (!dataType) {
