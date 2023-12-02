@@ -73,7 +73,7 @@
   "bool1": {
     "name": "bool1",
     "isNullable": false,
-    "hasDefault": false,
+    "hasDefault": true,
     "dataType": "boolean",
     "udtName": "bool",
     "readOnly": false

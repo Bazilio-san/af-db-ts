@@ -37,6 +37,7 @@ describe('getTableSchemaPg()', () => {
   });
   test('defaults', async () => {
     expect(tableSchema.defaults).toEqual({
+      bool1: 'true',
       bool2: 'false',
       dtz1: 'CURRENT_TIMESTAMP',
       i1: '25',

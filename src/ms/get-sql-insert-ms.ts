@@ -40,6 +40,6 @@ export const getInsertSqlMs = async (arg: {
   const target = schemaTable.to.ms(commonSchemaAndTable);
   // noinspection UnnecessaryLocalVariableJS
   const insertSQL = `INSERT INTO ${target} (${insertFieldsList}) ${out}
-                     VALUES ${values}`;
+                     VALUES ${values};`;
   return insertSQL;
 };

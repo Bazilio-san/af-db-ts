@@ -14,7 +14,7 @@ export const getInsertSqlPg = async (arg: {
   const { commonSchemaAndTable } = arg;
 
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(arg.connectionId, commonSchemaAndTable);
-  const { columnsSchema, fieldsWoSerialsAndRO } = tableSchema;
+  const { columnsSchema, fieldsWoSerialsAndRO, defaults } = tableSchema;
 
   const insertFieldsArray = fieldsWoSerialsAndRO.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
   const insertFieldsList = insertFieldsArray.map((f) => `"${f}"`).join(', ');
@@ -22,7 +22,15 @@ export const getInsertSqlPg = async (arg: {
   const preparedRowsArray = arg.packet.map((record) => {
     const preparedRecordValuesArray = insertFieldsArray.map((f) => {
       const value = record[f];
-      return value == null ? 'NULL' : prepareSqlValuePg({ value, fieldDef: columnsSchema[f] });
+      const fieldDef = columnsSchema[f];
+      if (value != null) {
+        return prepareSqlValuePg({ value, fieldDef });
+      }
+      const defVal = defaults[f];
+      if (!fieldDef.isNullable && defVal != null) {
+        return defVal;
+      }
+      return 'NULL';
     });
     return preparedRecordValuesArray.join(',');
   });
@@ -31,7 +39,7 @@ export const getInsertSqlPg = async (arg: {
   const out = arg.addOutputInserted ? ' RETURNING * ' : '';
   const target = schemaTable.to.pg(commonSchemaAndTable);
   // noinspection UnnecessaryLocalVariableJS
-  const insertSQL = `INSERT INTO ${target} ${out} (${insertFieldsList})
-          VALUES ${values} ON CONFLICT DO NOTHING ${out}`;
+  const insertSQL = `INSERT INTO ${target} (${insertFieldsList})
+                     VALUES ${values} ON CONFLICT DO NOTHING ${out};`;
   return insertSQL;
 };

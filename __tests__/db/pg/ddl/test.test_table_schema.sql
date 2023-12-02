@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS test.table_schema
   vc1       varchar(20)                           not null,
   dtz1      timestamptz default CURRENT_TIMESTAMP not null,
   time1     time                                  not null,
-  bool1     boolean                               not null,
+  bool1     boolean     default TRUE              not null,
   bool2     boolean     default FALSE,
   gen1 numeric GENERATED ALWAYS AS (i1 / 2.54) STORED,
   constraint pk__test__fable_schema primary key (i1, si1),

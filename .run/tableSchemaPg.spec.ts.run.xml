@@ -1,15 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="getTableSchemaPg()" type="JavaScriptTestRunnerJest" nameIsGenerated="true">
+  <configuration default="false" name="tableSchemaPg.spec.ts" type="JavaScriptTestRunnerJest" folderName="PG" nameIsGenerated="true">
     <node-interpreter value="project" />
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$" />
     <jest-options value="--runInBand --detectOpenHandles --forceExit" />
     <envs />
-    <scope-kind value="SUITE" />
+    <scope-kind value="TEST_FILE" />
     <test-file value="$PROJECT_DIR$/__tests__/db/pg/tableSchemaPg.spec.ts" />
-    <test-names>
-      <test-name value="getTableSchemaPg()" />
-    </test-names>
     <method v="2" />
   </configuration>
 </component>
