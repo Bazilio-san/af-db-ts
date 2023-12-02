@@ -47,6 +47,7 @@ export const getSqlMergeMs = async <U extends TDBRecord = TDBRecord> (arg: {
     });
     return `(${preparedValues.join(', ')})`;
   }).join(',\n').trim();
+
   if (!arg.mergeIdentity) {
     arg.mergeIdentity = [];
     if (pk?.length) {
