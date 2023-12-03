@@ -50,6 +50,23 @@
     "identity": false,
     "readOnly": false
   },
+  "i3": {
+    "caseSensitive": false,
+    "charSetName": null,
+    "collation": null,
+    "columnDefault": null,
+    "dataType": "int",
+    "dtPrecision": null,
+    "hasDefault": false,
+    "identity": false,
+    "isNullable": true,
+    "length": null,
+    "name": "i3",
+    "octetLength": null,
+    "precision": 10,
+    "radix": 10,
+    "readOnly": false
+  },
   "si1": {
     "name": "si1",
     "isNullable": false,

@@ -49,6 +49,7 @@ describe('getTableSchemaPg()', () => {
       'ser1',
       'ser2',
       'i1',
+      'i2',
       'si1',
       'vc1',
       'dtz1',
@@ -61,6 +62,7 @@ describe('getTableSchemaPg()', () => {
   test('fieldsWoSerialsAndRO', async () => {
     expect(tableSchema.fieldsWoSerialsAndRO).toEqual([
       'i1',
+      'i2',
       'si1',
       'vc1',
       'dtz1',
@@ -73,6 +75,7 @@ describe('getTableSchemaPg()', () => {
     expect(tableSchema.serialsFields).toEqual(['ser1', 'ser2']);
   });
   test('columnsSchema', async () => {
-    expect(tableSchema.columnsSchema).toMatchObject(columnsSchema);
+    const json = JSON.parse(JSON.stringify(tableSchema.columnsSchema));
+    expect(tableSchema.columnsSchema).toStrictEqual(json);
   });
 });

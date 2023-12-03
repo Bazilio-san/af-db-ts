@@ -49,6 +49,7 @@ describe('getTableSchemaMs()', () => {
       'ser1',
       'i1',
       'i2',
+      'i3',
       'si1',
       'vc1',
       'dtz1',
@@ -62,6 +63,7 @@ describe('getTableSchemaMs()', () => {
     expect(tableSchema.fieldsWoSerialsAndRO).toEqual([
       'i1',
       'i2',
+      'i3',
       'si1',
       'vc1',
       'dtz1',
