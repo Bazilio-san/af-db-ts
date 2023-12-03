@@ -3,7 +3,7 @@ import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
 import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
-import { schemaTable } from '../utils/utils';
+import { removePairBrackets, schemaTable } from '../utils/utils';
 import { TDBRecord } from '../@types/i-common';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
@@ -30,13 +30,15 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
   const fields = result?.rows || [];
   const columnsSchema: TColumnsSchemaPg = {};
   fields.forEach((fieldDef) => {
+    const columnDefault = fieldDef.column_default != null ? fieldDef.column_default : undefined;
+    const name = fieldDef.column_name;
     const fieldSchema: IFieldDefPg = {
-      name: fieldDef.column_name,
+      name,
       isNullable: /yes/i.test(fieldDef.is_nullable || ''),
       columnDefault: fieldDef.column_default,
-      hasDefault: !!fieldDef.column_default,
+      hasDefault: columnDefault != null,
       dataType: fieldDef.data_type,
-      maxLen: fieldDef.character_maximum_length,
+      length: fieldDef.character_maximum_length,
       precision: fieldDef.numeric_precision,
       radix: fieldDef.numeric_precision_radix,
       dtPrecision: fieldDef.datetime_precision,
@@ -48,7 +50,7 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
         delete fieldSchema[prop as keyof IFieldDefPg];
       }
     });
-    columnsSchema[fieldDef.column_name] = fieldSchema;
+    columnsSchema[name] = fieldSchema;
   });
   return columnsSchema;
 };

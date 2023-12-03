@@ -26,6 +26,7 @@ export const getTypeOfDateInput = (v: any): 'string' | 'number' | 'date' | 'luxo
 
 export const getLuxonDT = (value: any, fieldDef: IFieldDefMs | IFieldDefPg): DateTime | null => {
   const { inputDateFormat, dateTimeOptions } = fieldDef;
+  const { fromZone, setZone, correctionMillis = 0 } = dateTimeOptions || {};
 
   let v: any;
   let millis: number | null = null;
@@ -38,11 +39,13 @@ export const getLuxonDT = (value: any, fieldDef: IFieldDefMs | IFieldDefPg): Dat
   } else if (inputType === 'string' || inputType === 'any') {
     v = String(value);
     let dt: DateTime;
+
+    const zoneOpts = fromZone ? { zone: fromZone } : undefined;
     if (inputDateFormat) {
-      dt = DateTime.fromFormat(v, inputDateFormat, dateTimeOptions);
+      dt = DateTime.fromFormat(v, inputDateFormat, zoneOpts);
     } else {
-      v = v.replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?(?:Z|\+\d{2}:\d{2})?)/img, '$1T$2');
-      dt = DateTime.fromISO(v, dateTimeOptions);
+      v = v.replace(/^(\d{4}-\d\d-\d\d) (\d)/, '$1T$2');
+      dt = DateTime.fromISO(v, zoneOpts);
     }
     millis = dt.isValid ? dt.toMillis() : null;
   } else if (inputType === 'luxon') {
@@ -53,8 +56,12 @@ export const getLuxonDT = (value: any, fieldDef: IFieldDefMs | IFieldDefPg): Dat
   if (millis == null) {
     return null;
   }
-  if (dateTimeOptions?.correctionMillis) {
-    millis += dateTimeOptions.correctionMillis;
+  if (correctionMillis) {
+    millis += correctionMillis;
   }
-  return DateTime.fromMillis(millis, dateTimeOptions?.zone ? { zone: dateTimeOptions.zone } : undefined);
+  let ld = DateTime.fromMillis(millis);
+  if (setZone) {
+    ld = ld.setZone(setZone);
+  }
+  return ld;
 };

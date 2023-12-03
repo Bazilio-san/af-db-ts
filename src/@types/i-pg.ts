@@ -1,5 +1,5 @@
 import { Pool, PoolClient } from 'pg';
-import { IDateTimeOptionsEx, TFieldName } from './i-common';
+import { IDateTimeOptionsEx, IFieldDef, TFieldName } from './i-common';
 
 export enum EDataTypePg {
   'USER_DEFINED' = 'USER-DEFINED',
@@ -21,22 +21,7 @@ export enum EDataTypePg {
   'ARRAY' = 'ARRAY',
 }
 
-export interface IFieldDefPg {
-  name: string,
-  isNullable: boolean,
-  columnDefault: string | number | boolean,
-  hasDefault: boolean,
-  dataType: EDataTypePg,
-  maxLen?: number,
-  precision?: number,
-  radix?: number,
-  dtPrecision?: number,
-  udtName?: string,
-  readOnly?: boolean, // VVQ Задействовать!
-
-  /* Дополнительные свойства */
-  inputDateFormat?: string,
-  dateTimeOptions?: IDateTimeOptionsEx,
+export interface IFieldDefPg extends IFieldDef {
 }
 
 export interface TColumnsSchemaPg {

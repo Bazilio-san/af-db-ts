@@ -108,13 +108,14 @@ const getColumnsSchemaMs_ = async (
   let res = await queryMs(connectionId, sqlText, true, `getRecordSchemaMs SQL ERROR`);
   const columnsSchema: TColumnsSchemaMs = {};
   (res?.recordset || []).forEach((fieldDef) => {
-    const fieldName = fieldDef.COLUMN_NAME;
+    const name = fieldDef.COLUMN_NAME;
+    const columnDefault = fieldDef.COLUMN_DEFAULT != null ? removePairBrackets(fieldDef.COLUMN_DEFAULT) : undefined;
     // noinspection UnnecessaryLocalVariableJS
     const fieldSchema: IFieldDefMs = {
-      name: fieldName,
+      name,
       isNullable: /YES/i.test(fieldDef.IS_NULLABLE || ''),
-      columnDefault: removePairBrackets(fieldDef.COLUMN_DEFAULT),
-      hasDefault: fieldDef.COLUMN_DEFAULT !== null,
+      columnDefault,
+      hasDefault: columnDefault != null,
       dataType: fieldDef.DATA_TYPE,
       length: fieldDef.CHARACTER_MAXIMUM_LENGTH,
       octetLength: fieldDef.CHARACTER_OCTET_LENGTH,
@@ -125,7 +126,7 @@ const getColumnsSchemaMs_ = async (
       charSetName: fieldDef.CHARACTER_SET_NAME, // cp1251
       collation: fieldDef.COLLATION_NAME, // Cyrillic_General_BIN
     };
-    columnsSchema[fieldName] = fieldSchema;
+    columnsSchema[name] = fieldSchema;
   });
 
   sqlText = `/**/ SELECT TOP(1) * FROM ${schemaTable.to.ms(commonSchemaAndTable)}`;

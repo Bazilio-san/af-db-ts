@@ -47,7 +47,7 @@
     "isNullable": false,
     "hasDefault": false,
     "dataType": "character varying",
-    "maxLen": 20,
+    "length": 20,
     "udtName": "varchar",
     "readOnly": false
   },

@@ -1,38 +1,21 @@
 import { ConnectionPool } from 'mssql';
-import { IDateTimeOptionsEx, TFieldName } from './i-common';
+import { IDateTimeOptionsEx, IFieldDef, TFieldName } from './i-common';
 
 /**
  * Метаинформация о поле БД
  */
-export interface IFieldDefMs { // ранее IFieldSchemaMs
-  /* Свойства 1-го элемента IColumnMetadata */
-  name?: string,
-  isNullable?: boolean, // nullable
-  length?: number,
+export interface IFieldDefMs extends IFieldDef {
   octetLength?: number,
-  dataType?: any, // type
-  precision?: number,
-  radix?: number,
   scale?: number,
-  dtPrecision?: boolean,
   charSetName?: string,
   collation?: string,
-  udtName?: any; // udt
   caseSensitive?: boolean, // VVQ
 
   identity?: boolean,
-  readOnly?: boolean,
   arrayType?: any,
-  index?: number,
 
   /* Дополнительные свойства */
-  inputDateFormat?: string,
-  dateTimeOptions?: IDateTimeOptionsEx,
-  noQuotes?: boolean,
   escapeOnlySingleQuotes?: boolean,
-
-  columnDefault?: any, // VVQ ITableSchemaMs.defaults defaultValue
-  hasDefault?: boolean
 }
 
 export interface TColumnsSchemaMs { // ранее TRecordSchemaAssocMs

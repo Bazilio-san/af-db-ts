@@ -1,6 +1,6 @@
 import { NULL } from '../common';
 
-export const prepareFloatNumber = (value: any) => {
+export const prepareFloatNumber = (value: any): number | typeof NULL => {
   if (value == null) {
     return NULL;
   }
@@ -17,7 +17,7 @@ export const prepareFloatNumber = (value: any) => {
   return v;
 };
 
-export const prepareIntNumber = (value: any, min: number, max: number) => {
+export const prepareIntNumber = (value: any, min: number, max: number): number | typeof NULL => {
   if (value == null) {
     return NULL;
   }
@@ -31,12 +31,12 @@ export const prepareIntNumber = (value: any, min: number, max: number) => {
   if (v > max) {
     v = max;
   }
-  return `${Math.floor(v)}`;
+  return Math.floor(v);
 };
 
 // return prepareBigIntNumber(value, -9223372036854775808, 9223372036854775807);
 
-export const prepareBigIntNumber = (value: any) => {
+export const prepareBigIntNumber = (value: any): string | typeof NULL => { // VVT
   if (value == null) {
     return NULL;
   }
