@@ -2,21 +2,22 @@ import { getTableSchemaPg } from './table-schema-pg';
 import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
 import { schemaTable } from '../utils';
-import { TDBRecord } from '../@types/i-common';
+import { TDBRecord, TRecordSet } from '../@types/i-common';
 
-export const getSqlMergePg = async <U extends TDBRecord = TDBRecord> (arg: {
+export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   connectionId: string,
-  targetSchemaAndTable: string,
-  recordset: U[],
+  commonSchemaAndTable: string,
+  recordset: TRecordSet<U>,
   omitFields?: string[],
   noUpdateIfNull?: boolean,
+  mergeCorrection?: (_sql: string) => string,
 }): Promise<string> => {
-  const { connectionId, targetSchemaAndTable, recordset, omitFields = [], noUpdateIfNull } = arg;
+  const { connectionId, commonSchemaAndTable, recordset, omitFields = [], noUpdateIfNull } = arg;
   if (!recordset?.length) {
     return '';
   }
-  const schemaTablePg = schemaTable.to.pg(targetSchemaAndTable);
-  const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, targetSchemaAndTable);
+  const schemaTablePg = schemaTable.to.pg(commonSchemaAndTable);
+  const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, commonSchemaAndTable);
   const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults } = tableSchema;
 
   let insertFieldsList: string[] = fieldsWoSerialsAndRO;
@@ -51,12 +52,14 @@ export const getSqlMergePg = async <U extends TDBRecord = TDBRecord> (arg: {
   }).join(',\n');
 
   // noinspection UnnecessaryLocalVariableJS
-  const mergeSQL = `${'INSERT'} INTO ${schemaTablePg}
+  let mergeSQL = `${'INSERT'} INTO ${schemaTablePg}
   (${insertFieldsList.map((f) => `"${f}"`).join(', ')})
   VALUES ${insertValues}
    ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')}) 
    DO UPDATE SET ${upsertFields}
    `;
-
+  if (typeof arg.mergeCorrection === 'function') {
+    mergeSQL = arg.mergeCorrection(mergeSQL);
+  }
   return mergeSQL;
 };

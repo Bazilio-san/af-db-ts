@@ -2,17 +2,17 @@ import { getTableSchemaMs } from './table-schema-ms';
 import { prepareSqlValueMs } from './prepare-value';
 import { ITableSchemaMs } from '../@types/i-ms';
 import { schemaTable } from '../utils';
-import { TDBRecord } from '../@types/i-common';
+import { TDBRecord, TRecordSet } from '../@types/i-common';
 
-export const getSqlMergeMs = async <U extends TDBRecord = TDBRecord> (arg: {
+export const getMergeSqlMs = async <U extends TDBRecord = TDBRecord> (arg: {
   connectionId: string,
   commonSchemaAndTable: string,
-  recordset: U[],
+  recordset: TRecordSet<U>,
   omitFields?: string[],
   excludeFromInsert?: string[],
   noUpdateIfNull?: boolean,
   withClause?: string,
-  mergeIdentity?: string[][], // Может быть несколько альтернативных уникальных наборов полей
+  mergeIdentity?: string[], // Список полей, по которым оценивается уникальность записи. По умолчанию - поля PK
   noReturnMergeResult?: boolean,
   mergeCorrection?: (_sql: string) => string,
 }): Promise<string> => {
@@ -27,84 +27,72 @@ export const getSqlMergeMs = async <U extends TDBRecord = TDBRecord> (arg: {
   }
   const schemaTableMs = schemaTable.to.ms(commonSchemaAndTable);
   const tableSchema: ITableSchemaMs = await getTableSchemaMs(connectionId, commonSchemaAndTable);
-  const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults, uc } = tableSchema;
-  let mergeFieldsList: string[] = fieldsWoSerialsAndRO;
+  const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults } = tableSchema;
+  let mergeFieldsArr: string[] = fieldsWoSerialsAndRO;
   if (omitFields.length) {
     const set = new Set(omitFields);
-    mergeFieldsList = fieldsWoSerialsAndRO.filter((fieldName) => !set.has(fieldName));
+    mergeFieldsArr = fieldsWoSerialsAndRO.filter((fieldName) => !set.has(fieldName));
   }
 
   const mergeValues = recordset.map((record: U) => {
     const preparedValues: (string | number)[] = [];
 
-    mergeFieldsList.forEach((fieldName) => {
+    mergeFieldsArr.forEach((fieldName) => {
       const value = record[fieldName];
       let sqlValueMs = prepareSqlValueMs({ value, fieldDef: columnsSchema[fieldName] });
-      if (defaults[fieldName] != null && sqlValueMs === 'null') {
+      if (defaults[fieldName] != null && (sqlValueMs == null || sqlValueMs === 'null')) {
         sqlValueMs = defaults[fieldName];
       }
       preparedValues.push(sqlValueMs);
     });
     return `(${preparedValues.join(', ')})`;
-  }).join(',\n').trim();
+  }).join(',\n    ').trim();
 
-  if (!arg.mergeIdentity) {
-    arg.mergeIdentity = [];
-    if (pk?.length) {
-      arg.mergeIdentity.push(pk);
-    }
-    const ucl = Object.values(uc || {}).filter((arr) => arr.length);
-    if (ucl.length) {
-      arg.mergeIdentity.push(...ucl);
-    }
+  const { mergeIdentity = pk } = arg;
+  if (!mergeIdentity?.length) {
+    throw new Error(`The list of fields by which the uniqueness of a record is assessed is empty!`);
   }
-  const onClauseAlters: string[] = [];
-  const mergeIdentityFields: string[] = [];
-  arg.mergeIdentity.forEach((uFieldsArr) => {
-    const s = uFieldsArr.map((f) => (`target.[${f}] = source.[${f}]`)).join(' AND ');
-    onClauseAlters.push(`(${s})`);
-    mergeIdentityFields.push(...uFieldsArr);
-  });
-  const onClause = `( ${onClauseAlters.join(' OR ')} )`;
+  const onClause = mergeIdentity.map((f) => (`target.[${f}] = source.[${f}]`)).join(' AND ');
 
-  const mergeIdentitySet = new Set(mergeIdentityFields);
-  const updateFields = mergeFieldsList.filter((f) => (!mergeIdentitySet.has(f)));
+  const updateFields = mergeFieldsArr.filter((f) => (!mergeIdentity.includes(f)));
 
   const updateFieldsList = updateFields.map((f) => (`target.[${f}] = ${
     arg.noUpdateIfNull
       ? `COALESCE(source.[${f}], target.[${f}])`
       : `source.[${f}]`
-  }`)).join(', ');
+  }`)).join(',\n    ');
 
-  const insertFieldsArray = mergeFieldsList.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
+  const insertFieldsArray = mergeFieldsArr.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
+  const mergeFieldsList = mergeFieldsArr.map((f) => `[${f}]`).join(',\n    ');
 
-  const insertSourceList = insertFieldsArray.map((f) => (`source.[${f}]`)).join(', ');
-  const insertFieldsList = insertFieldsArray.map((f) => `[${f}]`).join(', ');
+  const insertSourceList = insertFieldsArray.map((f) => (`source.[${f}]`)).join(',\n    ');
+  const insertFieldsList = insertFieldsArray.map((f) => `[${f}]`).join(',\n    ');
 
-  let mergeSQL = `
-MERGE ${schemaTableMs} ${arg.withClause || ''} AS target
+  let mergeSQL = `MERGE ${schemaTableMs} ${arg.withClause || ''} AS target
 USING
 (
-    SELECT * FROM
-    ( VALUES
-        ${mergeValues}
-    )
-    AS s (
+  SELECT * FROM ( 
+    VALUES
+    ${mergeValues}
+  )
+  AS s (
     ${mergeFieldsList}
-    )
+  )
 )
 AS source
 ON ${onClause}
+
 WHEN MATCHED THEN
-    UPDATE SET
-        ${updateFieldsList}
-    WHEN NOT MATCHED THEN
-        INSERT (
-        ${insertFieldsList}
-        )
-        VALUES (
-        ${insertSourceList}
-        )`;
+  UPDATE SET
+    ${updateFieldsList}
+
+WHEN NOT MATCHED THEN
+  INSERT (
+    ${insertFieldsList}
+  )
+  VALUES (
+    ${insertSourceList}
+  )`;
 
   if (!arg.noReturnMergeResult) {
     mergeSQL = `

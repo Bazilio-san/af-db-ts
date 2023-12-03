@@ -41,7 +41,7 @@ export {
 
 export { getInsertSqlMs } from './ms/get-sql-insert-ms';
 
-export { getSqlMergeMs } from './ms/get-sql-merge-ms';
+export { getMergeSqlMs } from './ms/get-sql-merge-ms';
 
 export { getUpdateSqlMs } from './ms/get-sql-update-ms';
 
@@ -89,7 +89,7 @@ export {
 
 export { getInsertSqlPg } from './pg/get-sql-insert-pg';
 
-export { getSqlMergePg } from './pg/get-sql-merge-pg';
+export { getMergeSqlPg } from './pg/get-sql-merge-pg';
 
 export { getUpdateSqlPg } from './pg/get-sql-update-pg';
 

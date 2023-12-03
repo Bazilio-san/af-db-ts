@@ -15,7 +15,10 @@ export const q = (val: string, noQuotes?: boolean): string => (noQuotes ? val : 
 /**
  * Подготовка строки для передачи в SQL
  */
-export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string => {
+export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | null => {
+  if (value == null) {
+    return value;
+  }
   const { length = 0, noQuotes } = fieldDef;
   let v = String(value);
   v = v.replace(/'/g, `''`);

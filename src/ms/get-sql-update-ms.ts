@@ -4,10 +4,10 @@ import { ITableSchemaMs } from '../@types/i-ms';
 import { TDBRecord } from '../@types/i-common';
 import { schemaTable } from '../utils';
 
-export const getUpdateSqlMs = async (arg: {
+export const getUpdateSqlMs = async <U extends TDBRecord = TDBRecord>(arg: {
   connectionId: string,
   commonSchemaAndTable: string,
-  record: TDBRecord,
+  record: U,
   customSets: TDBRecord,
   updateIdentity?: string[],
 }): Promise<string> => {

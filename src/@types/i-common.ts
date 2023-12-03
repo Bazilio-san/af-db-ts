@@ -24,7 +24,7 @@ export interface TDBRecord {
  *
  * _isPreparedForSQL - Признак того, что значения полей подготовлены для использования в строке SQL
  */
-export type TRecordSet = TDBRecord[] & { _isPreparedForSQL?: boolean }
+export type TRecordSet<U extends TDBRecord = TDBRecord> = U[] & { _isPreparedForSQL?: boolean }
 
 /**
  * Пакет записей БД.

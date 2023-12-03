@@ -1,13 +1,13 @@
 import { getTableSchemaPg } from './table-schema-pg';
 import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
-import { TRecordSet } from '../@types/i-common';
+import { TDBRecord, TRecordSet } from '../@types/i-common';
 import { schemaTable } from '../utils';
 
-export const getInsertSqlPg = async (arg: {
+export const getInsertSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   connectionId: string,
   commonSchemaAndTable: string,
-  packet: TRecordSet,
+  recordset: TRecordSet<U>,
   excludeFromInsert?: string[],
   addOutputInserted?: boolean,
 }): Promise<string> => {
@@ -19,7 +19,7 @@ export const getInsertSqlPg = async (arg: {
   const insertFieldsArray = fieldsWoSerialsAndRO.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
   const insertFieldsList = insertFieldsArray.map((f) => `"${f}"`).join(', ');
 
-  const preparedRowsArray = arg.packet.map((record) => {
+  const preparedRowsArray = arg.recordset.map((record) => {
     const preparedRecordValuesArray = insertFieldsArray.map((f) => {
       const value = record[f];
       const fieldDef = columnsSchema[f];
