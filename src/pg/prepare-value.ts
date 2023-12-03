@@ -18,7 +18,7 @@ export const prepareSqlValuePg = (arg: {
   fieldDef: IFieldDefPg,
 }): any => {
   const { value, fieldDef } = arg;
-  if (value == null && fieldDef.isNullable) {
+  if (value == null) {
     return NULL;
   }
   switch (fieldDef.dataType) {

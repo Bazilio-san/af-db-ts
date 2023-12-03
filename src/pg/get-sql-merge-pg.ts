@@ -16,48 +16,53 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   if (!recordset?.length) {
     return '';
   }
-  const schemaTablePg = schemaTable.to.pg(commonSchemaAndTable);
+  const schemaTableStr = schemaTable.to.pg(commonSchemaAndTable);
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, commonSchemaAndTable);
   const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults } = tableSchema;
 
-  let insertFieldsList: string[] = fieldsWoSerialsAndRO;
+  let mergeFieldsArr: string[] = fieldsWoSerialsAndRO;
   if (omitFields.length) {
     const set = new Set(omitFields);
-    insertFieldsList = fieldsWoSerialsAndRO.filter((fieldName) => !set.has(fieldName));
+    mergeFieldsArr = fieldsWoSerialsAndRO.filter((fieldName) => !set.has(fieldName));
   }
 
-  const insertValues = recordset.map((record: U) => {
+  const mergeValues = recordset.map((record: U) => {
     const preparedValues: (string | number)[] = [];
 
-    insertFieldsList.forEach((fieldName) => {
-      const value = record[fieldName];
-      let pgSqlValue = prepareSqlValuePg({ value, fieldDef: columnsSchema[fieldName] });
-      if (defaults[fieldName] != null && pgSqlValue === 'null') {
-        pgSqlValue = defaults[fieldName];
+    mergeFieldsArr.forEach((f) => {
+      const value = record[f];
+      let sqlValue = prepareSqlValuePg({ value, fieldDef: columnsSchema[f] });
+      if (defaults[f] != null && (sqlValue == null || sqlValue === 'null')) {
+        sqlValue = defaults[f];
       }
-      preparedValues.push(pgSqlValue);
+      preparedValues.push(sqlValue);
     });
     return `(${preparedValues.join(', ')})`;
-  }).join(',\n').trim();
+  }).join(',\n  ').trim();
 
-  const upsertFields = insertFieldsList.map((f) => {
+  const updateSetStr = mergeFieldsArr.map((f) => {
     const vArr = [`EXCLUDED."${f}"`];
     if (noUpdateIfNull) {
-      vArr.push(`${schemaTablePg}."${f}"`);
+      vArr.push(`${schemaTableStr}."${f}"`);
     }
     if (defaults[f]) {
       vArr.push(defaults[f]);
     }
     return `"${f}" = ${vArr.length > 1 ? `COALESCE(${vArr.join(', ')})` : vArr[0]}`;
-  }).join(',\n');
+  }).join(',\n  ');
 
+  const mergeFieldsList = mergeFieldsArr.map((f) => `"${f}"`).join(',\n  ');
   // noinspection UnnecessaryLocalVariableJS
-  let mergeSQL = `${'INSERT'} INTO ${schemaTablePg}
-  (${insertFieldsList.map((f) => `"${f}"`).join(', ')})
-  VALUES ${insertValues}
-   ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')}) 
-   DO UPDATE SET ${upsertFields}
-   `;
+  let mergeSQL = `--
+INSERT INTO ${schemaTableStr} (
+  ${mergeFieldsList}
+)
+VALUES
+  ${mergeValues}
+ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')})
+DO UPDATE SET
+  ${updateSetStr}
+;`;
   if (typeof arg.mergeCorrection === 'function') {
     mergeSQL = arg.mergeCorrection(mergeSQL);
   }

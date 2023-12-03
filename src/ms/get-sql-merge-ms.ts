@@ -25,9 +25,10 @@ export const getMergeSqlMs = async <U extends TDBRecord = TDBRecord> (arg: {
   if (!recordset?.length) {
     return '';
   }
-  const schemaTableMs = schemaTable.to.ms(commonSchemaAndTable);
+  const schemaTableStr = schemaTable.to.ms(commonSchemaAndTable);
   const tableSchema: ITableSchemaMs = await getTableSchemaMs(connectionId, commonSchemaAndTable);
   const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults } = tableSchema;
+
   let mergeFieldsArr: string[] = fieldsWoSerialsAndRO;
   if (omitFields.length) {
     const set = new Set(omitFields);
@@ -37,13 +38,13 @@ export const getMergeSqlMs = async <U extends TDBRecord = TDBRecord> (arg: {
   const mergeValues = recordset.map((record: U) => {
     const preparedValues: (string | number)[] = [];
 
-    mergeFieldsArr.forEach((fieldName) => {
-      const value = record[fieldName];
-      let sqlValueMs = prepareSqlValueMs({ value, fieldDef: columnsSchema[fieldName] });
-      if (defaults[fieldName] != null && (sqlValueMs == null || sqlValueMs === 'null')) {
-        sqlValueMs = defaults[fieldName];
+    mergeFieldsArr.forEach((f) => {
+      const value = record[f];
+      let sqlValue = prepareSqlValueMs({ value, fieldDef: columnsSchema[f] });
+      if (defaults[f] != null && (sqlValue == null || sqlValue === 'null')) {
+        sqlValue = defaults[f];
       }
-      preparedValues.push(sqlValueMs);
+      preparedValues.push(sqlValue);
     });
     return `(${preparedValues.join(', ')})`;
   }).join(',\n    ').trim();
@@ -68,7 +69,7 @@ export const getMergeSqlMs = async <U extends TDBRecord = TDBRecord> (arg: {
   const insertSourceList = insertFieldsArray.map((f) => (`source.[${f}]`)).join(',\n    ');
   const insertFieldsList = insertFieldsArray.map((f) => `[${f}]`).join(',\n    ');
 
-  let mergeSQL = `MERGE ${schemaTableMs} ${arg.withClause || ''} AS target
+  let mergeSQL = `MERGE ${schemaTableStr} ${arg.withClause || ''} AS target
 USING
 (
   SELECT * FROM ( 

@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS test.table_schema
   ser1      serial                                not null,
   ser2      serial                                not null,
   i1        integer     default ((25))            not null,
+  i2        integer                                   null,
   si1       smallint,
   vc1       varchar(20)                           not null,
   dtz1      timestamptz default CURRENT_TIMESTAMP not null,

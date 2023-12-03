@@ -1,15 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="insertPg()" type="JavaScriptTestRunnerJest">
+  <configuration default="false" name="PG: get SQL" type="JavaScriptTestRunnerJest" folderName="PG">
     <node-interpreter value="project" />
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$" />
     <jest-options value="--runInBand --detectOpenHandles --forceExit" />
     <envs />
-    <scope-kind value="SUITE" />
-    <test-file value="$PROJECT_DIR$/__tests__/db/pg/insertPg.spec.ts" />
-    <test-names>
-      <test-name value="Mini ORM" />
-    </test-names>
+    <scope-kind value="TEST_FILE" />
+    <test-file value="$PROJECT_DIR$/__tests__/db/pg/get-sql-pg.spec.ts" />
     <method v="2" />
   </configuration>
 </component>

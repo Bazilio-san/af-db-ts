@@ -2,6 +2,7 @@ export interface ITestTableSchemaRecord {
   ser1?: number,
   ser2?: number,
   i1?: number,
+  i2?: number | null,
   si1: number,
   vc1: string,
   dtz1?: string | Date | number,

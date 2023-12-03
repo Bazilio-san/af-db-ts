@@ -33,11 +33,10 @@ export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | 
 
 const prepareIntNumber = (
   value: any,
-  fieldDef: IFieldDefMs,
   min: number,
   max: number,
 ) => {
-  if ((value == null || Number.isNaN(value)) && fieldDef.isNullable) {
+  if (value == null || Number.isNaN(value)) {
     return NULL;
   }
   let v = Number(value);
@@ -167,7 +166,7 @@ const array = (value: any, fieldDef: IFieldDefMs): string | null => {
     switch (arrayType) {
       case 'int':
       case 'integer':
-        arr = value.map((v) => prepareIntNumber(v, fieldDef, -2147483648, 2147483647));
+        arr = value.map((v) => prepareIntNumber(v, -2147483648, 2147483647));
         break;
       default: // + case 'string'
         arr = value.map((v) => {
@@ -195,7 +194,7 @@ export const prepareSqlValueMs = (arg: {
   fieldDef: IFieldDefMs,
 }): any => {
   const { value, fieldDef } = arg;
-  if (value == null && fieldDef.isNullable) {
+  if (value == null) {
     return NULL;
   }
   const { length = 0, noQuotes, dataType } = fieldDef;
@@ -208,18 +207,18 @@ export const prepareSqlValueMs = (arg: {
 
     case 'tinyint':
     case sql.TinyInt:
-      return prepareIntNumber(value, fieldDef, 0, 255);
+      return prepareIntNumber(value, 0, 255);
     case 'smallint':
     case sql.SmallInt:
-      return prepareIntNumber(value, fieldDef, -32768, 32767);
+      return prepareIntNumber(value, -32768, 32767);
     case 'int':
     case 'integer':
     case sql.Int:
-      return prepareIntNumber(value, fieldDef, -2147483648, 2147483647);
+      return prepareIntNumber(value, -2147483648, 2147483647);
     case 'bigint':
     case sql.BigInt:
       // eslint-disable-next-line no-loss-of-precision
-      return prepareIntNumber(value, fieldDef, -9223372036854775808, 9223372036854775807);
+      return prepareIntNumber(value, -9223372036854775808, 9223372036854775807);
     case 'number':
     case sql.Decimal:
     case sql.Float:
@@ -275,7 +274,7 @@ export const prepareSqlValueMs = (arg: {
         ? prepareDatetimeOffset(v, fieldDef)
         : prepareDatetime(v, fieldDef);
       if (v == null) {
-        return fieldDef.isNullable ? NULL : null;
+        return NULL;
       }
       return q(v, noQuotes);
     }
