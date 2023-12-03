@@ -6,7 +6,7 @@
     <jest-options value="--runInBand --detectOpenHandles --forceExit" />
     <envs />
     <scope-kind value="TEST_FILE" />
-    <test-file value="$PROJECT_DIR$/__tests__/db/pg/get-sql-pg.spec.ts" />
+    <test-file value="$PROJECT_DIR$/__tests__/db/pg/get-sql.spec.ts" />
     <method v="2" />
   </configuration>
 </component>

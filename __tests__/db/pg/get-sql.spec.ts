@@ -16,14 +16,14 @@ const norm = (s: string): string => s.replace(/\s+/sg, '');
 
 const expectedInsertSql = norm(`
   INSERT INTO "test"."table_schema" ("i1", "i2", "si1", "vc1", "dtz1", "time1", "bool1")
-  VALUES (111, NULL, 11, 'aaa', '2022-12-31T22:02:03.345Z'::timestamptz, '23:04:06', true)
+  VALUES (111, NULL, 11, 'aaa', '2023-01-01T01:02:03.345+03:00'::timestamptz, '23:04:06', true)
        , (222, 222, 12, 'bbb', CURRENT_TIMESTAMP, '23:04:06', true) ON CONFLICT DO NOTHING  RETURNING *;
 `);
 
 const expectedUpdateSql = norm(`
   UPDATE "test"."table_schema"
   SET "vc1"  = 'aaa',
-      "dtz1" = '2022-12-31T22:02:03.345Z'::timestamptz, "time1" = '23:04:06', "bool1" = NOT bool1, "bool2" = true
+      "dtz1" = '2023-01-01T01:02:03.345+03:00'::timestamptz, "time1" = '23:04:06', "bool1" = NOT bool1, "bool2" = true
   WHERE "i1" = 111 AND "si1" = 11;
 `);
 
@@ -39,7 +39,7 @@ INSERT INTO "test"."table_schema" (
   "bool2"
 )
 VALUES
-  (111, 11, 'aaa', '2022-12-31T22:02:03.345Z'::timestamptz, '23:04:06', false, true),
+  (111, 11, 'aaa', '2023-01-01T01:02:03.345+03:00'::timestamptz, '23:04:06', false, true),
   (222, 12, 'bbb', CURRENT_TIMESTAMP, '23:04:06', true, false)
 ON CONFLICT ("i1", "si1")
 DO UPDATE SET

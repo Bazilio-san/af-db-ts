@@ -39,11 +39,11 @@ export {
   genTableInterfacesMs,
 } from './ms/gen-table-interfaces-ms';
 
-export { getInsertSqlMs } from './ms/get-sql-insert-ms';
+export { getInsertSqlMs } from './ms/get-sql/insert';
 
-export { getMergeSqlMs } from './ms/get-sql-merge-ms';
+export { getMergeSqlMs } from './ms/get-sql/merge';
 
-export { getUpdateSqlMs } from './ms/get-sql-update-ms';
+export { getUpdateSqlMs } from './ms/get-sql/update';
 
 export {
   poolsCacheMs,
@@ -87,11 +87,11 @@ export {
   genTableInterfacesPg,
 } from './pg/gen-table-interfaces-pg';
 
-export { getInsertSqlPg } from './pg/get-sql-insert-pg';
+export { getInsertSqlPg } from './pg/get-sql/insert';
 
-export { getMergeSqlPg } from './pg/get-sql-merge-pg';
+export { getMergeSqlPg } from './pg/get-sql/merge';
 
-export { getUpdateSqlPg } from './pg/get-sql-update-pg';
+export { getUpdateSqlPg } from './pg/get-sql/update';
 
 export { insertPg, EUpdateLevel } from './pg/insert';
 

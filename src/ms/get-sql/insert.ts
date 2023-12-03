@@ -1,8 +1,8 @@
-import { getTableSchemaMs } from './table-schema-ms';
-import { prepareSqlValueMs } from './prepare-value';
-import { ITableSchemaMs } from '../@types/i-ms';
-import { TDBRecord, TRecordSet } from '../@types/i-common';
-import { schemaTable } from '../utils/utils';
+import { getTableSchemaMs } from '../table-schema-ms';
+import { prepareSqlValueMs } from '../prepare-value';
+import { ITableSchemaMs } from '../../@types/i-ms';
+import { TDBRecord, TRecordSet } from '../../@types/i-common';
+import { schemaTable } from '../../utils/utils';
 
 export const getInsertSqlMs = async <U extends TDBRecord = TDBRecord>(arg: {
   connectionId: string,
