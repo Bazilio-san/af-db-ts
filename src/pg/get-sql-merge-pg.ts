@@ -1,7 +1,7 @@
 import { getTableSchemaPg } from './table-schema-pg';
 import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
-import { schemaTable } from '../utils';
+import { schemaTable } from '../utils/utils';
 import { TDBRecord, TRecordSet } from '../@types/i-common';
 
 export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {

@@ -1,7 +1,7 @@
 // noinspection SqlResolve
 import * as sql from 'mssql';
 import { each } from 'af-tools-ts';
-import { removePairBrackets, schemaTable } from '../utils';
+import { removePairBrackets, schemaTable } from '../utils/utils';
 import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } from '../@types/i-ms';
 import { queryMs } from './query-ms';
 import { logger } from '../logger-error';

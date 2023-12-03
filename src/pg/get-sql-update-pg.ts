@@ -2,7 +2,7 @@ import { getTableSchemaPg } from './table-schema-pg';
 import { prepareSqlValuePg } from './prepare-value';
 import { ITableSchemaPg } from '../@types/i-pg';
 import { TDBRecord } from '../@types/i-common';
-import { schemaTable } from '../utils';
+import { schemaTable } from '../utils/utils';
 
 export const getUpdateSqlPg = async <U extends TDBRecord = TDBRecord>(arg: {
   connectionId: string,

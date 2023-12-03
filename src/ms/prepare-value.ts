@@ -4,13 +4,10 @@ import { echo } from 'af-echo-ts';
 import { getBool, rn } from 'af-tools-ts';
 import * as sql from 'mssql';
 import { IFieldDefMs } from '../@types/i-ms';
-
-const NULL = 'null';
-
-/**
- * Оборачивает строку в одинарные кавычки, если второй аргумент не true
- */
-export const q = (val: string, noQuotes?: boolean): string => (noQuotes ? val : `'${val}'`);
+import { q } from '../utils/utils';
+import { getLuxonDT } from '../utils/utils-dt';
+import { prepareBigIntNumber, prepareIntNumber } from '../utils/utils-num';
+import { NULL } from '../common';
 
 /**
  * Подготовка строки для передачи в SQL
@@ -29,46 +26,6 @@ export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | 
     v = v.substring(0, length);
   }
   return q(v, noQuotes);
-};
-
-const prepareIntNumber = (
-  value: any,
-  min: number,
-  max: number,
-) => {
-  if (value == null || Number.isNaN(value)) {
-    return NULL;
-  }
-  let v = Number(value);
-  if (v < min) {
-    v = min;
-  }
-  if (v > max) {
-    v = max;
-  }
-  return `${Math.floor(v)}`;
-};
-
-const getTypeOfDateInput = (v: any): 'string' | 'number' | 'date' | 'luxon' | 'moment' | 'any' | 'null' => {
-  const type = typeof v;
-  if (type === 'string' || type === 'number') {
-    return type;
-  }
-  if (type === 'boolean' || !v) {
-    return 'null';
-  }
-  if (type === 'object') {
-    if (Object.prototype.toString.call(v) === '[object Date]') {
-      return 'date';
-    }
-    if (v.isLuxonDateTime) {
-      return 'luxon';
-    }
-    if (v._isAMomentObject) {
-      return 'moment';
-    }
-  }
-  return 'any';
 };
 
 const getDTStr = (dt: DateTime, fieldDef: IFieldDefMs): string | null | undefined => {
@@ -97,38 +54,7 @@ const getDTStr = (dt: DateTime, fieldDef: IFieldDefMs): string | null | undefine
   }
 };
 
-const getLuxonDT = (value: any, fieldDef: IFieldDefMs): DateTime | null => {
-  const { inputDateFormat, dateTimeOptions } = fieldDef;
-
-  let v: any;
-  let millis: number | null = null;
-  const inputType = getTypeOfDateInput(value); // 'number' | 'string' | 'date' | 'luxon' | 'moment' | 'any' | 'null'
-
-  if (inputType === 'null') {
-    millis = null;
-  } else if (inputType === 'number' || inputType === 'date') {
-    millis = +value;
-  } else if (inputType === 'string' || inputType === 'any') {
-    v = String(value);
-    const dt = inputDateFormat
-      ? DateTime.fromFormat(v, inputDateFormat, dateTimeOptions)
-      : DateTime.fromISO(v, dateTimeOptions);
-    millis = dt.isValid ? dt.toMillis() : null;
-  } else if (inputType === 'luxon') {
-    millis = value.isValid ? value.toMillis() : null;
-  } else if (inputType === 'moment') {
-    millis = value.isValid() ? +value : null;
-  }
-  if (millis == null) {
-    return null;
-  }
-  if (dateTimeOptions?.correctionMillis) {
-    millis += dateTimeOptions.correctionMillis;
-  }
-  return DateTime.fromMillis(millis, dateTimeOptions?.zone ? { zone: dateTimeOptions.zone } : undefined);
-};
-
-const prepareDatetime = (value: any, fieldDef: IFieldDefMs): string | null => {
+const dateTimeValue = (value: any, fieldDef: IFieldDefMs): string | null => {
   const luxonDate = getLuxonDT(value, fieldDef);
   return luxonDate ? (getDTStr(luxonDate, fieldDef) || null) : null;
 };
@@ -217,8 +143,7 @@ export const prepareSqlValueMs = (arg: {
       return prepareIntNumber(value, -2147483648, 2147483647);
     case 'bigint':
     case sql.BigInt:
-      // eslint-disable-next-line no-loss-of-precision
-      return prepareIntNumber(value, -9223372036854775808, 9223372036854775807);
+      return prepareBigIntNumber(value);
     case 'number':
     case sql.Decimal:
     case sql.Float:
@@ -272,7 +197,7 @@ export const prepareSqlValueMs = (arg: {
     case sql.DateTimeOffset: {
       v = dataType === sql.DateTimeOffset
         ? prepareDatetimeOffset(v, fieldDef)
-        : prepareDatetime(v, fieldDef);
+        : dateTimeValue(v, fieldDef);
       if (v == null) {
         return NULL;
       }

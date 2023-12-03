@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax */
+
 const toSchemaTableCommon = (s: string): string => s.replace(/["[\]]/g, '');
 const toSchemaTableSpec = (s: string, dbType: 'mssql' | 'ms' | 'pg'): string => {
   const [schema, table] = toSchemaTableCommon(s).split('.');
@@ -31,3 +32,8 @@ export const removePairBrackets = (s: string): string => {
   }
   return s;
 };
+
+/**
+ * Оборачивает строку в одинарные кавычки, если второй аргумент не true
+ */
+export const q = (val: string, noQuotes?: boolean): string => (noQuotes ? val : `'${val}'`);

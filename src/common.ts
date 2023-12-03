@@ -3,6 +3,8 @@ import { closeAllPgConnectionsPg } from './pg/pool-pg';
 import { closeAllDbConnectionsMs } from './ms/pool-ms';
 import { logger } from './logger-error';
 
+export const NULL = 'null';
+
 export const logSqlError = (err: Error | any, throwError?: boolean, textSQL?: string, prefix?: string) => {
   if (prefix) {
     logger.error(prefix);

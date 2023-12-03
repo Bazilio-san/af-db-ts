@@ -6,7 +6,7 @@ import { echo } from 'af-echo-ts';
 import { IFieldDefMs } from '../@types/i-ms';
 import { getTableSchemaMs } from './table-schema-ms';
 import { closeAllDbConnectionsMs } from './pool-ms';
-import { schemaTable } from '../utils';
+import { schemaTable } from '../utils/utils';
 
 const getJsTypeByFieldDef = (fieldDef: IFieldDefMs): string => {
   switch (fieldDef.dataType) {

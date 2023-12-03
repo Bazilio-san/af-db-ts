@@ -3,7 +3,7 @@ import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
 import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
-import { schemaTable } from '../utils';
+import { schemaTable } from '../utils/utils';
 import { TDBRecord } from '../@types/i-common';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid

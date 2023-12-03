@@ -1,5 +1,5 @@
 import { Pool, PoolClient } from 'pg';
-import { TFieldName } from './i-common';
+import { IDateTimeOptionsEx, TFieldName } from './i-common';
 
 export enum EDataTypePg {
   'USER_DEFINED' = 'USER-DEFINED',
@@ -33,6 +33,10 @@ export interface IFieldDefPg {
   dtPrecision?: number,
   udtName?: string,
   readOnly?: boolean, // VVQ Задействовать!
+
+  /* Дополнительные свойства */
+  inputDateFormat?: string,
+  dateTimeOptions?: IDateTimeOptionsEx,
 }
 
 export interface TColumnsSchemaPg {
