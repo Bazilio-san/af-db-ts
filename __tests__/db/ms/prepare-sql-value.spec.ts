@@ -6,6 +6,7 @@
 // "Europe/Moscow"    +03:00
 
 import { IFieldDefMs, prepareSqlValueMs } from '../../../src';
+import * as sql from "mssql";
 
 const valuesAs0: [any, any][] = [
   ['0', '0'],
@@ -252,6 +253,28 @@ describe('prepare sql value MS', () => {
     testArr.forEach((caseValues) => {
       const [value, expected] = caseValues;
       const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'json' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
+  describe('string', () => {
+    const testArr: [any, any][] = [
+      [null, 'null'],
+      [undefined, 'null'],
+      ['', `''`],
+      [`aa'aa`, `'aa''aa'`],
+      [`aa%aa`, `'aa%%aa'`],
+      [{ a: 1, b: '2' }, `'[object Ob'`],
+      [[], `''`],
+      [1, `'1'`],
+      [0, `'0'`],
+    ];
+
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: sql.VarChar, length: 10 } });
       test(`${value} --> ${res}`, () => {
         expect(res).toBe(expected);
       });
