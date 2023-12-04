@@ -224,12 +224,34 @@ describe('prepare sql value MS', () => {
       // eslint-disable-next-line no-loss-of-precision
       [9223.372036854775800, '9223.372036854777'],
       [0.000000000000000000758, '7.58e-19'],
-
     ];
 
     testArr.forEach((caseValues) => {
       const [value, expected] = caseValues;
       const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'number' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
+  describe('json', () => {
+    const testArr: [any, any][] = [
+      [null, 'null'],
+      [undefined, 'null'],
+      ['', `''`],
+      ['{{}}', `'{{}}'`],
+      [{ a: 1, b: '2' }, `'{"a":1,"b":"2"}'`],
+      [[], `'[]'`],
+      [[1, 'f'], `'[1,"f"]'`],
+      [-1.2, `'-1.2'`],
+      ['0123', `'0123'`],
+      [1, `'1'`],
+    ];
+
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'json' } });
       test(`${value} --> ${res}`, () => {
         expect(res).toBe(expected);
       });
