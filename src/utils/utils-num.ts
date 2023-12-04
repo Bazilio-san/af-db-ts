@@ -7,16 +7,20 @@ export const parseFloatNumber = (value: any): number | null => {
   if (typeof value === 'number') {
     return value;
   }
+  if (typeof value === 'object') {
+    try {
+      value = JSON.stringify(value);
+    } catch (err) {
+      //
+    }
+  }
   value = String(value).trim();
   if (!value) {
     return null;
   }
-  let v: any = parseFloat(value);
+  const v: any = parseFloat(value);
   if (Number.isNaN(v)) {
-    v = parseFloat(value.replace(/[^\de+-]/g, ''));
-    if (Number.isNaN(v)) {
-      return null;
-    }
+    return null;
   }
   return v;
 };
@@ -49,7 +53,22 @@ export const prepareBigIntNumber = (value: any): string | typeof NULL => { // VV
   if (value == null) {
     return NULL;
   }
-  const v: any = parseFloat(value.replace(/[^\de+-]/g, ''));
-  const bi = BigInt(v);
-  return `${bi}`;
+  if (typeof value === 'bigint') {
+    return `${value}`;
+  }
+  let bi: BigInt;
+  try {
+    if (typeof value === 'number') {
+      const v = Math.floor(value);
+      bi = BigInt(v);
+      return `${bi}`;
+    }
+    if (typeof value === 'string') {
+      const v = value.replace(/^\++/, '').split(/[^\d-]/)[0].trim();
+      return v ? `${BigInt(v)}` : NULL;
+    }
+  } catch (err) {
+    //
+  }
+  return NULL;
 };

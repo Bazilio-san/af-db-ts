@@ -7,6 +7,41 @@
 
 import { IFieldDefMs, prepareSqlValueMs } from '../../../src';
 
+const valuesAs0: [any, any][] = [
+  ['0', '0'],
+  [0, '0'],
+];
+
+const valuesAsIntPositive: [any, any][] = [
+  ['1', '1'],
+  [1, '1'],
+  ['+1.6', '2'],
+  [1.6, '2'],
+  ['+1.2', '1'],
+  [1.2, '1'],
+  ['0123', '123'],
+];
+
+const valuesAsIntNegative: [any, any][] = [
+  ['-1', '-1'],
+  [-1, '-1'],
+  ['-1.6', '-2'],
+];
+
+const valuesAsNull: [any, any][] = [
+  [null, 'null'],
+  [undefined, 'null'],
+  ['', 'null'],
+  ['u-2o', 'null'],
+  [false, 'null'],
+  [true, 'null'],
+  [[], 'null'],
+  [[1], 'null'],
+  [[-1], 'null'],
+  [{ a: 1 }, 'null'],
+  [{}, 'null'],
+];
+
 describe('prepare sql value MS', () => {
   describe('boolean', () => {
     const testArr: [any, any][] = [
@@ -46,34 +81,181 @@ describe('prepare sql value MS', () => {
 
   describe('tinyint', () => {
     const testArr: [any, any][] = [
-      [[1], '1'],
-      ['', 'null'],
-      [null, 'null'],
-      [undefined, 'null'],
-      ['0', '0'],
-      [0, '0'],
-      ['1', '1'],
-      [1, '1'],
+      ...valuesAs0,
+      ...valuesAsIntPositive,
       ['-1', '0'],
       [-1, '0'],
       ['-1.6', '0'],
-      ['+1.6', '2'],
-      [1.6, '2'],
-      ['+1.2', '1'],
-      [1.2, '1'],
-      ['0123', '123'],
       [12345678, '255'],
       [-12345678, '0'],
-
-      [false, 'null'],
-      [true, 'null'],
-      [[], 'null'],
-      [{ a: 1 }, 'null'],
-      [{}, 'null'],
+      ...valuesAsNull,
     ];
     testArr.forEach((caseValues) => {
       const [value, expected] = caseValues;
       const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'tinyint' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
+  describe('smallint', () => {
+    const testArr: [any, any][] = [
+      ...valuesAs0,
+      ...valuesAsIntPositive,
+      ...valuesAsIntNegative,
+      [12345678, '32767'],
+      [-12345678, '-32768'],
+      ...valuesAsNull,
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'smallint' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
+  describe('int', () => {
+    const testArr: [any, any][] = [
+      ...valuesAs0,
+      ...valuesAsNull,
+      ...valuesAsIntPositive,
+      ...valuesAsIntNegative,
+      [3147483647, '2147483647'],
+      [-3147483648, '-2147483648'],
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'int' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
+  describe('bigint', () => {
+    const testArr: [any, any][] = [
+      ['.6', 'null'],
+      ...valuesAs0,
+      ['1', '1'],
+      [1, '1'],
+      ['+1.6', '1'],
+      [1.6, '1'],
+      ['+1.2', '1'],
+      [1.2, '1'],
+      ['0123', '123'],
+      ['-1', '-1'],
+      [-1, '-1'],
+      ['-1.6', '-1'],
+      // Макс числа без варнинга об потере точности
+      [-9223372036854775808, '-9223372036854775808'],
+      [9223372036854775800, '9223372036854775808'], // ! на конце появляется 8
+
+      // Приводятся к максимальному и минимальному числам не BigInt
+      // eslint-disable-next-line no-loss-of-precision
+      [-9223372036854775809, '-9223372036854775808'],
+      // eslint-disable-next-line no-loss-of-precision
+      [9223372036854775807, '9223372036854775808'],
+
+      // Приводятся к максимальному и минимальному числам не BigInt
+      // eslint-disable-next-line no-loss-of-precision
+      [-9223372036854775809, '-9223372036854775808'],
+      // eslint-disable-next-line no-loss-of-precision
+      [9223372036854775807, '9223372036854775808'],
+
+      [-1234567890123456, '-1234567890123456'],
+      [1234567890123456, '1234567890123456'],
+
+      // n
+      [9223372036854775800n, '9223372036854775800'],
+      [-9223372036854775808n, '-9223372036854775808'],
+
+      [9223372036854775807n, '9223372036854775807'],
+      [-9223372036854775809n, '-9223372036854775809'],
+
+      [-1, '-1'],
+      [3101019223372036854775807n, '3101019223372036854775807'],
+      [-3101019223372036854775808n, '-3101019223372036854775808'],
+
+      // String
+      ['9223372036854775800', '9223372036854775800'],
+      ['-9223372036854775808', '-9223372036854775808'],
+
+      ['3101019223372036854775807', '3101019223372036854775807'],
+      ['-3101019223372036854775808', '-3101019223372036854775808'],
+
+      ...valuesAsNull,
+    ];
+
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'bigint' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
+  describe('number', () => {
+    const testArr: [any, any][] = [
+      ...valuesAsNull,
+      ['.6', 'null'],
+      ...valuesAs0,
+      ['1', '1'],
+      [1, '1'],
+      ['+1.6', '1'],
+      [1.6, '1'],
+      ['+1.2', '1'],
+      [1.2, '1'],
+      ['0123', '123'],
+      ['-1', '-1'],
+      [-1, '-1'],
+      ['-1.6', '-1'],
+      // Макс числа без варнинга об потере точности
+      [-9223372036854775808, '-9223372036854775808'],
+      [9223372036854775800, '9223372036854775808'], // ! на конце появляется 8
+
+      // Приводятся к максимальному и минимальному числам не BigInt
+      // eslint-disable-next-line no-loss-of-precision
+      [-9223372036854775809, '-9223372036854775808'],
+      // eslint-disable-next-line no-loss-of-precision
+      [9223372036854775807, '9223372036854775808'],
+
+      // Приводятся к максимальному и минимальному числам не BigInt
+      // eslint-disable-next-line no-loss-of-precision
+      [-9223372036854775809, '-9223372036854775808'],
+      // eslint-disable-next-line no-loss-of-precision
+      [9223372036854775807, '9223372036854775808'],
+
+      [-1234567890123456, '-1234567890123456'],
+      [1234567890123456, '1234567890123456'],
+
+      // n
+      [9223372036854775800n, '9223372036854775800'],
+      [-9223372036854775808n, '-9223372036854775808'],
+
+      [9223372036854775807n, '9223372036854775807'],
+      [-9223372036854775809n, '-9223372036854775809'],
+
+      [-1, '-1'],
+      [3101019223372036854775807n, '3101019223372036854775807'],
+      [-3101019223372036854775808n, '-3101019223372036854775808'],
+
+      // String
+      ['9223372036854775800', '9223372036854775800'],
+      ['-9223372036854775808', '-9223372036854775808'],
+
+      ['3101019223372036854775807', '3101019223372036854775807'],
+      ['-3101019223372036854775808', '-3101019223372036854775808'],
+
+      ...valuesAsNull,
+    ];
+
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'number' } });
       test(`${value} --> ${res}`, () => {
         expect(res).toBe(expected);
       });

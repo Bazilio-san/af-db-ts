@@ -8,7 +8,7 @@
       "es2020.string",
       "es2020.symbol.wellknown"
     ],
-    "target": "es2019",
+    "target": "es2020",
     "module": "commonjs",
     "types": [
       "node",
