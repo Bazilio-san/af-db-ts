@@ -20,8 +20,22 @@ export {
 } from './@types/i-config';
 
 export { closeAllDb, graceExit, logSqlError } from './common';
+
 export { setLogger } from './logger-error';
+
 export { schemaTable } from './utils/utils';
+
+export { getLuxonDT, getTypeOfDateInput } from './utils/utils-dt';
+
+export {
+  parseIntNumber,
+  prepareIntNumber,
+
+  parseFloatNumber,
+  prepareFloatNumber,
+
+  prepareBigIntNumber,
+} from './utils/utils-num';
 
 // ######################### MS #####################################
 
@@ -93,7 +107,7 @@ export { getMergeSqlPg } from './pg/get-sql/merge';
 
 export { getUpdateSqlPg } from './pg/get-sql/update';
 
-export { insertPg, EUpdateLevel } from './pg/insert';
+export { insertPg, EUpdateLevel } from './pg/insert-pg';
 
 export { isTableOrViewExistsPg } from './pg/is-table-or-view-exists';
 

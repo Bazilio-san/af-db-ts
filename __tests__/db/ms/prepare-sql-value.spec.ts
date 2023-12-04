@@ -8,6 +8,78 @@
 import { IFieldDefMs, prepareSqlValueMs } from '../../../src';
 
 describe('prepare sql value MS', () => {
+  describe('boolean', () => {
+    const testArr: [any, any][] = [
+      [null, 'null'],
+      [undefined, 'null'],
+      ['%#@@!', '0'],
+
+      [false, '0'],
+      ['false', '0'],
+      ['0', '0'],
+      ['no', '0'],
+      ['no', '0'],
+      ['нет', '0'],
+      [0, '0'],
+
+      ['true', '1'],
+      ['1', '1'],
+      ['yes', '1'],
+      ['да', '1'],
+      [1, '1'],
+
+      [-1, '1'],
+      [10, '1'],
+      [[], '1'],
+      [[1], '1'],
+      [{ a: 1 }, '1'],
+      [{}, '1'],
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'boolean' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
+  describe('tinyint', () => {
+    const testArr: [any, any][] = [
+      [[1], '1'],
+      ['', 'null'],
+      [null, 'null'],
+      [undefined, 'null'],
+      ['0', '0'],
+      [0, '0'],
+      ['1', '1'],
+      [1, '1'],
+      ['-1', '0'],
+      [-1, '0'],
+      ['-1.6', '0'],
+      ['+1.6', '2'],
+      [1.6, '2'],
+      ['+1.2', '1'],
+      [1.2, '1'],
+      ['0123', '123'],
+      [12345678, '255'],
+      [-12345678, '0'],
+
+      [false, 'null'],
+      [true, 'null'],
+      [[], 'null'],
+      [{ a: 1 }, 'null'],
+      [{}, 'null'],
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'tinyint' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
   describe('parse date', () => {
     const testArr: [string, string, IFieldDefMs?][] = [
       // Строки без указания таймзоны интерпретируются в указанной таймзоне
