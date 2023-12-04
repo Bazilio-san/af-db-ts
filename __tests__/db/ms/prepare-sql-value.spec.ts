@@ -281,6 +281,26 @@ describe('prepare sql value MS', () => {
     });
   });
 
+  describe('uuid', () => {
+    const testArr: [any, any][] = [
+      [null, 'null'],
+      [undefined, 'null'],
+      ['', 'null'],
+      [`edacd531-c762-45bb-b5d1-01d49219bbfd`, `'EDACD531-C762-45BB-B5D1-01D49219BBFD'`],
+      [`edacd531-c762-45bb-b5d1-01d49219bbfdffff`, `'EDACD531-C762-45BB-B5D1-01D49219BBFD'`],
+      [`edacd531-c762-45bb-b5d1-01d49219b`, 'null'],
+      [45, 'null'],
+    ];
+
+    testArr.forEach((caseValues) => {
+      const [value, expected] = caseValues;
+      const res = prepareSqlValueMs({ value, fieldDef: { dataType: 'uuid' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
   describe('parse date', () => {
     const testArr: [string, string, IFieldDefMs?][] = [
       // Строки без указания таймзоны интерпретируются в указанной таймзоне
