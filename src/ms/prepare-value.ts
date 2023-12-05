@@ -177,9 +177,11 @@ export const prepareSqlValueMs = (arg: {
 
     case 'datetime':
     case sql.DateTime:
-    case sql.DateTime2:
+    case sql.DateTime2: {
+      const { includeOffset = false } = fieldDef.dateTimeOptions || {};
       // 2023-09-05T02:23:54.105
-      return dateTimeValue(value, fieldDef, (dt: DateTime) => dt.toISO({ includeOffset: false }));
+      return dateTimeValue(value, fieldDef, (dt: DateTime) => dt.toISO({ includeOffset }));
+    }
 
     case 'date':
     case sql.Date:
