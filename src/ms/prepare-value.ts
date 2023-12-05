@@ -70,9 +70,12 @@ const prepareDatetimeOffset = (value: any, fieldDef: IFieldDefMs): string | 'nul
 
 const functionRef = `(${__filename}::prepareSqlValueMs())`;
 
-const binToHexString = (value: any) => (value ? `0x${value.toString(16).toUpperCase()}` : null);
+const binToHexString = (value: any) => (value ? `0x${value.toString('hex').toUpperCase()}` : null);
 
-const array = (value: any, fieldDef: IFieldDefMs): string => {
+const parseArray = (value: any, fieldDef: IFieldDefMs): string | typeof NULL => {
+  if (value == null) {
+    return NULL;
+  }
   const { arrayType } = fieldDef;
   let arr: any[] = [];
   if (Array.isArray(value) && value.length) {
@@ -84,22 +87,22 @@ const array = (value: any, fieldDef: IFieldDefMs): string => {
       default: // + case 'string'
         arr = value.map((v) => {
           if (v === '') {
-            return v;
+            return '';
           }
           if (v == null) {
             return null;
           }
-          return prepareSqlStringMs(String(value), { ...fieldDef, noQuotes: true });
+          return prepareSqlStringMs(v, { ...fieldDef, noQuotes: true });
         })
-          .filter((v) => v != null)
-          .map((v) => `"${v}"`);
+          .map((v) => (v == null ? NULL : `"${v}"`));
         break;
     }
   }
-  if (arr.length) {
-    return `{${arr.join(',')}`;
-  }
-  return '{}';
+  return `{${arr.join(',')}}`;
+};
+const array = (value: any, fieldDef: IFieldDefMs): string | typeof NULL => {
+  const v = parseArray(value, fieldDef);
+  return v === NULL ? NULL : q(v, fieldDef.noQuotes);
 };
 
 export const prepareSqlValueMs = (arg: {
@@ -227,6 +230,10 @@ export const prepareSqlValueMs = (arg: {
       v = binToHexString(value);
       return v ? q(v, noQuotes) : NULL;
 
+    case 'udt':
+    case 'geography':
+    case 'geometry':
+    case 'variant':
     case sql.UDT:
     case sql.Geography:
     case sql.Geometry:

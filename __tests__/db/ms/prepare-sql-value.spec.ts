@@ -478,7 +478,7 @@ describe('prepare sql value MS', () => {
     });
   });
 
-  describe.only('datetimeoffset', () => {
+  describe('datetimeoffset', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
       // Исходное время интерпретируется в указанной таймзоне (fromZone). Результат - в локальной
       ['2000-01-22T11:59:59.123', `'2000-01-22T14:59:59.123+03:00'`, { dateTimeOptions: { fromZone: 'UTC' } }],
@@ -545,6 +545,67 @@ describe('prepare sql value MS', () => {
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'datetimeoffset' as TDataTypeMs };
+      const dateStrOut = prepareSqlValueMs({ value, fieldDef });
+      test(`${value} --> ${dateStrOut}`, () => {
+        expect(dateStrOut).toBe(expected);
+      });
+    });
+  });
+
+  describe('binary', () => {
+    const testArr: [any, string][] = [
+      [Buffer.from('asdfghjkyytreew'), `'0x6173646667686A6B79797472656577'`],
+      ['DDDDDD', `'0xDDDDDD'`],
+      [null, 'null'],
+      [undefined, 'null'],
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected, fDev = {}] = caseValues;
+      const fieldDef = { ...fDev, dataType: 'binary' as TDataTypeMs };
+      const dateStrOut = prepareSqlValueMs({ value, fieldDef });
+      test(`${value} --> ${dateStrOut}`, () => {
+        expect(dateStrOut).toBe(expected);
+      });
+    });
+  });
+
+  describe('variant', () => {
+    const testArr: [any, string][] = [
+      [null, 'null'],
+      [undefined, 'null'],
+      ['', `''`],
+      [`aa'aa`, `'aa''aa'`],
+      [`aa%aa`, `'aa%%aa'`],
+      [{ a: 1, b: '2' }, `'[object Object]'`],
+      [[], `''`],
+      [1, `'1'`],
+      [0, `'0'`],
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected, fDev = {}] = caseValues;
+      const fieldDef = { ...fDev, dataType: 'variant' as TDataTypeMs };
+      const dateStrOut = prepareSqlValueMs({ value, fieldDef });
+      test(`${value} --> ${dateStrOut}`, () => {
+        expect(dateStrOut).toBe(expected);
+      });
+    });
+  });
+
+  describe('array', () => {
+    const testArr: [any, string, IFieldDefMs?][] = [
+      [null, 'null'],
+      [undefined, 'null'],
+      ['', `'{}'`],
+      [[1, '2', 'a', '', null], `'{1,2,null,null,null}'`, { arrayType: 'int' }],
+      [[1, '2', 'a', '', null], `'{"1","2","a","",null}'`, { arrayType: 'string' }],
+      [{ a: 1, b: '2' }, `'{}'`],
+      [[], `'{}'`],
+      [1, `'{}'`],
+      [0, `'{}'`],
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected, fDev = {}] = caseValues;
+      const fieldDef = { ...fDev, dataType: 'array' as TDataTypeMs };
       const dateStrOut = prepareSqlValueMs({ value, fieldDef });
       test(`${value} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
