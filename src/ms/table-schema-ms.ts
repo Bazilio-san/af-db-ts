@@ -2,7 +2,7 @@
 import * as sql from 'mssql';
 import { each } from 'af-tools-ts';
 import { removePairBrackets, schemaTable } from '../utils/utils';
-import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } from '../@types/i-ms';
+import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TDataTypeMs, TUniqueConstraintsMs } from '../@types/i-ms';
 import { queryMs } from './query-ms';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
@@ -135,7 +135,7 @@ const getColumnsSchemaMs_ = async (
   Object.entries(columns).forEach(([fieldName, fieldDefC]) => {
     const fieldDef = columnsSchema[fieldName];
     if (fieldDef) {
-      fieldDef.dataType = fieldDefC.type;
+      fieldDef.dataType = fieldDefC.type as TDataTypeMs;
       fieldDef.udtName = fieldDefC.udt;
       fieldDef.caseSensitive = fieldDefC.caseSensitive;
       fieldDef.identity = fieldDefC.identity; // boolean;

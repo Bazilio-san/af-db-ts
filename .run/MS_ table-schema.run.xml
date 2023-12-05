@@ -1,12 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="tableSchemaPg.spec.ts" type="JavaScriptTestRunnerJest" folderName="PG" nameIsGenerated="true">
+  <configuration default="false" name="MS: table-schema" type="JavaScriptTestRunnerJest" folderName="MS">
     <node-interpreter value="project" />
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$" />
     <jest-options value="--runInBand --detectOpenHandles --forceExit" />
     <envs />
     <scope-kind value="TEST_FILE" />
-    <test-file value="$PROJECT_DIR$/__tests__/db/pg/tableSchemaPg.spec.ts" />
+    <test-file value="$PROJECT_DIR$/__tests__/db/ms/table-schema.spec.ts" />
     <method v="2" />
   </configuration>
 </component>

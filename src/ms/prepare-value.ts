@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import { echo } from 'af-echo-ts';
 import { getBool } from 'af-tools-ts';
 import * as sql from 'mssql';
-import { IFieldDefMs } from '../@types/i-ms';
+import { IFieldDefMs, TDataTypeMs } from '../@types/i-ms';
 import { q } from '../utils/utils';
 import { getLuxonDT } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
@@ -113,11 +113,13 @@ export const prepareSqlValueMs = (arg: {
   const { length = 0, noQuotes } = fieldDef;
   let { dataType } = fieldDef;
   if (typeof dataType === 'string') {
-    dataType = dataType.toLowerCase();
+    dataType = dataType.toLowerCase() as TDataTypeMs;
   }
   let v: any = value;
   switch (dataType) {
+    case 'bool':
     case 'boolean':
+    case 'bit':
     case sql.Bit: {
       return getBool(value) ? '1' : '0';
     }
@@ -138,6 +140,12 @@ export const prepareSqlValueMs = (arg: {
       return prepareBigIntNumber(value);
 
     case 'number':
+    case 'decimal':
+    case 'float':
+    case 'money':
+    case 'numeric':
+    case 'smallmoney':
+    case 'real':
     case sql.Decimal:
     case sql.Float:
     case sql.Money:
@@ -157,6 +165,13 @@ export const prepareSqlValueMs = (arg: {
     }
 
     case 'string':
+    case 'char':
+    case 'nchar':
+    case 'text':
+    case 'ntext':
+    case 'varchar':
+    case 'nvarchar':
+    case 'xml':
     case sql.Char:
     case sql.NChar:
     case sql.Text:
@@ -193,6 +208,7 @@ export const prepareSqlValueMs = (arg: {
       // 02:22:17.368
       return dateTimeValue(value, fieldDef, (dt: DateTime) => dt.toISOTime()?.substring(0, 12));
 
+    case 'smalldatetime':
     case sql.SmallDateTime:
       // 2023-09-05T02:20:00
       return dateTimeValue(value, fieldDef, (dt: DateTime) => `${dt.toISO()?.substring(0, 17)}00`);
@@ -202,6 +218,9 @@ export const prepareSqlValueMs = (arg: {
       // 2023-09-05T02:20:00.1234567Z
       return prepareDatetimeOffset(value, fieldDef);
 
+    case 'binary':
+    case 'varbinary':
+    case 'image':
     case sql.Binary:
     case sql.VarBinary:
     case sql.Image:

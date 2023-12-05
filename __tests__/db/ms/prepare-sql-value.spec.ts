@@ -8,6 +8,7 @@
 import * as sql from 'mssql';
 import { DateTime } from 'luxon';
 import { IFieldDefMs, prepareSqlValueMs } from '../../../src';
+import { TDataTypeMs } from '../../../src/@types/i-ms';
 
 const valuesAs0: [any, any][] = [
   ['0', '0'],
@@ -302,7 +303,7 @@ describe('prepare sql value MS', () => {
     });
   });
 
-  describe.only('datetime', () => {
+  describe('datetime', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
       // Исходное время интерпретируется в указанной таймзоне (fromZone). Результат - в локальной
       ['2000-01-22T11:59:59.123', `'2000-01-22T14:59:59.123+03:00'`, { dateTimeOptions: { fromZone: 'UTC', includeOffset: true } }],
@@ -342,7 +343,7 @@ describe('prepare sql value MS', () => {
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
-      const fieldDef = { ...fDev, dataType: 'datetime' };
+      const fieldDef = { ...fDev, dataType: 'datetime' as TDataTypeMs };
       const dateStrOut = prepareSqlValueMs({ value, fieldDef });
       test(`${value} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
@@ -379,7 +380,7 @@ describe('prepare sql value MS', () => {
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
-      const fieldDef = { ...fDev, dataType: 'date' };
+      const fieldDef = { ...fDev, dataType: 'date' as TDataTypeMs };
       const dateStrOut = prepareSqlValueMs({ value, fieldDef });
       test(`${value} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
@@ -387,7 +388,7 @@ describe('prepare sql value MS', () => {
     });
   });
 
-  describe.only('time', () => {
+  describe('time', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
       ['2000-01-22T11:59:59.123', `'14:59:59.123'`, { dateTimeOptions: { fromZone: 'UTC' } }],
       ['2000-01-22T11:59:59.123', `'11:59:59.123'`],
@@ -421,7 +422,7 @@ describe('prepare sql value MS', () => {
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
-      const fieldDef = { ...fDev, dataType: 'time' };
+      const fieldDef = { ...fDev, dataType: 'time' as TDataTypeMs };
       const dateStrOut = prepareSqlValueMs({ value, fieldDef });
       test(`${value} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
