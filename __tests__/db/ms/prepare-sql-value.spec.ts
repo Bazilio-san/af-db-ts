@@ -350,7 +350,7 @@ describe('prepare sql value MS', () => {
     });
   });
 
-  describe.only('date', () => {
+  describe('date', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
       ['2000-01-22T11:59:59.123', `'2000-01-22'`, { dateTimeOptions: { fromZone: 'UTC' } }],
       ['2000-01-22T11:59:59.123', `'2000-01-22'`],
@@ -380,6 +380,48 @@ describe('prepare sql value MS', () => {
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'date' };
+      const dateStrOut = prepareSqlValueMs({ value, fieldDef });
+      test(`${value} --> ${dateStrOut}`, () => {
+        expect(dateStrOut).toBe(expected);
+      });
+    });
+  });
+
+  describe.only('time', () => {
+    const testArr: [any, string, IFieldDefMs?][] = [
+      ['2000-01-22T11:59:59.123', `'14:59:59.123'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22T11:59:59.123', `'11:59:59.123'`],
+      ['2000-01-22T22:59:59.123', `'01:59:59.123'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22T22:59:59.123', `'22:59:59.123'`],
+      ['2000-01-22T22:59:59.123', `'22:59:59.123'`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+
+      ['2000-01-22T11:59:59.1', `'14:59:59.100'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22T11:59:59', `'11:59:59.000'`],
+      ['2000-01-22T22:59', `'01:59:00.000'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+
+      ['2000-01-22 22:59:59.123', `'22:59:59.123'`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+      ['2000-01-22 11:59:59.1', `'14:59:59.100'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22 11:59:59', `'11:59:59.000'`],
+      ['2000-01-22 22:59', `'01:59:00.000'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+
+      ['2000-01-22', `'00:00:00.000'`],
+
+      ['22:59:59.123', `'22:59:59.123'`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+      ['11:59:59.1', `'14:59:59.100'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['11:59:59', `'11:59:59.000'`],
+      ['22:59', `'01:59:00.000'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+
+      [new Date(2023, 1, 2, 22, 11, 59, 123), `'22:11:59.123'`],
+      [1675365119123, `'22:11:59.123'`],
+      [DateTime.fromMillis(1675365119123), `'22:11:59.123'`],
+
+      ['DDDDDD', 'null'],
+      [null, 'null'],
+      [undefined, 'null'],
+    ];
+    testArr.forEach((caseValues) => {
+      const [value, expected, fDev = {}] = caseValues;
+      const fieldDef = { ...fDev, dataType: 'time' };
       const dateStrOut = prepareSqlValueMs({ value, fieldDef });
       test(`${value} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
