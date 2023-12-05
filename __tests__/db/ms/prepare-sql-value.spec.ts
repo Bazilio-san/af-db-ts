@@ -6,6 +6,7 @@
 // "Europe/Moscow"    +03:00
 
 import * as sql from 'mssql';
+import { DateTime } from 'luxon';
 import { IFieldDefMs, prepareSqlValueMs } from '../../../src';
 
 const valuesAs0: [any, any][] = [
@@ -301,7 +302,7 @@ describe('prepare sql value MS', () => {
     });
   });
 
-  describe('datetime', () => {
+  describe.only('datetime', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
       // Исходное время интерпретируется в указанной таймзоне (fromZone). Результат - в локальной
       ['2000-01-22T11:59:59.123', `'2000-01-22T14:59:59.123+03:00'`, { dateTimeOptions: { fromZone: 'UTC', includeOffset: true } }],
@@ -329,6 +330,12 @@ describe('prepare sql value MS', () => {
       ['2000-01-22 11:59:59.1', `'2000-01-22T11:59:59.100'`],
       ['2000-01-22 11:59:59', `'2000-01-22T11:59:59.000'`],
       ['2000-01-22 11:59', `'2000-01-22T11:59:00.000'`],
+
+      ['2000-01-22', `'2000-01-22T00:00:00.000'`],
+      [new Date(2023, 1, 2, 22, 11, 59, 123), `'2023-02-02T22:11:59.123'`],
+      [1675365119123, `'2023-02-02T22:11:59.123'`],
+      [DateTime.fromMillis(1675365119123), `'2023-02-02T22:11:59.123'`],
+
       ['DDDDDD', 'null'],
       [null, 'null'],
       [undefined, 'null'],
@@ -343,13 +350,29 @@ describe('prepare sql value MS', () => {
     });
   });
 
-  describe('date', () => {
+  describe.only('date', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
       ['2000-01-22T11:59:59.123', `'2000-01-22'`, { dateTimeOptions: { fromZone: 'UTC' } }],
       ['2000-01-22T11:59:59.123', `'2000-01-22'`],
       ['2000-01-22T22:59:59.123', `'2000-01-23'`, { dateTimeOptions: { fromZone: 'UTC' } }],
       ['2000-01-22T22:59:59.123', `'2000-01-22'`],
       ['2000-01-22T22:59:59.123', `'2000-01-22'`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+
+      ['2000-01-22T11:59:59.1', `'2000-01-22'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22T11:59:59', `'2000-01-22'`],
+      ['2000-01-22T22:59', `'2000-01-23'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+
+      ['2000-01-22 22:59:59.123', `'2000-01-22'`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+      ['2000-01-22 11:59:59.1', `'2000-01-22'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22 11:59:59', `'2000-01-22'`],
+      ['2000-01-22 22:59', `'2000-01-23'`, { dateTimeOptions: { fromZone: 'UTC' } }],
+
+      ['2000-01-22', `'2000-01-22'`],
+
+      [new Date(2023, 1, 2, 22, 11, 59), `'2023-02-02'`],
+      [1675365119123, `'2023-02-02'`],
+      [DateTime.fromMillis(1675365119123), `'2023-02-02'`],
+
       ['DDDDDD', 'null'],
       [null, 'null'],
       [undefined, 'null'],
