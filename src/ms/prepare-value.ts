@@ -59,8 +59,8 @@ const prepareDatetimeOffset = (value: any, fieldDef: IFieldDefMs): string | 'nul
   } else {
     sss = `${isoZ.substring(20, 23)}0000`;
   }
-  const scale = fieldDef.scale == null ? 3 : fieldDef.scale;
-  const dotMillis = !scale ? '' : `.${sss}`.substring(0, scale + 1);
+  const dtPrecision = fieldDef.dtPrecision == null ? 3 : fieldDef.dtPrecision;
+  const dotMillis = !dtPrecision ? '' : `.${sss}`.substring(0, dtPrecision + 1);
 
   const { includeOffset = true } = fieldDef.dateTimeOptions || {};
   const offset = includeOffset ? isoZ.substring(23, isoZ.length) : ''; // +03:00
