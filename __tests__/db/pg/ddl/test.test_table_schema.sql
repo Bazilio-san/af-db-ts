@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS test.table_schema
   i2        integer                                   null,
   si1       smallint,
   vc1       varchar(20)                           not null,
-  dtz1      timestamptz default CURRENT_TIMESTAMP not null,
+  dtz1      timestamptz(5) default CURRENT_TIMESTAMP not null,
   time1     time                                  not null,
   bool1     boolean     default TRUE              not null,
   bool2     boolean     default FALSE,

@@ -1,6 +1,6 @@
 // noinspection SqlResolve
 import { DateTime } from 'luxon';
-import { EDataTypePg, IFieldDefPg } from '../@types/i-pg';
+import { IFieldDefPg } from '../@types/i-pg';
 import { NULL } from '../common';
 import { getLuxonDT } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
@@ -32,43 +32,43 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     return NULL;
   }
   switch (fieldDef.dataType) {
-    case EDataTypePg.boolean:
+    case 'boolean':
       return value ? 'true' : 'false';
 
-    case EDataTypePg.bigint:
+    case 'bigint':
       return prepareBigIntNumber(value);
 
-    case EDataTypePg.numeric:
-    case EDataTypePg.real:
+    case 'numeric':
+    case 'real':
       return prepareFloatNumber(value);
 
-    case EDataTypePg.integer:
+    case 'integer':
       return prepareIntNumber(value, -2147483648, 2147483647);
-    case EDataTypePg.smallint:
+    case 'smallint':
       return prepareIntNumber(value, -32768, 32767);
 
-    case EDataTypePg.text:
-    case EDataTypePg.character:
-    case EDataTypePg.varchar:
-    case EDataTypePg.uuid:
+    case 'text':
+    case 'character':
+    case 'varchar':
+    case 'uuid':
       return prepareSqlStringPg(value, fieldDef);
 
-    case EDataTypePg.json:
-    case EDataTypePg.jsonb:
+    case 'json':
+    case 'jsonb':
       return prepareSqlStringPg(JSON.stringify(value), fieldDef);
 
-    case EDataTypePg.date:
+    case 'date':
       return dateTimeValue(value, fieldDef, (dt: DateTime) => `'${dt.toISODate()}'::date`);
-    case EDataTypePg.timestamptz:
-    case EDataTypePg.timestamp: {
+    case 'timestamptz':
+    case 'timestamp': {
       const { includeOffset = true } = fieldDef.dateTimeOptions || {};
       return dateTimeValue(value, fieldDef, (dt: DateTime) => `'${dt.toISO({ includeOffset })}'::timestamptz`);
     }
 
-    case EDataTypePg.USER_DEFINED:
+    case 'USER_DEFINED':
       return prepareSqlStringPg(value, fieldDef);
 
-    case EDataTypePg.ARRAY: {
+    case 'ARRAY': {
       let v = JSON.stringify(value);
       v = v.replace(/^\[(.*?)]$/, '{$1}');
       return prepareSqlStringPg(v, fieldDef);

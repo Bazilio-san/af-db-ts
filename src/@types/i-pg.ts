@@ -1,27 +1,9 @@
 import { Pool, PoolClient } from 'pg';
-import { IDateTimeOptionsEx, IFieldDef, TFieldName } from './i-common';
-
-export enum EDataTypePg {
-  'USER_DEFINED' = 'USER-DEFINED',
-  'bigint' = 'bigint',
-  'boolean' = 'boolean',
-  'character' = 'character',
-  'varchar' = 'character varying',
-  'date' = 'date',
-  'integer' = 'integer',
-  'json' = 'json',
-  'jsonb' = 'jsonb',
-  'numeric' = 'numeric',
-  'real' = 'real',
-  'smallint' = 'smallint',
-  'text' = 'text',
-  'timestamptz' = 'timestamp with time zone',
-  'timestamp' = 'timestamp without time zone',
-  'uuid' = 'uuid',
-  'ARRAY' = 'ARRAY',
-}
+import { IFieldDef, TFieldName } from './i-common';
+import { TDataTypePg } from './i-data-types-pg';
 
 export interface IFieldDefPg extends IFieldDef {
+  dataType?: TDataTypePg,
 }
 
 export interface TColumnsSchemaPg {

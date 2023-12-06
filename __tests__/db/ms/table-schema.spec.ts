@@ -31,7 +31,7 @@ describe('getTableSchemaMs()', () => {
       ],
       ux__test__table_schema__vc_tz: [
         'vc1',
-        'dtz1',
+        'dt1',
       ],
     });
   });
@@ -39,6 +39,9 @@ describe('getTableSchemaMs()', () => {
     expect(tableSchema.defaults).toEqual({
       bool1: '0',
       dtz1: 'getdate()',
+      dt1: 'getdate()',
+      dt2: 'getdate()',
+      dtz: 'getdate()',
       i1: '123',
       vc1: `'aaa'`,
     });
@@ -52,7 +55,9 @@ describe('getTableSchemaMs()', () => {
       'i3',
       'si1',
       'vc1',
-      'dtz1',
+      'dt1',
+      'dt2',
+      'dtz',
       'time1',
       'bool1',
       'comp1',
@@ -66,7 +71,9 @@ describe('getTableSchemaMs()', () => {
       'i3',
       'si1',
       'vc1',
-      'dtz1',
+      'dt1',
+      'dt2',
+      'dtz',
       'time1',
       'bool1',
     ]);

@@ -2,11 +2,12 @@
 import * as sql from 'mssql';
 import { each } from 'af-tools-ts';
 import { removePairBrackets, schemaTable } from '../utils/utils';
-import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TDataTypeMs, TUniqueConstraintsMs } from '../@types/i-ms';
+import { IFieldDefMs, ITableSchemaMs, TColumnsSchemaMs, TUniqueConstraintsMs } from '../@types/i-ms';
 import { queryMs } from './query-ms';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
 import { TFieldName } from '../@types/i-common';
+import { TDataTypeMs } from '../@types/i-data-types-ms';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
 // schemaAndTableMs: "<schema>"."<table>" :  "Staff"."nnPersones-personGuid"

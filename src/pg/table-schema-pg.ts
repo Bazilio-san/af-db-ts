@@ -2,8 +2,8 @@
 import { queryPg } from './query-pg';
 import { logger } from '../logger-error';
 import { graceExit } from '../common';
-import { EDataTypePg, IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
-import { removePairBrackets, schemaTable } from '../utils/utils';
+import { IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
+import { schemaTable } from '../utils/utils';
 import { TDBRecord } from '../@types/i-common';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
@@ -173,7 +173,7 @@ export const getFieldsAndValuesPg = <U extends TDBRecord = TDBRecord> (record: U
     if (!dataType) {
       return;
     }
-    if ((dataType === EDataTypePg.jsonb || dataType === EDataTypePg.json) && Array.isArray(v)) {
+    if ((dataType === 'jsonb' || dataType === 'json') && Array.isArray(v)) {
       recordNormalized[f] = JSON.stringify(v);
     } else {
       recordNormalized[f] = v;

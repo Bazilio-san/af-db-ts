@@ -5,7 +5,7 @@ export interface ITestTableSchemaRecord {
   i2?: number | null,
   si1: number,
   vc1: string,
-  dtz1?: string | Date | number,
+  dtz1?: string,
   time1: string,
   bool1?: boolean,
   bool2?: boolean | null,

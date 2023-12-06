@@ -2,36 +2,36 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { echo } from 'af-echo-ts';
-import { EDataTypePg, IFieldDefPg } from '../@types/i-pg';
+import { IFieldDefPg } from '../@types/i-pg';
 import { getTableSchemaPg } from './table-schema-pg';
 import { closeAllPgConnectionsPg } from './pool-pg';
 
 const getJsTypeByFieldDef = (fieldDef: IFieldDefPg): string => {
   switch (fieldDef.dataType) {
-    case EDataTypePg.boolean:
+    case 'boolean':
       return 'boolean';
-    case EDataTypePg.bigint:
+    case 'bigint':
       return 'string | number';
-    case EDataTypePg.integer:
-    case EDataTypePg.numeric:
-    case EDataTypePg.real:
-    case EDataTypePg.smallint:
+    case 'integer':
+    case 'numeric':
+    case 'real':
+    case 'smallint':
       return 'number';
-    case EDataTypePg.text:
-    case EDataTypePg.character:
-    case EDataTypePg.varchar:
-    case EDataTypePg.uuid:
+    case 'text':
+    case 'character':
+    case 'varchar':
+    case 'uuid':
       return 'string';
-    case EDataTypePg.json:
-    case EDataTypePg.jsonb:
+    case 'json':
+    case 'jsonb':
       return 'any';
-    case EDataTypePg.date:
-    case EDataTypePg.timestamptz:
-    case EDataTypePg.timestamp:
+    case 'date':
+    case 'timestamptz':
+    case 'timestamp':
       return 'string | Date | number';
-    case EDataTypePg.USER_DEFINED:
+    case 'USER_DEFINED':
       return 'string';
-    case EDataTypePg.ARRAY: {
+    case 'ARRAY': {
       switch (fieldDef.udtName) {
         case '_int2':
         case '_int4':

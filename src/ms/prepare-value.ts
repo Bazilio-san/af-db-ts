@@ -3,12 +3,13 @@ import { DateTime } from 'luxon';
 import { echo } from 'af-echo-ts';
 import { getBool } from 'af-tools-ts';
 import * as sql from 'mssql';
-import { IFieldDefMs, TDataTypeMs } from '../@types/i-ms';
+import { IFieldDefMs } from '../@types/i-ms';
 import { q } from '../utils/utils';
 import { getLuxonDT } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
 import { NULL } from '../common';
 import { IFieldDef } from '../@types/i-common';
+import { TDataTypeMs } from '../@types/i-data-types-ms';
 
 /**
  * Подготовка строки для передачи в SQL

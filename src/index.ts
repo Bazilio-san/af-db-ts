@@ -39,6 +39,8 @@ export {
 
 // ######################### MS #####################################
 
+export { TDataTypeMs } from './@types/i-data-types-ms';
+
 export {
   IFieldDefMs,
   TColumnsSchemaMs,
@@ -89,12 +91,13 @@ export {
   IFieldDefPg,
   TColumnsSchemaPg,
   ITableSchemaPg,
-  EDataTypePg,
   TUniqueConstraintsPg,
   IPoolPg,
   IConnectionPoolsPg,
   IPoolClientPg,
 } from './@types/i-pg';
+
+export { TDataTypePg } from './@types/i-data-types-pg';
 
 export {
   genTableInterfacePg,
