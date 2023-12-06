@@ -38,7 +38,6 @@ describe('getTableSchemaMs()', () => {
   test('defaults', async () => {
     expect(tableSchema.defaults).toEqual({
       bool1: '0',
-      dtz1: 'getdate()',
       dt1: 'getdate()',
       dt2: 'getdate()',
       dtz: 'getdate()',
