@@ -17,14 +17,14 @@ const norm = (s: string): string => s.replace(/\s+/sg, '');
 const expectedInsertSql = norm(`
   INSERT INTO [test].[table_schema] ([i1], [i3], [si1], [vc1], [dt1], [dt2], [dtz], [time1], [bool1]) OUTPUT inserted.*
   VALUES 
-    (111, NULL, 11, 'bbb', getdate(), getdate(), '2023-01-01T01:02:03.345+03:00', '23:04:06.000', 1), 
+    (111, NULL, 11, 'bbb', getdate(), getdate(), '2023-01-01T01:02:03.3450+03:00', '23:04:06.000', 1), 
     (222, NULL, 12, 'aaa', getdate(), getdate(), getdate(), '23:04:06.000', 0);
 `);
 
 const expectedUpdateSql = norm(`
   UPDATE [test].[table_schema]
   SET
-      [i2] = i2 + 134, [vc1] = 'bbb', [dtz] = '2023-01-01T01:02:03.345+03:00', [time1] = '23:04:06.000', [bool1] = 1
+      [i2] = i2 + 134, [vc1] = 'bbb', [dtz] = '2023-01-01T01:02:03.3450+03:00', [time1] = '23:04:06.000', [bool1] = 1
   WHERE [i1] = 111 AND [si1] = 11;
 `);
 
@@ -33,7 +33,7 @@ USING
 (
   SELECT * FROM ( 
     VALUES
-    (111, null, 11, 'bbb', '2023-01-01T01:02:03.345+03:00', '23:04:06.000', 1),
+    (111, null, 11, 'bbb', '2023-01-01T01:02:03.3450+03:00', '23:04:06.000', 1),
     (222, null, 12, 'aaa', getdate(), '23:04:06.000', 0)
   )
   AS s (

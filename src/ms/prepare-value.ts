@@ -5,7 +5,7 @@ import { getBool } from 'af-tools-ts';
 import * as sql from 'mssql';
 import { IFieldDefMs } from '../@types/i-ms';
 import { q } from '../utils/utils';
-import { getLuxonDT } from '../utils/utils-dt';
+import { dateTimeValue, getLuxonDT } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
 import { NULL } from '../common';
 import { IFieldDef } from '../@types/i-common';
@@ -28,15 +28,6 @@ export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | 
     v = v.substring(0, length);
   }
   return q(v, noQuotes);
-};
-
-const dateTimeValue = (value: any, fieldDef: IFieldDef, fn: Function): string | typeof NULL => {
-  const luxonDate = getLuxonDT(value, fieldDef);
-  if (!luxonDate) {
-    return NULL;
-  }
-  const v = fn(luxonDate);
-  return q(v, fieldDef.noQuotes);
 };
 
 const prepareDatetimeOffset = (value: any, fieldDef: IFieldDefMs): string | 'null' => {
@@ -101,15 +92,13 @@ const parseArray = (value: any, fieldDef: IFieldDefMs): string | typeof NULL => 
   }
   return `{${arr.join(',')}}`;
 };
+
 const array = (value: any, fieldDef: IFieldDefMs): string | typeof NULL => {
   const v = parseArray(value, fieldDef);
   return v === NULL ? NULL : q(v, fieldDef.noQuotes);
 };
 
-export const prepareSqlValueMs = (arg: {
-  value: any,
-  fieldDef: IFieldDefMs,
-}): string | number | typeof NULL => {
+export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): string | typeof NULL => {
   const { value, fieldDef } = arg;
   if (value == null) {
     return NULL;

@@ -1,6 +1,9 @@
 import { DateTime } from 'luxon';
 import { IFieldDefMs } from '../@types/i-ms';
 import { IFieldDefPg } from '../@types/i-pg';
+import { IFieldDef } from "../@types/i-common";
+import { NULL } from "../common";
+import { q } from "./utils";
 
 export const getTypeOfDateInput = (v: any): 'string' | 'number' | 'date' | 'luxon' | 'moment' | 'any' | 'null' => {
   const type = typeof v;
@@ -64,4 +67,13 @@ export const getLuxonDT = (value: any, fieldDef: IFieldDefMs | IFieldDefPg): Dat
     ld = ld.setZone(setZone);
   }
   return ld;
+};
+
+export const dateTimeValue = (value: any, fieldDef: IFieldDef, fn: Function): string | typeof NULL => {
+  const luxonDate = getLuxonDT(value, fieldDef);
+  if (!luxonDate) {
+    return NULL;
+  }
+  const v = fn(luxonDate);
+  return q(v, fieldDef.noQuotes);
 };

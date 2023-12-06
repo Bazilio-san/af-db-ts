@@ -25,7 +25,11 @@ export { setLogger } from './logger-error';
 
 export { schemaTable } from './utils/utils';
 
-export { getLuxonDT, getTypeOfDateInput } from './utils/utils-dt';
+export {
+  getLuxonDT,
+  getTypeOfDateInput,
+  dateTimeValue,
+} from './utils/utils-dt';
 
 export {
   parseIntNumber,

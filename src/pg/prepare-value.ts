@@ -1,8 +1,9 @@
 // noinspection SqlResolve
 import { DateTime } from 'luxon';
+import { getBool } from 'af-tools-ts';
 import { IFieldDefPg } from '../@types/i-pg';
 import { NULL } from '../common';
-import { getLuxonDT } from '../utils/utils-dt';
+import { dateTimeValue } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
 
 //  const utc$ = (millis?: number): DateTime => DateTime.fromMillis(millis == null ? Date.now() : millis).setZone('UTC');
@@ -20,21 +21,26 @@ export const prepareSqlStringPg = (s: any, fieldDef: IFieldDefPg): string => {
   }
   return `'${s}'`;
 };
+
 // VVA q """""
-const dateTimeValue = (value: any, fieldDef: IFieldDefPg, fn: Function): string => {
-  const luxonDate = getLuxonDT(value, fieldDef);
-  return luxonDate ? fn(luxonDate) : NULL;
-};
 
 export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): any => {
   const { value, fieldDef } = arg;
   if (value == null) {
     return NULL;
   }
-  switch (fieldDef.dataType) {
-    case 'boolean':
-      return value ? 'true' : 'false';
+  const fieldDefWithNoQuotes = { ...fieldDef, noQuotes: true };
 
+  switch (fieldDef.dataType) {
+    case 'bool':
+    case 'boolean':
+      return getBool(value) ? 'true' : 'false';
+
+    case 'smallint':
+      return prepareIntNumber(value, -32768, 32767);
+    case 'int':
+    case 'integer':
+      return prepareIntNumber(value, -2147483648, 2147483647);
     case 'bigint':
       return prepareBigIntNumber(value);
 
@@ -42,11 +48,7 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     case 'real':
       return prepareFloatNumber(value);
 
-    case 'integer':
-      return prepareIntNumber(value, -2147483648, 2147483647);
-    case 'smallint':
-      return prepareIntNumber(value, -32768, 32767);
-
+    case 'string':
     case 'text':
     case 'character':
     case 'varchar':
@@ -57,13 +59,19 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     case 'jsonb':
       return prepareSqlStringPg(JSON.stringify(value), fieldDef);
 
-    case 'date':
-      return dateTimeValue(value, fieldDef, (dt: DateTime) => `'${dt.toISODate()}'::date`);
     case 'timestamptz':
     case 'timestamp': {
+      // '2023-09-05T02:23:54.105+03:00'::timestamptz
       const { includeOffset = true } = fieldDef.dateTimeOptions || {};
-      return dateTimeValue(value, fieldDef, (dt: DateTime) => `'${dt.toISO({ includeOffset })}'::timestamptz`);
+      return dateTimeValue(value, fieldDefWithNoQuotes, (dt: DateTime) => `'${dt.toISO({ includeOffset })}'::timestamptz`);
     }
+
+    case 'date':
+      // '2023-09-05'::date
+      return dateTimeValue(value, fieldDefWithNoQuotes, (dt: DateTime) => `'${dt.toISODate()}'::date`);
+    case 'time':
+      // '02:22:17.368'::time
+      return dateTimeValue(value, fieldDefWithNoQuotes, (dt: DateTime) => `'${dt.toISOTime()?.substring(0, 12)}'::time`);
 
     case 'USER_DEFINED':
       return prepareSqlStringPg(value, fieldDef);
