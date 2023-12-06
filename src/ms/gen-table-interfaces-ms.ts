@@ -8,7 +8,7 @@ import { getTableSchemaMs } from './table-schema-ms';
 import { closeAllDbConnectionsMs } from './pool-ms';
 import { schemaTable } from '../utils/utils';
 
-const getJsTypeByFieldDef = (fieldDef: IFieldDefMs): string => {
+export const getJsTypeByFieldDefMs = (fieldDef: IFieldDefMs): string => {
   switch (fieldDef.dataType) {
     case 'boolean':
     case sql.Bit:
@@ -76,7 +76,7 @@ const getJsTypeByFieldDef = (fieldDef: IFieldDefMs): string => {
 
 const getFieldDefinition = (
   d: IFieldDefMs,
-): string => `${d.name}${d.isNullable || d.hasDefault ? '?' : ''}: ${getJsTypeByFieldDef(d)}${d.isNullable ? ' | null' : ''}`;
+): string => `${d.name}${d.isNullable || d.hasDefault ? '?' : ''}: ${getJsTypeByFieldDefMs(d)}${d.isNullable ? ' | null' : ''}`;
 
 const TABLE_INTERFACES_DIR = __dirname.replace(/\\/g, '/').replace(/\/dist\//, '/');
 

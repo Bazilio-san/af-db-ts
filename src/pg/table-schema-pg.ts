@@ -5,6 +5,7 @@ import { graceExit } from '../common';
 import { IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } from '../@types/i-pg';
 import { schemaTable } from '../utils/utils';
 import { TDBRecord } from '../@types/i-common';
+import { TUdtNamesPg } from "../@types/i-data-types-pg";
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
 // schemaAndTablePg: "<schema>"."<table>" :  "Staff"."nnPersones-personGuid"
@@ -42,7 +43,8 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
       precision: fieldDef.numeric_precision,
       radix: fieldDef.numeric_precision_radix,
       dtPrecision: fieldDef.datetime_precision,
-      udtName: fieldDef.udt_name,
+      // Для dataType = ARRAY тут содержится тип элементов массива
+      udtName: fieldDef.udt_name as TUdtNamesPg,
       readOnly: fieldDef.is_generated === 'ALWAYS', // boolean;
     };
     Object.entries(fieldSchema).forEach(([prop, value]) => {
@@ -58,11 +60,11 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
 const getPrimaryKey = async (connectionId: string, commonSchemaAndTable: string): Promise<string[]> => {
   const schemaTablePg = schemaTable.to.pg(commonSchemaAndTable);
   const sql = `
-      SELECT a.attname as f
-      FROM pg_index i
-               JOIN pg_attribute a
-                    ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
-      WHERE i.indrelid = '${schemaTablePg}'::regclass
+    SELECT a.attname as f
+    FROM pg_index i
+           JOIN pg_attribute a
+                ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
+    WHERE i.indrelid = '${schemaTablePg}'::regclass
     AND i.indisprimary;`;
   const result = await queryPg(connectionId, sql);
 
@@ -73,25 +75,25 @@ const getUniqueConstraints = async (connectionId: string, commonSchemaAndTable: 
   const schemaTablePg = schemaTable.to.pg(commonSchemaAndTable);
   const [schema, table] = schemaTable.to.common(commonSchemaAndTable).split('.');
   const sql = `
-      SELECT UI.cn as cn, UI.cols as cols, CASE WHEN UC.cn IS NULL THEN 'UX' ELSE 'UC' END AS typ
-      FROM (SELECT c.relname as cn, array_to_json(array_agg(a.attname ORDER BY a.attname)) AS cols
-            FROM pg_index i
-                     JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
-                     JOIN pg_class AS c ON c.oid = i.indexrelid
-            WHERE i.indrelid = '${schemaTablePg}'::regclass
+    SELECT UI.cn as cn, UI.cols as cols, CASE WHEN UC.cn IS NULL THEN 'UX' ELSE 'UC' END AS typ
+    FROM (SELECT c.relname as cn, array_to_json(array_agg(a.attname ORDER BY a.attname)) AS cols
+          FROM pg_index i
+                 JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
+                 JOIN pg_class AS c ON c.oid = i.indexrelid
+          WHERE i.indrelid = '${schemaTablePg}'::regclass
               AND i.indisunique
               AND NOT i.indisprimary
-            GROUP BY c.relname) AS UI
-               LEFT OUTER JOIN (SELECT ccu.constraint_name AS cn
-                                FROM information_schema.table_constraints tc
-                                         JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)
-                                         JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
-                                    AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
-                                WHERE tc.table_schema = '${schema}'
-                                  AND tc.table_name = '${table}'
-                                  AND tc.constraint_type = 'UNIQUE'
-                                GROUP BY ccu.constraint_name) AS UC ON UC.cn = UI.cn
-      ORDER BY CASE WHEN UC.cn IS NULL THEN 2 ELSE 1 END
+          GROUP BY c.relname) AS UI
+           LEFT OUTER JOIN (SELECT ccu.constraint_name AS cn
+                            FROM information_schema.table_constraints tc
+                                   JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)
+                                   JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
+                              AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
+                            WHERE tc.table_schema = '${schema}'
+                              AND tc.table_name = '${table}'
+                              AND tc.constraint_type = 'UNIQUE'
+                            GROUP BY ccu.constraint_name) AS UC ON UC.cn = UI.cn
+    ORDER BY CASE WHEN UC.cn IS NULL THEN 2 ELSE 1 END
   `;
   const result = await queryPg(connectionId, sql);
   const uc: TUniqueConstraintsPg = {};
@@ -104,22 +106,22 @@ const getUniqueConstraints = async (connectionId: string, commonSchemaAndTable: 
 const getSerials = async (connectionId: string, commonSchemaAndTable: string): Promise<string[]> => {
   const fqName = schemaTable.to.common(commonSchemaAndTable);
   const sql = `
-      WITH fq_objects AS (SELECT c.oid,
-                                 n.nspname || '.' || c.relname AS fqname,
-                                 c.relkind,
-                                 c.relname                     AS relation
-                          FROM pg_class c
-                                   JOIN pg_namespace n ON n.oid = c.relnamespace),
-           sequences AS (SELECT oid, fqname FROM fq_objects WHERE relkind = 'S'),
-           tables AS (SELECT oid, fqname FROM fq_objects WHERE relkind = 'r')
-      SELECT t.fqname AS tbl, array_to_json(array_agg(a.attname ORDER BY a.attname)) AS cols
-      FROM pg_depend d
-               JOIN sequences s ON s.oid = d.objid
-               JOIN tables t ON t.oid = d.refobjid
-               JOIN pg_attribute a ON a.attrelid = d.refobjid and a.attnum = d.refobjsubid
-      WHERE d.deptype = 'a'
-        AND t.fqname = '${fqName}'
-      GROUP BY t.fqname
+    WITH fq_objects AS (SELECT c.oid,
+                               n.nspname || '.' || c.relname AS fqname,
+                               c.relkind,
+                               c.relname                     AS relation
+                        FROM pg_class c
+                               JOIN pg_namespace n ON n.oid = c.relnamespace),
+         sequences AS (SELECT oid, fqname FROM fq_objects WHERE relkind = 'S'),
+         tables AS (SELECT oid, fqname FROM fq_objects WHERE relkind = 'r')
+    SELECT t.fqname AS tbl, array_to_json(array_agg(a.attname ORDER BY a.attname)) AS cols
+    FROM pg_depend d
+           JOIN sequences s ON s.oid = d.objid
+           JOIN tables t ON t.oid = d.refobjid
+           JOIN pg_attribute a ON a.attrelid = d.refobjid and a.attnum = d.refobjsubid
+    WHERE d.deptype = 'a'
+      AND t.fqname = '${fqName}'
+    GROUP BY t.fqname
   `;
   const result = await queryPg(connectionId, sql);
   return result?.rows?.[0]?.cols || [];

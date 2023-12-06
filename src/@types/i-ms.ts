@@ -6,8 +6,10 @@ import { TDataTypeMs } from './i-data-types-ms';
  * Метаинформация о поле БД
  */
 export interface IFieldDefMs extends IFieldDef {
+  dataType?: TDataTypeMs,
+
   octetLength?: number,
-  scale?: number,
+  scale?: number, // VVQ
   charSetName?: string,
   collation?: string,
   caseSensitive?: boolean, // VVQ
@@ -17,7 +19,6 @@ export interface IFieldDefMs extends IFieldDef {
 
   /* Дополнительные свойства */
   escapeOnlySingleQuotes?: boolean,
-  dataType?: TDataTypeMs,
 }
 
 export interface TColumnsSchemaMs { // ранее TRecordSchemaAssocMs

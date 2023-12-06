@@ -1,5 +1,3 @@
-import { DateTimeOptions } from 'luxon';
-
 export type IDialect = 'mssql' | 'pg';
 
 /**
@@ -59,16 +57,20 @@ export interface IFieldDef {
   isNullable?: boolean,
   length?: number,
   dataType?: any, // type
+
   precision?: number,
   radix?: number,
+
   dtPrecision?: number,
+
+  columnDefault?: string | number | boolean,
   hasDefault?: boolean,
+
+  udtName?: string,
+  readOnly?: boolean,
 
   /* Дополнительные свойства */
   inputDateFormat?: string,
   dateTimeOptions?: IDateTimeOptionsEx,
-  readOnly?: boolean,
-  udtName?: string,
-  columnDefault?: string | number | boolean,
   noQuotes?: boolean,
 }

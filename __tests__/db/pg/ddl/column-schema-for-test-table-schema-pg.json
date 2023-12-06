@@ -32,6 +32,16 @@
     "udtName": "int4",
     "readOnly": false
   },
+  "i2": {
+    "dataType": "integer",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "i2",
+    "precision": 32,
+    "radix": 2,
+    "readOnly": false,
+    "udtName": "int4"
+  },
   "si1": {
     "name": "si1",
     "isNullable": false,
@@ -47,7 +57,7 @@
     "isNullable": false,
     "hasDefault": false,
     "dataType": "character varying",
-    "length": 20,
+    "length": 10,
     "udtName": "varchar",
     "readOnly": false
   },
@@ -57,7 +67,7 @@
     "columnDefault": "CURRENT_TIMESTAMP",
     "hasDefault": true,
     "dataType": "timestamp with time zone",
-    "dtPrecision": 6,
+    "dtPrecision": 5,
     "udtName": "timestamptz",
     "readOnly": false
   },
@@ -71,12 +81,29 @@
     "readOnly": false
   },
   "bool1": {
+    "columnDefault": "true",
     "name": "bool1",
     "isNullable": false,
     "hasDefault": true,
     "dataType": "boolean",
     "udtName": "bool",
     "readOnly": false
+  },
+  "arr_int": {
+    "dataType": "ARRAY",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "arr_int",
+    "readOnly": false,
+    "udtName": "_int4"
+  },
+  "arr_str": {
+    "dataType": "ARRAY",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "arr_str",
+    "readOnly": false,
+    "udtName": "_varchar"
   },
   "bool2": {
     "name": "bool2",

@@ -5,8 +5,34 @@ import { echo } from 'af-echo-ts';
 import { IFieldDefPg } from '../@types/i-pg';
 import { getTableSchemaPg } from './table-schema-pg';
 import { closeAllPgConnectionsPg } from './pool-pg';
+import { TUdtNamesPg } from '../@types/i-data-types-pg';
 
-const getJsTypeByFieldDef = (fieldDef: IFieldDefPg): string => {
+export const getJsTypeByUdtNamePg = (udtName?: TUdtNamesPg): string => {
+  switch (udtName) {
+    case '_int2':
+    case '_int4':
+    case '_int8':
+    case '_float8':
+    case '_float4':
+    case '_numeric':
+    case '_money':
+      return 'number';
+    case '_text':
+    case '_varchar':
+      return 'string';
+    case '_bool':
+      return 'boolean';
+    case '_time':
+    case '_date':
+    case '_timestamp':
+    case '_timestamptz':
+      return '(string | Date | number)';
+    default:
+      return 'any';
+  }
+};
+
+export const getJsTypeByFieldDefPg = (fieldDef: IFieldDefPg): string => {
   switch (fieldDef.dataType) {
     case 'boolean':
       return 'boolean';
@@ -32,28 +58,8 @@ const getJsTypeByFieldDef = (fieldDef: IFieldDefPg): string => {
     case 'USER_DEFINED':
       return 'string';
     case 'ARRAY': {
-      switch (fieldDef.udtName) {
-        case '_int2':
-        case '_int4':
-        case '_int8':
-        case '_float8':
-        case '_float4':
-        case '_numeric':
-        case '_money':
-          return 'number[]';
-        case '_text':
-        case '_varchar':
-          return 'string[]';
-        case '_bool':
-          return 'boolean[]';
-        case '_time':
-        case '_date':
-        case '_timestamp':
-        case '_timestamptz':
-          return '(string | Date | number)[]';
-        default:
-          return 'any[]';
-      }
+      const jsType = getJsTypeByUdtNamePg(fieldDef.udtName);
+      return `${jsType}[]`;
     }
     default:
       return 'string';
@@ -62,7 +68,7 @@ const getJsTypeByFieldDef = (fieldDef: IFieldDefPg): string => {
 
 const getFieldDefinition = (
   d: IFieldDefPg,
-): string => `${d.name}${d.isNullable || d.hasDefault ? '?' : ''}: ${getJsTypeByFieldDef(d)}${d.isNullable ? ' | null' : ''}`;
+): string => `${d.name}${d.isNullable || d.hasDefault ? '?' : ''}: ${getJsTypeByFieldDefPg(d)}${d.isNullable ? ' | null' : ''}`;
 
 const TABLE_INTERFACES_DIR = __dirname.replace(/\\/g, '/').replace(/\/dist\//, '/');
 

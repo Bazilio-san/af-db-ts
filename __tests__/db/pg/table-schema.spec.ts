@@ -56,6 +56,8 @@ describe('getTableSchemaPg()', () => {
       'time1',
       'bool1',
       'bool2',
+      'arr_int',
+      'arr_str',
       'gen1',
     ]);
   });
@@ -69,13 +71,15 @@ describe('getTableSchemaPg()', () => {
       'time1',
       'bool1',
       'bool2',
+      'arr_int',
+      'arr_str',
     ]);
   });
   test('serialsFields', async () => {
     expect(tableSchema.serialsFields).toEqual(['ser1', 'ser2']);
   });
   test('columnsSchema', async () => {
-    const json = JSON.parse(JSON.stringify(tableSchema.columnsSchema));
+    const json = JSON.parse(JSON.stringify(columnsSchema));
     expect(tableSchema.columnsSchema).toStrictEqual(json);
   });
 });

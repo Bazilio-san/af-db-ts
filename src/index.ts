@@ -53,6 +53,7 @@ export {
 export {
   genTableInterfaceMs,
   genTableInterfacesMs,
+  getJsTypeByFieldDefMs,
 } from './ms/gen-table-interfaces-ms';
 
 export { getInsertSqlMs } from './ms/get-sql/insert';
@@ -97,11 +98,13 @@ export {
   IPoolClientPg,
 } from './@types/i-pg';
 
-export { TDataTypePg } from './@types/i-data-types-pg';
+export { TDataTypePg, TUdtNamesPg } from './@types/i-data-types-pg';
 
 export {
   genTableInterfacePg,
   genTableInterfacesPg,
+  getJsTypeByUdtNamePg,
+  getJsTypeByFieldDefPg,
 } from './pg/gen-table-interfaces-pg';
 
 export { getInsertSqlPg } from './pg/get-sql/insert';

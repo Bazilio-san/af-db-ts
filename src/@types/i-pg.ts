@@ -1,9 +1,10 @@
 import { Pool, PoolClient } from 'pg';
 import { IFieldDef, TFieldName } from './i-common';
-import { TDataTypePg } from './i-data-types-pg';
+import { TDataTypePg, TUdtNamesPg } from './i-data-types-pg';
 
 export interface IFieldDefPg extends IFieldDef {
   dataType?: TDataTypePg,
+  udtName?: TUdtNamesPg,
 }
 
 export interface TColumnsSchemaPg {

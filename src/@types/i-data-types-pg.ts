@@ -27,3 +27,19 @@ export type TDataTypePg =
 
   'ARRAY' |
   'USER_DEFINED'
+
+export type TUdtNamesPg =
+  '_int2' |
+  '_int4' |
+  '_int8' |
+  '_float8' |
+  '_float4' |
+  '_numeric' |
+  '_money' |
+  '_text' |
+  '_varchar' |
+  '_bool' |
+  '_time' |
+  '_date' |
+  '_timestamp' |
+  '_timestamptz'

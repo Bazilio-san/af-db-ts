@@ -9,5 +9,7 @@ export interface ITestTableSchemaRecord {
   time1: string,
   bool1?: boolean,
   bool2?: boolean | null,
+  arr_int?: number[] | null,
+  arr_str?: string[] | null,
   gen1?: number | null,
 }
