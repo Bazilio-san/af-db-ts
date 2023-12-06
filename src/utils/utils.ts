@@ -1,7 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 
-import { NULL } from "../common";
-import { quoteStringPg } from "../pg/prepare-value";
+import { NULL } from '../common';
 
 const toSchemaTableCommon = (s: string): string => s.replace(/["[\]]/g, '');
 const toSchemaTableSpec = (s: string, dbType: 'mssql' | 'ms' | 'pg'): string => {
@@ -54,3 +53,12 @@ export const prepareJSON = (value: any): string | typeof NULL => {
 };
 
 export const binToHexString = (value: any) => (value ? `0x${value.toString('hex').toUpperCase()}` : null);
+
+export const prepareUUID = (v: any, toLower: boolean = false, noQuotes: boolean = false): string | typeof NULL => {
+  if (v && typeof v === 'string' && /^[A-F\d]{8}(-[A-F\d]{4}){4}[A-F\d]{8}/i.test(v)) {
+    v = v.substring(0, 36);
+    v = toLower ? v.toLowerCase() : v.toUpperCase();
+    return q(v, noQuotes);
+  }
+  return NULL;
+};

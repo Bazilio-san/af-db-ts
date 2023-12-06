@@ -108,12 +108,3 @@ export const getDatetimeWithPrecisionAndOffset = (value: any, fieldDef: IFieldDe
   const str = `${iso}${dotMillis}${offset}`;
   return q(str, fieldDef.noQuotes);
 };
-
-export const prepareUUID = (v: any, toLower: boolean = false, noQuotes: boolean = false): string | typeof NULL => {
-  if (v && typeof v === 'string' && /^[A-F\d]{8}(-[A-F\d]{4}){4}[A-F\d]{8}/i.test(v)) {
-    v = v.substring(0, 36);
-    v = toLower ? v.toLowerCase() : v.toUpperCase();
-    return q(v, noQuotes);
-  }
-  return NULL;
-};

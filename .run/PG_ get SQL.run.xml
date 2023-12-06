@@ -4,7 +4,9 @@
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$" />
     <jest-options value="--runInBand --detectOpenHandles --forceExit" />
-    <envs />
+    <envs>
+      <env name="TZ" value="Europe/Moscow" />
+    </envs>
     <scope-kind value="TEST_FILE" />
     <test-file value="$PROJECT_DIR$/__tests__/db/pg/get-sql.spec.ts" />
     <method v="2" />

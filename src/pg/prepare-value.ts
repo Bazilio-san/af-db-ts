@@ -3,10 +3,10 @@ import { DateTime } from 'luxon';
 import { getBool } from 'af-tools-ts';
 import { IFieldDefPg } from '../@types/i-pg';
 import { NULL } from '../common';
-import { dateTimeValue, getDatetimeWithPrecisionAndOffset, prepareUUID } from '../utils/utils-dt';
+import { dateTimeValue, getDatetimeWithPrecisionAndOffset } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
 import { IFieldDef } from '../@types/i-common';
-import { binToHexString, prepareJSON, q } from '../utils/utils';
+import { binToHexString, prepareJSON, prepareUUID, q } from '../utils/utils';
 import { arrayToJsonList } from '../utils/utils-array';
 
 export const quoteStringPg = (value: string): string => {
@@ -41,7 +41,7 @@ const prepareJsonPg = (value: any, dataType: 'json' | 'jsonb'): string | typeof 
   if (v === NULL) {
     return NULL;
   }
-  return `${quoteStringPg(v)}::${dataType}`; // VVQ
+  return `${quoteStringPg(v)}::${dataType}`;
 };
 
 export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): any => {
@@ -52,7 +52,7 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
   const fieldDefWithNoQuotes = { ...fieldDef, noQuotes: true };
 
   let v = value;
-  const { length = 0, noQuotes, dataType } = fieldDef;
+  const { noQuotes, dataType } = fieldDef;
 
   switch (dataType) {
     case 'bool':
@@ -118,7 +118,8 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
       if (v === NULL) {
         return NULL;
       }
-      return fieldDef.noQuotes ? quoteStringPg(v) : v;
+      v = `{${v}}`;
+      return fieldDef.noQuotes ? v : quoteStringPg(v);
     }
     // 'USER_DEFINED'
     default:

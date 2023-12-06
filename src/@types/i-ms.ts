@@ -15,7 +15,7 @@ export interface IFieldDefMs extends IFieldDef {
   caseSensitive?: boolean, // VVQ
 
   identity?: boolean,
-  arrayType?: any,
+  arrayType?: TDataTypeMs,
 
   /* Дополнительные свойства */
   escapeOnlySingleQuotes?: boolean,

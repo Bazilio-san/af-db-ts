@@ -608,21 +608,30 @@ describe('prepare sql value MS', () => {
 
   describe('array', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
-      [[1, '2', 'a', '', null], `'[1,2,null,null,null]'`, { arrayType: 'int' }],
       [null, 'null'],
       [undefined, 'null'],
-      ['', `'[]'`],
-      [[1, '2', 'a', '', null], `'["1","2","a","",null]'`, { arrayType: 'string' }],
-      [{ a: 1, b: '2' }, `'[]'`],
+
+      [1, 'null'],
+      [0, 'null'],
+      [false, 'null'],
+      [true, 'null'],
+      ['', 'null'],
+      [{ a: 1, b: '2' }, 'null'],
+
       [[], `'[]'`],
-      [1, `'[]'`],
-      [0, `'[]'`],
+      [[1, '2', 'a', '', true, false, null], `'[1,"2","a","",true,false,null]'`],
+      [[1, '2', 'a', '', null], `'[1,2,null,null,null]'`, { arrayType: 'int' }],
+      [[1, 0, true, false, '2', 'a', '', null], `'[true,false,true,false,false,false,false,null]'`, { arrayType: 'boolean' }],
+      [[1, 0, true, false, '2', 'a', '', null], `'[1,0,1,0,0,0,0,null]'`, { arrayType: sql.Bit }],
+      [[1, 0, 444444444, -55555555, '2', 'a', '', null], `'[1,0,32767,-32768,2,null,null,null]'`, { arrayType: 'smallint' }],
+      [['edacd531-c762-45bb-b5d1-01d49219bbfd', 'ddd', null], `'["EDACD531-C762-45BB-B5D1-01D49219BBFD",null,null]'`, { arrayType: 'uniqueIdentifier' }],
+
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'array' as TDataTypeMs };
       const dateStrOut = prepareSqlValueMs({ value, fieldDef });
-      let v = Array.isArray(dateStrOut) ? `[${dateStrOut.join(', ')}]` : dateStrOut;
+      let v = Array.isArray(value) ? `[${value.join(', ')}]` : value;
       v = fDev.arrayType ? `${v} / arrayType: ${fDev.arrayType}` : v;
       test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);

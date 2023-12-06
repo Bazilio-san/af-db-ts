@@ -534,20 +534,25 @@ describe('prepare sql value PG', () => {
     const testArr: [any, string, IFieldDefPg?][] = [
       [null, 'null'],
       [undefined, 'null'],
-      ['', 'null'],
+
       [1, 'null'],
       [0, 'null'],
+      [false, 'null'],
+      [true, 'null'],
+      ['', 'null'],
       [{ a: 1, b: '2' }, 'null'],
+
+      [[], `'{}'`],
 
       [[1, '2', 'a', '', null], `'{1,2,null,null,null}'`, { udtName: '_int4' }],
       [[1, '2', 'a', '', null], `'{"1","2","a","",null}'`, { udtName: '_varchar' }],
-      [[], `'{}'`],
+      [[1, 0, '2', 'a', '', true, false, null], `'{true,false,true,false,true, false,null}'`, { udtName: '_bool' }],
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
-      const fieldDef = { ...fDev, dataType: 'array' as TDataTypePg };
+      const fieldDef = { ...fDev, dataType: 'ARRAY' as TDataTypePg };
       const dateStrOut = prepareSqlValuePg({ value, fieldDef });
-      let v = Array.isArray(dateStrOut) ? `[${dateStrOut.join(', ')}]` : dateStrOut;
+      let v = Array.isArray(value) ? `[${value.join(', ')}]` : value;
       v = fDev.udtName ? `${v} / udtName: ${fDev.udtName}` : v;
       test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
