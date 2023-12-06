@@ -19,16 +19,27 @@ export {
   IDbOptionsMs,
 } from './@types/i-config';
 
-export { closeAllDb, graceExit, logSqlError } from './common';
+export {
+  closeAllDb,
+  graceExit,
+  logSqlError,
+} from './common';
 
 export { setLogger } from './logger-error';
 
-export { schemaTable } from './utils/utils';
+export {
+  schemaTable,
+  prepareJSON,
+  binToHexString,
+  removePairBrackets,
+  q,
+} from './utils/utils';
 
 export {
   getLuxonDT,
   getTypeOfDateInput,
   dateTimeValue,
+  getDatetimeWithPrecisionAndOffset,
 } from './utils/utils-dt';
 
 export {

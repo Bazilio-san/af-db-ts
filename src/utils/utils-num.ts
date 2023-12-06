@@ -45,11 +45,38 @@ export const parseIntNumber = (value: any, min: number, max: number): number | t
   return Math.floor(v);
 };
 
-export const prepareIntNumber = (value: any, min: number, max: number): string | typeof NULL => `${parseIntNumber(value, min, max)}`;
+export const parseIntNumberS = (
+  value: any,
+  type: 'tinyint' |
+    'smallint' | '_int2' |
+    'int' | 'integer' | '_int4' |
+    'bigint' | '_int8',
+): number | typeof NULL => {
+  switch (type) {
+    case 'tinyint':
+      return parseIntNumber(value, 0, 255);
+    case 'smallint':
+    case '_int2':
+      return parseIntNumber(value, -32768, 32767);
+    case 'int':
+    case 'integer':
+    case '_int4':
+      return parseIntNumber(value, -2147483648, 2147483647);
+    case 'bigint':
+    case '_int8':
+      return parseIntNumber(value, -2147483648, 2147483647);
+    default:
+      return parseIntNumber(value, -2147483648, 2147483647);
+  }
+};
 
-// return prepareBigIntNumber(value, -9223372036854775808, 9223372036854775807);
+export const prepareIntNumber = (
+  value: any,
+  min: number,
+  max: number,
+): string | typeof NULL => `${parseIntNumber(value, min, max)}`;
 
-export const prepareBigIntNumber = (value: any): string | typeof NULL => { // VVT
+export const prepareBigIntNumber = (value: any): string | typeof NULL => {
   if (value == null) {
     return NULL;
   }

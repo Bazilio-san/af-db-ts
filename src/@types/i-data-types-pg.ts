@@ -9,6 +9,9 @@ export type TDataTypePg =
 
   'numeric' |
   'real' |
+  'decimal' | // VVQ
+  'money' | // VVQ
+  'double_precision' | // VVQ
 
   'json' |
   'jsonb' |
@@ -19,6 +22,8 @@ export type TDataTypePg =
   'text' |
 
   'uuid' |
+
+  'bytea' | // VVQ
 
   'timestamptz' |
   'timestamp' |

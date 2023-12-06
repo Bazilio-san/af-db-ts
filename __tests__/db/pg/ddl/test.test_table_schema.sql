@@ -15,6 +15,13 @@ CREATE TABLE IF NOT EXISTS test.table_schema
   bool2     boolean     default FALSE,
   arr_int   int[],
   arr_str   varchar[],
+  "decimal" decimal,
+  "numeric" numeric(7,5),
+  "money" money,
+  "real" real,
+  "double_precision" double precision,
+  "bytea" bytea,
+
   gen1 numeric GENERATED ALWAYS AS (i1 / 2.54) STORED,
   constraint pk__test__fable_schema primary key (i1, si1),
   constraint ux__test__fable_schema__vc_tz unique (vc1, dtz1)

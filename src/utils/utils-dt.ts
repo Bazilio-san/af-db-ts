@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 import { IFieldDefMs } from '../@types/i-ms';
 import { IFieldDefPg } from '../@types/i-pg';
-import { IFieldDef } from "../@types/i-common";
-import { NULL } from "../common";
-import { q } from "./utils";
+import { IFieldDef } from '../@types/i-common';
+import { NULL } from '../common';
+import { q } from './utils';
 
 export const getTypeOfDateInput = (v: any): 'string' | 'number' | 'date' | 'luxon' | 'moment' | 'any' | 'null' => {
   const type = typeof v;
@@ -47,7 +47,10 @@ export const getLuxonDT = (value: any, fieldDef: IFieldDefMs | IFieldDefPg): Dat
     if (inputDateFormat) {
       dt = DateTime.fromFormat(v, inputDateFormat, zoneOpts);
     } else {
-      v = v.replace(/^(\d{4}-\d\d-\d\d) (\d)/, '$1T$2');
+      v = v
+        .replace(/^(\d{4}-\d\d-\d\d) (\d)/, '$1T$2')
+        .replace(/(\d) +Z/, '$1Z')
+        .replace(/(\d) +([+-])/, '$1$2');
       dt = DateTime.fromISO(v, zoneOpts);
     }
     millis = dt.isValid ? dt.toMillis() : null;
@@ -76,4 +79,41 @@ export const dateTimeValue = (value: any, fieldDef: IFieldDef, fn: Function): st
   }
   const v = fn(luxonDate);
   return q(v, fieldDef.noQuotes);
+};
+
+export const getDatetimeWithPrecisionAndOffset = (value: any, fieldDef: IFieldDef, defaultDtPrecision: number = 3): string | typeof NULL => {
+  const dt = getLuxonDT(value, fieldDef);
+  if (!dt) {
+    return NULL;
+  }
+  const isoZ = dt.toISO({ includeOffset: true }) || ''; // 2000-01-22T14:59:59.123+03:00
+  const iso = isoZ.substring(0, 19); // 2000-01-22T14:59:59
+
+  // Миллисекунды
+  let sss = '';
+  if (typeof value === 'string') {
+    // Если во входных данных строка с миллисекундами, то берем их с той же точностью.
+    const re = /\.(\d+)(?=[^.]*$)/;
+    const [, fracSeconds = ''] = re.exec(value) || [];
+    sss = `${fracSeconds}0000000`.substring(0, 7);
+  } else {
+    sss = `${isoZ.substring(20, 23)}0000`;
+  }
+  const dtPrecision = fieldDef.dtPrecision == null ? defaultDtPrecision : fieldDef.dtPrecision;
+  const dotMillis = !dtPrecision ? '' : `.${sss}`.substring(0, dtPrecision + 1);
+
+  const { includeOffset = true } = fieldDef.dateTimeOptions || {};
+  const offset = includeOffset ? isoZ.substring(23, isoZ.length) : ''; // +03:00
+
+  const str = `${iso}${dotMillis}${offset}`;
+  return q(str, fieldDef.noQuotes);
+};
+
+export const prepareUUID = (v: any, toLower: boolean = false, noQuotes: boolean = false): string | typeof NULL => {
+  if (v && typeof v === 'string' && /^[A-F\d]{8}(-[A-F\d]{4}){4}[A-F\d]{8}/i.test(v)) {
+    v = v.substring(0, 36);
+    v = toLower ? v.toLowerCase() : v.toUpperCase();
+    return q(v, noQuotes);
+  }
+  return NULL;
 };

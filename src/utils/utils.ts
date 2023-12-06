@@ -1,5 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 
+import { NULL } from "../common";
+import { quoteStringPg } from "../pg/prepare-value";
+
 const toSchemaTableCommon = (s: string): string => s.replace(/["[\]]/g, '');
 const toSchemaTableSpec = (s: string, dbType: 'mssql' | 'ms' | 'pg'): string => {
   const [schema, table] = toSchemaTableCommon(s).split('.');
@@ -37,3 +40,17 @@ export const removePairBrackets = (s: string): string => {
  * Оборачивает строку в одинарные кавычки, если второй аргумент не true
  */
 export const q = (val: string, noQuotes?: boolean): string => (noQuotes ? val : `'${val}'`);
+
+export const prepareJSON = (value: any): string | typeof NULL => {
+  if (value == null) {
+    return NULL;
+  }
+  try {
+    value = JSON.stringify(value);
+  } catch (err) {
+    return NULL;
+  }
+  return value;
+};
+
+export const binToHexString = (value: any) => (value ? `0x${value.toString('hex').toUpperCase()}` : null);

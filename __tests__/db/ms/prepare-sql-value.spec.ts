@@ -4,11 +4,11 @@
 // "America/Toronto"  -05:00
 // "Europe/Berlin"    +01:00
 // "Europe/Moscow"    +03:00
+// "Etc/Universal"    +00:00
 
 import * as sql from 'mssql';
 import { DateTime } from 'luxon';
-import { IFieldDefMs, prepareSqlValueMs } from '../../../src';
-import { TDataTypeMs } from '../../../src/@types/i-data-types-ms';
+import { IFieldDefMs, prepareSqlValueMs, TDataTypeMs } from '../../../src';
 
 const valuesAs0: [any, any][] = [
   ['0', '0'],
@@ -46,6 +46,12 @@ const valuesAsNull: [any, any][] = [
 ];
 
 describe('prepare sql value MS', () => {
+  describe('time zone', () => {
+    test(`Node time zone should be Europe/Moscow`, () => {
+      expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe('Europe/Moscow');
+    });
+  });
+
   describe('boolean', () => {
     const testArr: [any, any][] = [
       [null, 'null'],
@@ -242,14 +248,19 @@ describe('prepare sql value MS', () => {
     const testArr: [any, any][] = [
       [null, 'null'],
       [undefined, 'null'],
-      ['', `''`],
-      ['{{}}', `'{{}}'`],
-      [{ a: 1, b: '2' }, `'{"a":1,"b":"2"}'`],
-      [[], `'[]'`],
-      [[1, 'f'], `'[1,"f"]'`],
+
+      ['', `'""'`],
+      ['ffff', `'"ffff"'`],
+      ['0', `'"0"'`],
+      ['{{}}', `'"{{}}"'`],
+
+      [true, `'true'`],
       [-1.2, `'-1.2'`],
-      ['0123', `'0123'`],
       [1, `'1'`],
+
+      [[], `'[]'`],
+      [[1, 'f', true, null], `'[1,"f",true,null]'`],
+      [{ a: 1, b: '2', c: false }, `'{"a":1,"b":"2","c":false}'`],
     ];
 
     testArr.forEach((caseValues) => {
@@ -326,6 +337,10 @@ describe('prepare sql value MS', () => {
       ['2000-01-22T11:59:59', `'2000-01-22T11:59:59.000'`],
       ['2000-01-22T11:59', `'2000-01-22T11:59:00.000'`],
 
+      ['2000-01-22 11:59:59.123Z', `'2000-01-22T14:59:59.123'`],
+      ['2000-01-22 11:59:59.123 Z', `'2000-01-22T14:59:59.123'`],
+      ['2000-01-22 11:59:59.123+03:00', `'2000-01-22T11:59:59.123'`],
+      ['2000-01-22 11:59:59.123 +03:00', `'2000-01-22T11:59:59.123'`],
       ['2000-01-22 11:59:59.123', `'2000-01-22T11:59:59.123'`],
       ['2000-01-22 11:59:59.12', `'2000-01-22T11:59:59.120'`],
       ['2000-01-22 11:59:59.1', `'2000-01-22T11:59:59.100'`],
@@ -593,21 +608,23 @@ describe('prepare sql value MS', () => {
 
   describe('array', () => {
     const testArr: [any, string, IFieldDefMs?][] = [
+      [[1, '2', 'a', '', null], `'[1,2,null,null,null]'`, { arrayType: 'int' }],
       [null, 'null'],
       [undefined, 'null'],
-      ['', `'{}'`],
-      [[1, '2', 'a', '', null], `'{1,2,null,null,null}'`, { arrayType: 'int' }],
-      [[1, '2', 'a', '', null], `'{"1","2","a","",null}'`, { arrayType: 'string' }],
-      [{ a: 1, b: '2' }, `'{}'`],
-      [[], `'{}'`],
-      [1, `'{}'`],
-      [0, `'{}'`],
+      ['', `'[]'`],
+      [[1, '2', 'a', '', null], `'["1","2","a","",null]'`, { arrayType: 'string' }],
+      [{ a: 1, b: '2' }, `'[]'`],
+      [[], `'[]'`],
+      [1, `'[]'`],
+      [0, `'[]'`],
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'array' as TDataTypeMs };
       const dateStrOut = prepareSqlValueMs({ value, fieldDef });
-      test(`${value} --> ${dateStrOut}`, () => {
+      let v = Array.isArray(dateStrOut) ? `[${dateStrOut.join(', ')}]` : dateStrOut;
+      v = fDev.arrayType ? `${v} / arrayType: ${fDev.arrayType}` : v;
+      test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
       });
     });

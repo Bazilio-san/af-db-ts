@@ -1,15 +1,27 @@
 // noinspection SqlResolve
 import { DateTime } from 'luxon';
-import { echo } from 'af-echo-ts';
 import { getBool } from 'af-tools-ts';
 import * as sql from 'mssql';
 import { IFieldDefMs } from '../@types/i-ms';
-import { q } from '../utils/utils';
-import { dateTimeValue, getLuxonDT } from '../utils/utils-dt';
-import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
+import { binToHexString, prepareJSON, q } from '../utils/utils';
+import { dateTimeValue, getDatetimeWithPrecisionAndOffset, prepareUUID } from '../utils/utils-dt';
+import { parseIntNumberS, prepareBigIntNumber, prepareFloatNumber } from '../utils/utils-num';
 import { NULL } from '../common';
-import { IFieldDef } from '../@types/i-common';
 import { TDataTypeMs } from '../@types/i-data-types-ms';
+import { IFieldDef } from '../@types/i-common';
+import { arrayToJsonList } from '../utils/utils-array';
+
+export const escapeStringMs = (value: any, escapeOnlySingleQuotes: boolean = false): string | typeof NULL => {
+  if (value == null) {
+    return NULL;
+  }
+  let v = String(value);
+  v = v.replace(/'/g, `''`);
+  if (!escapeOnlySingleQuotes) {
+    v = v.replace(/%/g, '%%');
+  }
+  return v;
+};
 
 /**
  * Подготовка строки для передачи в SQL
@@ -18,11 +30,7 @@ export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | 
   if (value == null) {
     return NULL;
   }
-  let v = String(value);
-  v = v.replace(/'/g, `''`);
-  if (!fieldDef.escapeOnlySingleQuotes) {
-    v = v.replace(/%/g, '%%');
-  }
+  let v = escapeStringMs(value, fieldDef.escapeOnlySingleQuotes);
   const { length = 0, noQuotes } = fieldDef;
   if (length > 0 && v.length > length) {
     v = v.substring(0, length);
@@ -30,80 +38,17 @@ export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | 
   return q(v, noQuotes);
 };
 
-const prepareDatetimeOffset = (value: any, fieldDef: IFieldDefMs): string | 'null' => {
-  const dt = getLuxonDT(value, fieldDef);
-  if (!dt) {
-    return NULL;
-  }
-  // В зависимости от fieldDef.dateTimeOptions.setZone строка будет в
-  // соответствующем поясе. По умолчанию - в локальном.
-  const isoZ = dt.toISO({ includeOffset: true }) || ''; // 2000-01-22T14:59:59.123+03:00
-  const iso = isoZ.substring(0, 19); // 2000-01-22T14:59:59
-
-  // Миллисекунды
-  let sss = '';
-  if (typeof value === 'string') {
-    // Если во входных данных строка с миллисекундами, то берем их с той же точностью.
-    const re = /\.(\d+)(?=[^.]*$)/;
-    const [, fracSeconds = ''] = re.exec(value) || [];
-    sss = `${fracSeconds}0000000`.substring(0, 7);
-  } else {
-    sss = `${isoZ.substring(20, 23)}0000`;
-  }
-  const dtPrecision = fieldDef.dtPrecision == null ? 3 : fieldDef.dtPrecision;
-  const dotMillis = !dtPrecision ? '' : `.${sss}`.substring(0, dtPrecision + 1);
-
-  const { includeOffset = true } = fieldDef.dateTimeOptions || {};
-  const offset = includeOffset ? isoZ.substring(23, isoZ.length) : ''; // +03:00
-
-  const str = `${iso}${dotMillis}${offset}`;
-  return q(str, fieldDef.noQuotes);
-};
-
-const functionRef = `(${__filename}::prepareSqlValueMs())`;
-
-const binToHexString = (value: any) => (value ? `0x${value.toString('hex').toUpperCase()}` : null);
-
-const parseArray = (value: any, fieldDef: IFieldDefMs): string | typeof NULL => {
-  if (value == null) {
-    return NULL;
-  }
-  const { arrayType } = fieldDef;
-  let arr: any[] = [];
-  if (Array.isArray(value) && value.length) {
-    switch (arrayType) {
-      case 'int':
-      case 'integer':
-        arr = value.map((v) => prepareIntNumber(v, -2147483648, 2147483647));
-        break;
-      default: // + case 'string'
-        arr = value.map((v) => {
-          if (v === '') {
-            return '';
-          }
-          if (v == null) {
-            return null;
-          }
-          return prepareSqlStringMs(v, { ...fieldDef, noQuotes: true });
-        })
-          .map((v) => (v == null ? NULL : `"${v}"`));
-        break;
-    }
-  }
-  return `{${arr.join(',')}}`;
-};
-
-const array = (value: any, fieldDef: IFieldDefMs): string | typeof NULL => {
-  const v = parseArray(value, fieldDef);
-  return v === NULL ? NULL : q(v, fieldDef.noQuotes);
-};
+const prepareDatetimeOffset = (
+  value: any,
+  fieldDef: IFieldDef,
+): string | typeof NULL => getDatetimeWithPrecisionAndOffset(value, fieldDef);
 
 export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): string | typeof NULL => {
   const { value, fieldDef } = arg;
   if (value == null) {
     return NULL;
   }
-  const { length = 0, noQuotes } = fieldDef;
+  const { noQuotes } = fieldDef;
   let { dataType } = fieldDef;
   if (typeof dataType === 'string') {
     dataType = dataType.toLowerCase() as TDataTypeMs;
@@ -119,14 +64,14 @@ export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): 
 
     case 'tinyint':
     case sql.TinyInt:
-      return prepareIntNumber(value, 0, 255);
+      return String(parseIntNumberS(value, 'tinyint'));
     case 'smallint':
     case sql.SmallInt:
-      return prepareIntNumber(value, -32768, 32767);
+      return String(parseIntNumberS(value, 'smallint'));
     case 'int':
     case 'integer':
     case sql.Int:
-      return prepareIntNumber(value, -2147483648, 2147483647);
+      return String(parseIntNumberS(value, 'int'));
 
     case 'bigint':
     case sql.BigInt:
@@ -147,15 +92,9 @@ export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): 
     case sql.Real:
       return prepareFloatNumber(value);
 
-    case 'json': {
-      if (Array.isArray(v) || typeof v === 'object') {
-        v = JSON.stringify(v);
-      }
-      if (length > 0 && v.length > length) {
-        echo.warn(`JSON field will be truncated! ${functionRef}`);
-      }
-      return prepareSqlStringMs(v, fieldDef);
-    }
+    case 'json':
+      v = prepareJSON(v);
+      return v === NULL ? NULL : q(v, noQuotes);
 
     case 'string':
     case 'char':
@@ -178,10 +117,7 @@ export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): 
     case 'uuid':
     case 'uniqueIdentifier':
     case sql.UniqueIdentifier:
-      if (v && typeof v === 'string' && /^[A-F\d]{8}(-[A-F\d]{4}){4}[A-F\d]{8}/i.test(v)) {
-        return q(v.substring(0, 36).toUpperCase(), noQuotes);
-      }
-      return NULL;
+      return prepareUUID(v, false, fieldDef.noQuotes);
 
     case 'datetime':
     case sql.DateTime:
@@ -230,8 +166,13 @@ export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): 
     case sql.Variant:
       return prepareSqlStringMs(v, fieldDef);
 
-    case 'array':
-      return array(value, fieldDef);
+    case 'array': {
+      v = arrayToJsonList(value, fieldDef.arrayType);
+      if (v === NULL) {
+        return NULL;
+      }
+      return q(`[${escapeStringMs(v)}]`, fieldDef.noQuotes);
+    }
 
     default:
       return prepareSqlStringMs(v, fieldDef);

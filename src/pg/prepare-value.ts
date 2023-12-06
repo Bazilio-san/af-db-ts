@@ -3,9 +3,18 @@ import { DateTime } from 'luxon';
 import { getBool } from 'af-tools-ts';
 import { IFieldDefPg } from '../@types/i-pg';
 import { NULL } from '../common';
-import { dateTimeValue } from '../utils/utils-dt';
+import { dateTimeValue, getDatetimeWithPrecisionAndOffset, prepareUUID } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
-import { q } from '../utils/utils';
+import { IFieldDef } from '../@types/i-common';
+import { binToHexString, prepareJSON, q } from '../utils/utils';
+import { arrayToJsonList } from '../utils/utils-array';
+
+export const quoteStringPg = (value: string): string => {
+  if (value == null) {
+    return NULL;
+  }
+  return /['\\]|\${2,}/.test(value) ? `$s$${value}$s$` : `'${value}'`;
+};
 
 export const prepareSqlStringPg = (value: any, fieldDef: IFieldDefPg): string | typeof NULL => {
   if (value == null) {
@@ -16,13 +25,24 @@ export const prepareSqlStringPg = (value: any, fieldDef: IFieldDefPg): string | 
   if (length > 0 && v.length > length) {
     v = v.substring(0, length);
   }
-  if (/['\\]|\${2,}/.test(v)) {
-    return `$s$${v}$s$`;
+  if (noQuotes) {
+    return v;
   }
-  return q(v, noQuotes);
+  return quoteStringPg(v);
 };
 
-// VVA q """""
+const prepareDatetimeOffset = (
+  value: any,
+  fieldDef: IFieldDef,
+): string | typeof NULL => getDatetimeWithPrecisionAndOffset(value, fieldDef, 6);
+
+const prepareJsonPg = (value: any, dataType: 'json' | 'jsonb'): string | typeof NULL => {
+  const v = prepareJSON(value);
+  if (v === NULL) {
+    return NULL;
+  }
+  return `${quoteStringPg(v)}::${dataType}`; // VVQ
+};
 
 export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): any => {
   const { value, fieldDef } = arg;
@@ -32,9 +52,9 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
   const fieldDefWithNoQuotes = { ...fieldDef, noQuotes: true };
 
   let v = value;
-  const { length = 0, noQuotes } = fieldDef;
+  const { length = 0, noQuotes, dataType } = fieldDef;
 
-  switch (fieldDef.dataType) {
+  switch (dataType) {
     case 'bool':
     case 'boolean':
       return getBool(value) ? 'true' : 'false';
@@ -49,21 +69,17 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
 
     case 'numeric':
     case 'real':
+    case 'money': // VVQ
+    case 'decimal': // VVQ
+    case 'double_precision': // VVQ
       return prepareFloatNumber(value);
 
+    case 'json':
     case 'jsonb':
-    case 'json': {
-      if (Array.isArray(v) || typeof v === 'object') {
-        v = JSON.stringify(v);
-      }
-      return prepareSqlStringPg(v, fieldDef);
-    }
+      return prepareJsonPg(value, dataType); // VVQ
 
     case 'uuid':
-      if (v && typeof v === 'string' && /^[A-F\d]{8}(-[A-F\d]{4}){4}[A-F\d]{8}/i.test(v)) {
-        return q(v.substring(0, 36).toUpperCase(), noQuotes);
-      }
-      return NULL;
+      return prepareUUID(v, true, fieldDef.noQuotes);
 
     case 'string':
     case 'text':
@@ -71,11 +87,19 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     case 'varchar':
       return prepareSqlStringPg(value, fieldDef);
 
-    case 'timestamptz':
     case 'timestamp': {
+      // '2023-09-05T02:23:54.105+03:00'::timestamp
+      // '2023-09-05T02:23:54.105'::timestamp
+      const { includeOffset = false } = fieldDef.dateTimeOptions || {}; // По умолчанию для timestamp includeOffset = false
+      const str = prepareDatetimeOffset(value, { ...fieldDef, noQuotes: true, dateTimeOptions: { ...fieldDef.dateTimeOptions, includeOffset } });
+      return str === NULL ? NULL : `'${str}'::timestamp`;
+    }
+
+    case 'timestamptz': {
+      // '2023-09-05T02:23:54.105'::timestamptz
       // '2023-09-05T02:23:54.105+03:00'::timestamptz
-      const { includeOffset = true } = fieldDef.dateTimeOptions || {};
-      return dateTimeValue(value, fieldDefWithNoQuotes, (dt: DateTime) => `'${dt.toISO({ includeOffset })}'::timestamptz`);
+      const str = prepareDatetimeOffset(value, fieldDefWithNoQuotes);
+      return str === NULL ? NULL : `'${str}'::timestamptz`;
     }
 
     case 'date':
@@ -85,14 +109,18 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
       // '02:22:17.368'::time
       return dateTimeValue(value, fieldDefWithNoQuotes, (dt: DateTime) => `'${dt.toISOTime()?.substring(0, 12)}'::time`);
 
-    case 'USER_DEFINED':
-      return prepareSqlStringPg(value, fieldDef);
+    case 'bytea':
+      v = binToHexString(value);
+      return v ? q(v, noQuotes) : NULL;
 
     case 'ARRAY': {
-      let v = JSON.stringify(value);
-      v = v.replace(/^\[(.*?)]$/, '{$1}');
-      return prepareSqlStringPg(v, fieldDef);
+      v = arrayToJsonList(value, fieldDef.udtName);
+      if (v === NULL) {
+        return NULL;
+      }
+      return fieldDef.noQuotes ? quoteStringPg(v) : v;
     }
+    // 'USER_DEFINED'
     default:
       return prepareSqlStringPg(value, fieldDef);
   }
