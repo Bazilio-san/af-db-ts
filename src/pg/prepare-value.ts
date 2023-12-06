@@ -5,21 +5,21 @@ import { IFieldDefPg } from '../@types/i-pg';
 import { NULL } from '../common';
 import { dateTimeValue } from '../utils/utils-dt';
 import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
+import { q } from '../utils/utils';
 
-//  const utc$ = (millis?: number): DateTime => DateTime.fromMillis(millis == null ? Date.now() : millis).setZone('UTC');
-
-export const prepareSqlStringPg = (s: any, fieldDef: IFieldDefPg): string => {
-  s = String(s);
-
-  const { length = 0 } = fieldDef;
-  if (length > 0 && s.length > length) {
-    s = s.substring(0, length);
+export const prepareSqlStringPg = (value: any, fieldDef: IFieldDefPg): string | typeof NULL => {
+  if (value == null) {
+    return NULL;
   }
-
-  if (/['\\]|\${2,}/.test(s)) {
-    return `$s$${s}$s$`;
+  let v = String(value);
+  const { length = 0, noQuotes } = fieldDef;
+  if (length > 0 && v.length > length) {
+    v = v.substring(0, length);
   }
-  return `'${s}'`;
+  if (/['\\]|\${2,}/.test(v)) {
+    return `$s$${v}$s$`;
+  }
+  return q(v, noQuotes);
 };
 
 // VVA q """""
@@ -30,6 +30,9 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     return NULL;
   }
   const fieldDefWithNoQuotes = { ...fieldDef, noQuotes: true };
+
+  let v = value;
+  const { length = 0, noQuotes } = fieldDef;
 
   switch (fieldDef.dataType) {
     case 'bool':
@@ -48,16 +51,25 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     case 'real':
       return prepareFloatNumber(value);
 
+    case 'jsonb':
+    case 'json': {
+      if (Array.isArray(v) || typeof v === 'object') {
+        v = JSON.stringify(v);
+      }
+      return prepareSqlStringPg(v, fieldDef);
+    }
+
+    case 'uuid':
+      if (v && typeof v === 'string' && /^[A-F\d]{8}(-[A-F\d]{4}){4}[A-F\d]{8}/i.test(v)) {
+        return q(v.substring(0, 36).toUpperCase(), noQuotes);
+      }
+      return NULL;
+
     case 'string':
     case 'text':
     case 'character':
     case 'varchar':
-    case 'uuid':
       return prepareSqlStringPg(value, fieldDef);
-
-    case 'json':
-    case 'jsonb':
-      return prepareSqlStringPg(JSON.stringify(value), fieldDef);
 
     case 'timestamptz':
     case 'timestamp': {
