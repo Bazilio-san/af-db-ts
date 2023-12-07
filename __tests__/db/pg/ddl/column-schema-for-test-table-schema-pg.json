@@ -1,132 +1,34 @@
 {
-  "ser1": {
-    "name": "ser1",
-    "isNullable": false,
-    "columnDefault": "nextval('test.table_schema_ser1_seq'::regclass)",
-    "hasDefault": true,
-    "dataType": "int",
-    "precision": 32,
-    "radix": 2,
-    "readOnly": false
-  },
-  "ser2": {
-    "name": "ser2",
-    "isNullable": false,
-    "columnDefault": "nextval('test.table_schema_ser2_seq'::regclass)",
-    "hasDefault": true,
-    "dataType": "int",
-    "precision": 32,
-    "radix": 2,
-    "readOnly": false
-  },
-  "i1": {
-    "name": "i1",
-    "isNullable": false,
-    "columnDefault": "25",
-    "hasDefault": true,
-    "dataType": "int",
-    "precision": 32,
-    "radix": 2,
-    "readOnly": false
-  },
-  "i2": {
-    "dataType": "int",
-    "hasDefault": false,
-    "isNullable": true,
-    "name": "i2",
-    "precision": 32,
-    "radix": 2,
-    "readOnly": false
-  },
-  "si1": {
-    "name": "si1",
-    "isNullable": false,
-    "hasDefault": false,
-    "dataType": "smallint",
-    "precision": 16,
-    "radix": 2,
-    "readOnly": false
-  },
-  "vc1": {
-    "name": "vc1",
-    "isNullable": false,
-    "hasDefault": false,
-    "dataType": "varchar",
-    "length": 10,
-    "readOnly": false
-  },
-  "dtz1": {
-    "name": "dtz1",
-    "isNullable": false,
-    "columnDefault": "CURRENT_TIMESTAMP",
-    "hasDefault": true,
-    "dataType": "timestamptz",
-    "dtPrecision": 5,
-    "readOnly": false
-  },
-  "time1": {
-    "name": "time1",
-    "isNullable": false,
-    "hasDefault": false,
-    "dataType": "time",
-    "dtPrecision": 6,
-    "readOnly": false
-  },
-  "bool1": {
-    "columnDefault": "true",
-    "name": "bool1",
-    "isNullable": false,
-    "hasDefault": true,
-    "dataType": "boolean",
-    "readOnly": false
-  },
   "arr_int": {
+    "arrayType": "int",
     "dataType": "ARRAY",
     "hasDefault": false,
     "isNullable": true,
     "name": "arr_int",
-    "readOnly": false,
-    "arrayType": "int"
+    "readOnly": false
   },
   "arr_str": {
+    "arrayType": "varchar",
     "dataType": "ARRAY",
     "hasDefault": false,
     "isNullable": true,
     "name": "arr_str",
-    "readOnly": false,
-    "arrayType": "varchar"
+    "readOnly": false
+  },
+  "bool1": {
+    "columnDefault": "true",
+    "dataType": "boolean",
+    "hasDefault": true,
+    "isNullable": false,
+    "name": "bool1",
+    "readOnly": false
   },
   "bool2": {
-    "name": "bool2",
-    "isNullable": true,
     "columnDefault": "false",
-    "hasDefault": true,
     "dataType": "boolean",
-    "readOnly": false
-  },
-  "money": {
-    "dataType": "money",
-    "hasDefault": false,
+    "hasDefault": true,
     "isNullable": true,
-    "name": "money",
-    "readOnly": false
-  },
-  "numeric": {
-    "dataType": "numeric",
-    "hasDefault": false,
-    "isNullable": true,
-    "name": "numeric",
-    "precision": 7,
-    "radix": 10,
-    "readOnly": false
-  },
-  "real": {
-    "dataType": "real",
-    "hasDefault": false,
-    "isNullable": true,
-    "name": "real",
-    "precision": 24,
-    "radix": 2,
+    "name": "bool2",
     "readOnly": false
   },
   "bytea": {
@@ -153,12 +55,116 @@
     "radix": 2,
     "readOnly": false
   },
+  "dtz1": {
+    "columnDefault": "CURRENT_TIMESTAMP",
+    "dataType": "timestamptz",
+    "dtPrecision": 5,
+    "hasDefault": true,
+    "isNullable": false,
+    "name": "dtz1",
+    "readOnly": false
+  },
   "gen1": {
-    "name": "gen1",
-    "isNullable": true,
-    "hasDefault": false,
     "dataType": "numeric",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "gen1",
     "radix": 10,
     "readOnly": true
+  },
+  "i1": {
+    "columnDefault": "25",
+    "dataType": "int",
+    "hasDefault": true,
+    "isNullable": false,
+    "name": "i1",
+    "precision": 32,
+    "radix": 2,
+    "readOnly": false,
+    "scale": 0
+  },
+  "i2": {
+    "dataType": "int",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "i2",
+    "precision": 32,
+    "radix": 2,
+    "readOnly": false,
+    "scale": 0
+  },
+  "money": {
+    "dataType": "money",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "money",
+    "readOnly": false
+  },
+  "numeric": {
+    "dataType": "numeric",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "numeric",
+    "precision": 7,
+    "radix": 10,
+    "readOnly": false,
+    "scale": 5
+  },
+  "real": {
+    "dataType": "real",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "real",
+    "precision": 24,
+    "radix": 2,
+    "readOnly": false
+  },
+  "ser1": {
+    "columnDefault": "nextval('test.table_schema_ser1_seq'::regclass)",
+    "dataType": "int",
+    "hasDefault": true,
+    "isNullable": false,
+    "name": "ser1",
+    "precision": 32,
+    "radix": 2,
+    "readOnly": false,
+    "scale": 0
+  },
+  "ser2": {
+    "columnDefault": "nextval('test.table_schema_ser2_seq'::regclass)",
+    "dataType": "int",
+    "hasDefault": true,
+    "isNullable": false,
+    "name": "ser2",
+    "precision": 32,
+    "radix": 2,
+    "readOnly": false,
+    "scale": 0
+  },
+  "si1": {
+    "dataType": "smallint",
+    "hasDefault": false,
+    "isNullable": false,
+    "name": "si1",
+    "precision": 16,
+    "radix": 2,
+    "readOnly": false,
+    "scale": 0
+  },
+  "time1": {
+    "dataType": "time",
+    "dtPrecision": 6,
+    "hasDefault": false,
+    "isNullable": false,
+    "name": "time1",
+    "readOnly": false
+  },
+  "vc1": {
+    "dataType": "varchar",
+    "hasDefault": false,
+    "isNullable": false,
+    "length": 10,
+    "name": "vc1",
+    "readOnly": false
   }
 }
