@@ -44,6 +44,55 @@ const valuesAsNull: [any, any][] = [
 ];
 
 describe('prepare sql value PG', () => {
+  describe('numeric', () => {
+    const testArr: [any, any, IFieldDefPg?][] = [
+      [49223.37253, '49223', { precision: 5, scale: 2 }],
+      [-9223.37253, '-9223.373', { precision: 8, scale: 3 }],
+      [49223.37253, '49223.373', { precision: 8, scale: 3 }],
+      [549223.3725, '99999', { precision: 5, scale: 2 }],
+      [49223.3725, '49223.4', { precision: 6, scale: 2 }],
+      [49223.3725, '49223.37', { precision: 7, scale: 2 }],
+      ['-9223.37253', '-9223.373', { precision: 8, scale: 3 }],
+      ['49223.37253', '49223.373', { precision: 8, scale: 3 }],
+      ['49223.37253', '49223', { precision: 5, scale: 2 }],
+      ['549223.3725', '99999', { precision: 5, scale: 2 }],
+      ['49223.3725', '49223.4', { precision: 6, scale: 2 }],
+      ['49223.3725', '49223.37', { precision: 7, scale: 2 }],
+      ...valuesAs0,
+      ...valuesAsNull,
+      ['1', '1'],
+      [1, '1'],
+      ['+1.6', '1.6'],
+      [1.6, '1.6'],
+      ['-1.2', '-1.2'],
+      [-1.2, '-1.2'],
+      ['0123', '123'],
+      ['-1', '-1'],
+      [-1, '-1'],
+      [12345.12345, '12345.12345'],
+      [-12345.12345, '-12345.12345'],
+
+      ['.6', '0.6'],
+      ['000.6', '0.6'],
+
+      [-9223372036854775808, '-9223372036854776000'],
+      [9223372036854775800, '9223372036854776000'],
+      // eslint-disable-next-line no-loss-of-precision
+      [-9223.372036854775808, '-9223.372036854777'],
+      // eslint-disable-next-line no-loss-of-precision
+      [9223.372036854775800, '9223.372036854777'],
+      [0.000000000000000000758, '7.58e-19'],
+    ];
+
+    testArr.forEach((caseValues) => {
+      const [value, expected, fieldDef = {}] = caseValues;
+      const res = prepareSqlValuePg({ value, fieldDef: { ...fieldDef, dataType: 'numeric' } });
+      test(`${value} --> ${res}`, () => {
+        expect(res).toBe(expected);
+      });
+    });
+  });
+
   describe('time zone', () => {
     test(`Node time zone should be Europe/Moscow`, () => {
       expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe('Europe/Moscow');
@@ -185,7 +234,7 @@ describe('prepare sql value PG', () => {
     });
   });
 
-  describe('numeric', () => {
+  describe('real', () => {
     const testArr: [any, any][] = [
       ...valuesAs0,
       ...valuesAsNull,
@@ -215,7 +264,7 @@ describe('prepare sql value PG', () => {
 
     testArr.forEach((caseValues) => {
       const [value, expected] = caseValues;
-      const res = prepareSqlValuePg({ value, fieldDef: { dataType: 'numeric' } });
+      const res = prepareSqlValuePg({ value, fieldDef: { dataType: 'real' } });
       test(`${value} --> ${res}`, () => {
         expect(res).toBe(expected);
       });

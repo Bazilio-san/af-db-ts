@@ -60,6 +60,7 @@ export interface IFieldDef {
   arrayType?: any,
 
   precision?: number,
+  scale?: number,
   radix?: number,
 
   dtPrecision?: number,

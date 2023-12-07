@@ -16,7 +16,7 @@ export type TDataTypePg =
   'numeric' | // numeric [(p,s)]
   'decimal' | // decimal [(p,s)]
 
-  'real' |
+  'real' | // 1E-37 to 1E+37 6 decimal digits precision
   'float4' |
 
   'money' |

@@ -9,7 +9,6 @@ export interface IFieldDefMs extends IFieldDef {
   dataType?: TDataTypeMs,
 
   octetLength?: number,
-  scale?: number, // VVQ
   charSetName?: string,
   collation?: string,
   caseSensitive?: boolean, // VVQ

@@ -43,6 +43,7 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
       dataType,
       length: fieldDef.character_maximum_length,
       precision: fieldDef.numeric_precision,
+      scale: fieldDef.numeric_scale,
       radix: fieldDef.numeric_precision_radix,
       dtPrecision: fieldDef.datetime_precision,
       arrayType: dataType === 'ARRAY' ? getTypeByUdtNamePg(fieldDef.udt_name) : undefined,

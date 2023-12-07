@@ -1,3 +1,4 @@
+import { rn } from 'af-tools-ts';
 import { NULL } from '../common';
 
 export const parseFloatNumber = (value: any): number | null => {
@@ -98,4 +99,33 @@ export const prepareBigIntNumber = (value: any): string | typeof NULL => {
     //
   }
   return NULL;
+};
+
+export const prepareNumeric = (value: any, precision?: number, scale?: number): string | typeof NULL => {
+  if (value == null) {
+    return NULL;
+  }
+  if (!precision) {
+    if (typeof value === 'bigint') {
+      return `${value}`;
+    }
+    return prepareFloatNumber(value);
+  }
+  if (typeof value === 'bigint') {
+    return `${value}`.substring(0, precision);
+  }
+  let vn = parseFloatNumber(value);
+  if (vn == null) {
+    return NULL;
+  }
+  const maxValue = (10 ** precision - 1) / (10 ** (scale || 0));
+  const minValue = -maxValue;
+  if (vn > maxValue) {
+    return `${maxValue}`;
+  }
+  if (vn < minValue) {
+    return `${minValue}`;
+  }
+  vn = rn(vn, scale);
+  return `${vn}`;
 };

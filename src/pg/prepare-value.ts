@@ -4,7 +4,7 @@ import { getBool } from 'af-tools-ts';
 import { IFieldDefPg } from '../@types/i-pg';
 import { NULL } from '../common';
 import { dateTimeValue, getDatetimeWithPrecisionAndOffset } from '../utils/utils-dt';
-import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber } from '../utils/utils-num';
+import { prepareBigIntNumber, prepareFloatNumber, prepareIntNumber, prepareNumeric } from '../utils/utils-num';
 import { IFieldDef } from '../@types/i-common';
 import { binToHexString, prepareJSON, prepareUUID, q } from '../utils/utils';
 import { arrayToJsonList } from '../utils/utils-array';
@@ -84,6 +84,8 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
 
     case 'numeric':
     case 'decimal':
+      return prepareNumeric(value, fieldDef.precision, fieldDef.scale);
+
     case 'real':
     case 'float4':
     case 'money':
