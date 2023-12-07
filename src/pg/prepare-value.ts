@@ -114,7 +114,7 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
       return v ? q(v, noQuotes) : NULL;
 
     case 'ARRAY': {
-      v = arrayToJsonList(value, fieldDef.udtName);
+      v = arrayToJsonList(value, fieldDef.arrayType);
       if (v === NULL) {
         return NULL;
       }

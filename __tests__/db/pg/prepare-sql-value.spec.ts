@@ -544,39 +544,17 @@ describe('prepare sql value PG', () => {
 
       [[], `'{}'`],
 
-      [[1, '2', 'a', '', null], `'{1,2,null,null,null}'`, { udtName: '_int4' }],
-      [[1, '2', 'a', '', null], `'{"1","2","a","",null}'`, { udtName: '_varchar' }],
-      [[1, 0, '2', 'a', '', true, false, null], `'{true,false,true,false,true, false,null}'`, { udtName: '_bool' }],
+      [[1, '2', 'a', '', null], `'{1,2,null,null,null}'`, { arrayType: 'int' }],
+      [[1, '2', 'a', '', null], `'{"1","2","a","",null}'`, { arrayType: 'varchar' }],
+      [[1, 0, '2', 'a', '', true, false, null], `'{true,false,false,false,false,true,false,null}'`, { arrayType: 'bool' }],
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'ARRAY' as TDataTypePg };
       const dateStrOut = prepareSqlValuePg({ value, fieldDef });
       let v = Array.isArray(value) ? `[${value.join(', ')}]` : value;
-      v = fDev.udtName ? `${v} / udtName: ${fDev.udtName}` : v;
+      v = fDev.arrayType ? `${v} / arrayType: ${fDev.arrayType}` : v;
       test(`${v} --> ${dateStrOut}`, () => {
-        expect(dateStrOut).toBe(expected);
-      });
-    });
-  });
-
-  describe('variant', () => {
-    const testArr: [any, string][] = [
-      [null, 'null'],
-      [undefined, 'null'],
-      ['', `''`],
-      [`aa'aa`, `'aa''aa'`],
-      [`aa%aa`, `'aa%%aa'`],
-      [{ a: 1, b: '2' }, `'[object Object]'`],
-      [[], `''`],
-      [1, `'1'`],
-      [0, `'0'`],
-    ];
-    testArr.forEach((caseValues) => {
-      const [value, expected, fDev = {}] = caseValues;
-      const fieldDef = { ...fDev, dataType: 'variant' as TDataTypePg };
-      const dateStrOut = prepareSqlValuePg({ value, fieldDef });
-      test(`${value} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
       });
     });

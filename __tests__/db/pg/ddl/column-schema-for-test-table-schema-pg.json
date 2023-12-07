@@ -4,10 +4,9 @@
     "isNullable": false,
     "columnDefault": "nextval('test.table_schema_ser1_seq'::regclass)",
     "hasDefault": true,
-    "dataType": "integer",
+    "dataType": "int",
     "precision": 32,
     "radix": 2,
-    "udtName": "int4",
     "readOnly": false
   },
   "ser2": {
@@ -15,10 +14,9 @@
     "isNullable": false,
     "columnDefault": "nextval('test.table_schema_ser2_seq'::regclass)",
     "hasDefault": true,
-    "dataType": "integer",
+    "dataType": "int",
     "precision": 32,
     "radix": 2,
-    "udtName": "int4",
     "readOnly": false
   },
   "i1": {
@@ -26,21 +24,19 @@
     "isNullable": false,
     "columnDefault": "25",
     "hasDefault": true,
-    "dataType": "integer",
+    "dataType": "int",
     "precision": 32,
     "radix": 2,
-    "udtName": "int4",
     "readOnly": false
   },
   "i2": {
-    "dataType": "integer",
+    "dataType": "int",
     "hasDefault": false,
     "isNullable": true,
     "name": "i2",
     "precision": 32,
     "radix": 2,
     "readOnly": false,
-    "udtName": "int4"
   },
   "si1": {
     "name": "si1",
@@ -49,16 +45,14 @@
     "dataType": "smallint",
     "precision": 16,
     "radix": 2,
-    "udtName": "int2",
     "readOnly": false
   },
   "vc1": {
     "name": "vc1",
     "isNullable": false,
     "hasDefault": false,
-    "dataType": "character varying",
+    "dataType": "varchar",
     "length": 10,
-    "udtName": "varchar",
     "readOnly": false
   },
   "dtz1": {
@@ -66,18 +60,16 @@
     "isNullable": false,
     "columnDefault": "CURRENT_TIMESTAMP",
     "hasDefault": true,
-    "dataType": "timestamp with time zone",
+    "dataType": "timestamptz",
     "dtPrecision": 5,
-    "udtName": "timestamptz",
     "readOnly": false
   },
   "time1": {
     "name": "time1",
     "isNullable": false,
     "hasDefault": false,
-    "dataType": "time without time zone",
+    "dataType": "time",
     "dtPrecision": 6,
-    "udtName": "time",
     "readOnly": false
   },
   "bool1": {
@@ -85,8 +77,7 @@
     "name": "bool1",
     "isNullable": false,
     "hasDefault": true,
-    "dataType": "boolean",
-    "udtName": "bool",
+    "dataType": "bool",
     "readOnly": false
   },
   "arr_int": {
@@ -95,7 +86,7 @@
     "isNullable": true,
     "name": "arr_int",
     "readOnly": false,
-    "udtName": "_int4"
+    "arrayType": "int"
   },
   "arr_str": {
     "dataType": "ARRAY",
@@ -103,15 +94,14 @@
     "isNullable": true,
     "name": "arr_str",
     "readOnly": false,
-    "udtName": "_varchar"
+    "arrayType": "varchar"
   },
   "bool2": {
     "name": "bool2",
     "isNullable": true,
     "columnDefault": "false",
     "hasDefault": true,
-    "dataType": "boolean",
-    "udtName": "bool",
+    "dataType": "bool",
     "readOnly": false
   },
   "gen1": {
@@ -120,7 +110,6 @@
     "hasDefault": false,
     "dataType": "numeric",
     "radix": 10,
-    "udtName": "numeric",
     "readOnly": true
   }
 }

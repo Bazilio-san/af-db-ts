@@ -3,7 +3,7 @@ import { getBool } from 'af-tools-ts';
 import { NULL } from '../common';
 import { parseFloatNumber, parseIntNumberS, prepareBigIntNumber } from './utils-num';
 import { TDataTypeMs } from '../@types/i-data-types-ms';
-import { TUdtNamesPg } from '../@types/i-data-types-pg';
+import { TDataTypePg } from '../@types/i-data-types-pg';
 import { prepareUUID } from './utils';
 
 const elementString = (value: any[]): string[] => {
@@ -22,7 +22,7 @@ const elementUuid = (
   toLower: boolean = false,
 ): string[] => value.map((v) => prepareUUID(v, toLower, true)).map((v) => (v === NULL ? NULL : `"${v}"`));
 
-export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TUdtNamesPg): string | typeof NULL => {
+export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TDataTypePg): string | typeof NULL => {
   if (value == null) {
     return NULL;
   }
@@ -34,7 +34,6 @@ export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TUdtNamesP
     switch (arrayType) {
       case 'bool':
       case 'boolean': // VVQ
-      case '_bool':
         arr = value.map((v) => (v == null ? NULL : getBool(v)));
         break;
       case sql.Bit:
@@ -46,16 +45,13 @@ export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TUdtNamesP
         arr = value.map((v) => parseIntNumberS(v, 'tinyint'));
         break;
       case 'smallint':
-      case '_int2':
       case sql.SmallInt:
         arr = value.map((v) => parseIntNumberS(v, 'smallint'));
         break;
       case 'bigint':
-      case '_int8':
       case sql.BigInt:
         arr = value.map((v) => prepareBigIntNumber(v));
         break;
-      case '_int4':
       case 'int':
       case 'integer':
       case sql.Int:
@@ -64,13 +60,10 @@ export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TUdtNamesP
       case 'number':
       case 'decimal':
       case 'numeric':
-      case '_numeric':
       case 'real':
       case 'money':
-      case '_money':
       case 'smallmoney':
       case 'float':
-      case '_float4':
       case sql.SmallMoney:
       case sql.Money:
       case sql.Float:
@@ -96,8 +89,6 @@ export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TUdtNamesP
       case 'varchar':
       case 'nvarchar':
       case 'xml':
-      case '_varchar':
-      case '_text':
       case sql.Char:
       case sql.NChar:
       case sql.NText:

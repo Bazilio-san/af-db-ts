@@ -1,82 +1,17 @@
 /* eslint-disable no-await-in-loop */
 import * as path from 'path';
 import * as fs from 'fs';
-import * as sql from 'mssql';
 import { echo } from 'af-echo-ts';
 import { IFieldDefMs } from '../@types/i-ms';
 import { getTableSchemaMs } from './table-schema-ms';
 import { closeAllDbConnectionsMs } from './pool-ms';
 import { schemaTable } from '../utils/utils';
+import { getJsTypeByTypeMs } from './utils-ms';
 
-export const getJsTypeByFieldDefMs = (fieldDef: IFieldDefMs): string => {
-  switch (fieldDef.dataType) {
-    case 'boolean':
-    case sql.Bit:
-      return 'boolean';
-
-    case 'bigint':
-    case sql.BigInt:
-      return 'string | number';
-
-    case 'tinyint':
-    case sql.TinyInt:
-    case 'smallint':
-    case sql.SmallInt:
-    case 'int':
-    case 'integer':
-    case sql.Int:
-    case 'number':
-    case sql.Decimal:
-    case sql.Float:
-    case sql.Money:
-    case sql.Numeric:
-    case sql.SmallMoney:
-    case sql.Real:
-      return 'number';
-
-    case 'string':
-    case sql.Char:
-    case sql.NChar:
-    case sql.Text:
-    case sql.NText:
-    case sql.VarChar:
-    case sql.NVarChar:
-    case sql.Xml:
-    case 'uid':
-    case 'uuid':
-    case 'uniqueIdentifier':
-    case sql.UniqueIdentifier:
-      return 'string';
-
-    case 'datetime':
-    case 'date':
-    case 'time':
-    case sql.DateTime:
-    case sql.DateTime2:
-    case sql.Time:
-    case sql.Date:
-    case sql.SmallDateTime:
-    case sql.DateTimeOffset:
-      return 'string | Date | number';
-
-    case sql.Binary:
-    case sql.VarBinary:
-    case sql.Image:
-      return 'any';
-
-    case sql.UDT:
-    case sql.Geography:
-    case sql.Geometry:
-    case sql.Variant:
-      return 'any';
-    default:
-      return 'string';
-  }
+const getFieldDefinition = (d: IFieldDefMs): string => {
+  const fieldName = d.name + (d.isNullable || d.hasDefault ? '?' : '');
+  return `${fieldName}: ${getJsTypeByTypeMs(d.dataType, d.arrayType)}${d.isNullable ? ' | null' : ''}`;
 };
-
-const getFieldDefinition = (
-  d: IFieldDefMs,
-): string => `${d.name}${d.isNullable || d.hasDefault ? '?' : ''}: ${getJsTypeByFieldDefMs(d)}${d.isNullable ? ' | null' : ''}`;
 
 const TABLE_INTERFACES_DIR = __dirname.replace(/\\/g, '/').replace(/\/dist\//, '/');
 
@@ -90,7 +25,7 @@ export const genTableInterfaceMs = async (
     .replace('.', '_')
     .split('_')
     .map((word) => word[0].toUpperCase() + word.substring(1))
-.join('')}Record`;
+    .join('')}Record`;
 
   const linesArr = Object.values(tableSchema.columnsSchema).map(getFieldDefinition);
   const content = `export interface ${interfaceName} {\n${linesArr.map((v) => `  ${v}`).join(',\n')},\n}\n`;

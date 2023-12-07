@@ -15,27 +15,28 @@ import { TDataTypeMs } from '../@types/i-data-types-ms';
 const tableSchemaHash: { [commonSchemaAndTable: string]: ITableSchemaMs } = {};
 
 const FIELD_SCHEMA_PROPS = [
-  'index',
-  'name',
-  'isNullable',
-  'length',
-  'octetLength',
-  'dataType',
-  'precision',
-  'scale',
-  'radix',
-  'dtPrecision',
+  'arrayType',
+  'caseSensitive',
   'charSetName',
   'collation',
-  'udtName',
-  'caseSensitive',
-  'readOnly',
-  'arrayType',
-  'inputDateFormat',
-  'dateTimeOptions',
-  'noQuotes',
-  'escapeOnlySingleQuotes',
   'columnDefault',
+  'dataType',
+  'dateTimeOptions',
+  'dtPrecision',
+  'escapeOnlySingleQuotes',
+  'hasDefault',
+  'identity',
+  'index',
+  'inputDateFormat',
+  'isNullable',
+  'length',
+  'name',
+  'noQuotes',
+  'octetLength',
+  'precision',
+  'radix',
+  'readOnly',
+  'scale', // VVQ
 ];
 
 /**
@@ -122,7 +123,7 @@ const getColumnsSchemaMs_ = async (
       octetLength: fieldDef.CHARACTER_OCTET_LENGTH,
       precision: fieldDef.NUMERIC_PRECISION, // VVq Числовые?
       radix: fieldDef.NUMERIC_PRECISION_RADIX,
-      scale: fieldDef.NUMERIC_SCALENUMERIC_SCALE,
+      scale: fieldDef.NUMERIC_SCALENUMERIC_SCALE, // VVQ
       dtPrecision: fieldDef.DATETIME_PRECISION,
       charSetName: fieldDef.CHARACTER_SET_NAME, // cp1251
       collation: fieldDef.COLLATION_NAME, // Cyrillic_General_BIN
@@ -137,7 +138,7 @@ const getColumnsSchemaMs_ = async (
     const fieldDef = columnsSchema[fieldName];
     if (fieldDef) {
       fieldDef.dataType = fieldDefC.type as TDataTypeMs;
-      fieldDef.udtName = fieldDefC.udt;
+      fieldDef.arrayType = fieldDefC.udt; // VVQ
       fieldDef.caseSensitive = fieldDefC.caseSensitive;
       fieldDef.identity = fieldDefC.identity; // boolean;
       fieldDef.readOnly = fieldDefC.readOnly; // boolean;

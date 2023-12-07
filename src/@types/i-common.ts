@@ -57,6 +57,7 @@ export interface IFieldDef {
   isNullable?: boolean,
   length?: number,
   dataType?: any, // type
+  arrayType?: any,
 
   precision?: number,
   radix?: number,
@@ -66,7 +67,6 @@ export interface IFieldDef {
   columnDefault?: string | number | boolean,
   hasDefault?: boolean,
 
-  udtName?: string,
   readOnly?: boolean,
 
   /* Дополнительные свойства */
