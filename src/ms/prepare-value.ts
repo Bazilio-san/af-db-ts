@@ -38,7 +38,7 @@ export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | 
   return q(v, noQuotes);
 };
 
-const prepareDatetimeOffset = (
+const prepareDateTimeOffset = (
   value: any,
   fieldDef: IFieldDef,
 ): string | typeof NULL => getDatetimeWithPrecisionAndOffset(value, fieldDef);
@@ -58,9 +58,8 @@ export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): 
     case 'bool':
     case 'boolean':
     case 'bit':
-    case sql.Bit: {
+    case sql.Bit:
       return getBool(value) ? '1' : '0';
-    }
 
     case 'tinyint':
     case sql.TinyInt:
@@ -145,7 +144,7 @@ export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): 
     case 'datetimeoffset':
     case sql.DateTimeOffset:
       // 2023-09-05T02:20:00.1234567Z
-      return prepareDatetimeOffset(value, fieldDef);
+      return prepareDateTimeOffset(value, fieldDef);
 
     case 'binary':
     case 'varbinary':
@@ -166,13 +165,9 @@ export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): 
     case sql.Variant:
       return prepareSqlStringMs(v, fieldDef);
 
-    case 'array': {
+    case 'array':
       v = arrayToJsonList(value, fieldDef.arrayType);
-      if (v === NULL) {
-        return NULL;
-      }
-      return q(`[${escapeStringMs(v)}]`, fieldDef.noQuotes);
-    }
+      return v === NULL ? NULL : q(`[${escapeStringMs(v)}]`, fieldDef.noQuotes);
 
     default:
       return prepareSqlStringMs(v, fieldDef);

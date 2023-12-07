@@ -52,7 +52,7 @@ export const prepareJSON = (value: any): string | typeof NULL => {
   return value;
 };
 
-export const binToHexString = (value: any) => (value ? `0x${value.toString('hex').toUpperCase()}` : null);
+export const binToHexString = (value: any): string | null => (value ? `0x${value.toString('hex').toUpperCase()}` : null);
 
 export const prepareUUID = (v: any, toLower: boolean = false, noQuotes: boolean = false): string | typeof NULL => {
   if (v && typeof v === 'string' && /^[A-F\d]{8}(-[A-F\d]{4}){4}[A-F\d]{8}/i.test(v)) {

@@ -31,10 +31,17 @@ export const prepareSqlStringPg = (value: any, fieldDef: IFieldDefPg): string | 
   return quoteStringPg(v);
 };
 
-const prepareDatetimeOffset = (
+const prepareDateTimeOffset = (
   value: any,
   fieldDef: IFieldDef,
 ): string | typeof NULL => getDatetimeWithPrecisionAndOffset(value, fieldDef, 6);
+
+const prepareTimeOffset = (value: any, fieldDef: IFieldDefPg): string | typeof NULL => {
+  const { includeOffset = fieldDef.dataType === 'timetz' } = fieldDef.dateTimeOptions || {};
+  const fd: IFieldDefPg = { ...fieldDef, noQuotes: true, dateTimeOptions: { ...(fieldDef.dateTimeOptions || {}), includeOffset } };
+  const dts = getDatetimeWithPrecisionAndOffset(value, fd, 6);
+  return dts === NULL ? NULL : `'${dts.substring(11, dts.length)}'::${fieldDef.dataType}`;
+};
 
 const prepareJsonPg = (value: any, dataType: 'json' | 'jsonb'): string | typeof NULL => {
   const v = prepareJSON(value);
@@ -55,28 +62,36 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
   const { noQuotes, dataType } = fieldDef;
 
   switch (dataType) {
+    case 'bit':
+      return getBool(value) ? '1' : '0';
+
     case 'bool':
     case 'boolean':
       return getBool(value) ? 'true' : 'false';
 
     case 'smallint':
+    case 'int2':
       return prepareIntNumber(value, -32768, 32767);
     case 'int':
     case 'integer':
+    case 'int4':
       return prepareIntNumber(value, -2147483648, 2147483647);
     case 'bigint':
+    case 'int8':
       return prepareBigIntNumber(value);
 
     case 'numeric':
+    case 'decimal':
     case 'real':
-    case 'money': // VVQ
-    case 'decimal': // VVQ
-    case 'double precision': // VVQ
+    case 'float4':
+    case 'money':
+    case 'double precision':
+    case 'float8':
       return prepareFloatNumber(value);
 
     case 'json':
     case 'jsonb':
-      return prepareJsonPg(value, dataType); // VVQ
+      return prepareJsonPg(value, dataType);
 
     case 'uuid':
       return prepareUUID(v, true, fieldDef.noQuotes);
@@ -84,30 +99,37 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     case 'string':
     case 'text':
     case 'character':
+    case 'char':
     case 'varchar':
+    case 'character varying':
       return prepareSqlStringPg(value, fieldDef);
 
-    case 'timestamp': {
+    case 'timestamp':
+    case 'timestamp without time zone': {
       // '2023-09-05T02:23:54.105+03:00'::timestamp
       // '2023-09-05T02:23:54.105'::timestamp
       const { includeOffset = false } = fieldDef.dateTimeOptions || {}; // По умолчанию для timestamp includeOffset = false
-      const str = prepareDatetimeOffset(value, { ...fieldDef, noQuotes: true, dateTimeOptions: { ...fieldDef.dateTimeOptions, includeOffset } });
+      const str = prepareDateTimeOffset(value, { ...fieldDef, noQuotes: true, dateTimeOptions: { ...(fieldDef.dateTimeOptions || {}), includeOffset } });
       return str === NULL ? NULL : `'${str}'::timestamp`;
     }
 
-    case 'timestamptz': {
+    case 'timestamptz':
+    case 'timestamp with time zone': {
       // '2023-09-05T02:23:54.105'::timestamptz
       // '2023-09-05T02:23:54.105+03:00'::timestamptz
-      const str = prepareDatetimeOffset(value, fieldDefWithNoQuotes);
+      const str = prepareDateTimeOffset(value, fieldDefWithNoQuotes);
       return str === NULL ? NULL : `'${str}'::timestamptz`;
     }
 
     case 'date':
       // '2023-09-05'::date
       return dateTimeValue(value, fieldDefWithNoQuotes, (dt: DateTime) => `'${dt.toISODate()}'::date`);
-    case 'time':
-      // '02:22:17.368'::time
-      return dateTimeValue(value, fieldDefWithNoQuotes, (dt: DateTime) => `'${dt.toISOTime()?.substring(0, 12)}'::time`);
+
+    case 'timetz': // '02:22:17.368+03:00'::time
+    case 'time with time zone':
+    case 'time': // '02:22:17.368'::time
+    case 'time without time zone':
+      return prepareTimeOffset(value, fieldDef);
 
     case 'bytea':
       v = binToHexString(value);

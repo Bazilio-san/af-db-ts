@@ -4,50 +4,41 @@ export type TDataTypePg =
   'boolean' |
 
   'smallint' |
-  'int2' | // VVQ
+  'int2' |
 
   'int' |
   'integer' |
-  'int4' | // VVQ
+  'int4' |
 
   'bigint' |
   'int8' |
 
-  'smallserial' | // VVQ
-  'serial2' | // VVQ
-
-  'serial' | // VVQ
-  'serial4' | // VVQ
-
-  'bigserial' | // VVQ
-  'serial8' | // VVQ
-
   'numeric' | // numeric [(p,s)]
-  'decimal' | // decimal [(p,s)] // VVQ
+  'decimal' | // decimal [(p,s)]
 
   'real' |
   'float4' |
 
-  'money' | // VVQ
+  'money' |
 
-  'double precision' | // VVQ
-  'float8' | // VVQ
+  'double precision' |
+  'float8' |
 
   'json' |
   'jsonb' |
 
-  'character' | // character[(n)]  // VVQ
-  'char' | // character[(n)]  // VVQ
+  'character' | // character[(n)]
+  'char' | // character[(n)]
 
   'varchar' | // varchar[(n)]
-  'character varying' | // character varying[(n)] // VVQ
+  'character varying' | // character varying[(n)]
 
   'string' | // Искусственный
   'text' |
 
   'uuid' |
 
-  'bytea' | // VVQ
+  'bytea' |
 
   'timestamptz' | // timestamp [(p)] with time zone
   'timestamp with time zone' |
@@ -57,14 +48,20 @@ export type TDataTypePg =
   'date' |
 
   'time' | // time [(p)]
-  'time without time zone' | // time [(p)] without time zone // VVQ
+  'time without time zone' | // time [(p)] without time zone
   'timetz' |
-  'time with time zone' | // time [(p)] with time zone // VVQ
+  'time with time zone' | // time [(p)] with time zone
 
   'ARRAY' |
   'USER_DEFINED' |
 
   // Не задействованы
+  'smallserial' |
+  'serial2' |
+  'serial' |
+  'serial4' |
+  'bigserial' |
+  'serial8' |
   'bit varying' | // varbit[(n)] / bit varying[(n)] - variable-length bit string
   'varbit' |
   'box' | // rectangular box on a plane
@@ -102,9 +99,8 @@ export type TArrayTypesPg =
   '_timestamp' |
   '_timestamptz' |
 
-  '_char' | // VVQ
-  '_bytea' | // VVQ
-
+  '_char' |
+  '_bytea' |
   '_bit' |
   '_inet' |
   '_macaddr' |
@@ -118,7 +114,7 @@ export type TArrayTypesPg =
   '_xml' |
   '_interval' |
   '_timetz'
-  // Не ясно, откуда взялись
-  // '_oid' |
-  // '_abstime' |
-  // '_name' /
+// Не ясно, откуда взялись
+// '_oid' |
+// '_abstime' |
+// '_name' /
