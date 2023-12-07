@@ -46,18 +46,12 @@ const valuesAsNull: [any, any][] = [
 describe('prepare sql value PG', () => {
   describe('numeric', () => {
     const testArr: [any, any, IFieldDefPg?][] = [
-      [49223.37253, '49223', { precision: 5, scale: 2 }],
+      [223.37253, '223.37', { precision: 5, scale: 2 }],
       [-9223.37253, '-9223.373', { precision: 8, scale: 3 }],
       [49223.37253, '49223.373', { precision: 8, scale: 3 }],
-      [549223.3725, '99999', { precision: 5, scale: 2 }],
-      [49223.3725, '49223.4', { precision: 6, scale: 2 }],
-      [49223.3725, '49223.37', { precision: 7, scale: 2 }],
-      ['-9223.37253', '-9223.373', { precision: 8, scale: 3 }],
-      ['49223.37253', '49223.373', { precision: 8, scale: 3 }],
-      ['49223.37253', '49223', { precision: 5, scale: 2 }],
-      ['549223.3725', '99999', { precision: 5, scale: 2 }],
-      ['49223.3725', '49223.4', { precision: 6, scale: 2 }],
-      ['49223.3725', '49223.37', { precision: 7, scale: 2 }],
+      [549223.3725, '999.99', { precision: 5, scale: 2 }],
+      [49223.3725, '49223.4', { precision: 6, scale: 1 }],
+      [149223.3725, '99999.9', { precision: 6, scale: 1 }],
       ...valuesAs0,
       ...valuesAsNull,
       ['1', '1'],

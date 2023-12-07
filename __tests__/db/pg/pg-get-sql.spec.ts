@@ -36,7 +36,7 @@ INSERT INTO "test"."table_schema" (
 )
 VALUES (
   111,
-  NULL,
+  null,
   11,
   'aaa',
   '2023-01-01T01:02:03.34500+03:00'::timestamptz,
@@ -45,7 +45,7 @@ VALUES (
   '{1,null,null}',
   '{"1","e",null}',
   1111.2222,
-  3333.4444,
+  99.99999,
   5555.6666,
   7777.8888,
   99999.12345
@@ -57,13 +57,13 @@ VALUES (
   CURRENT_TIMESTAMP,
   '23:04:06'::time,
   true,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+  null,
+  null,
+  null,
+  33.44446,
+  null,
+  null,
+  null
 )
 ON CONFLICT DO NOTHING  RETURNING *;
 `);
@@ -92,6 +92,7 @@ ON CONFLICT DO NOTHING  RETURNING *;
         vc1: 'bbb',
         // dtz1: '2023-01-01T01:02:03.345',
         time1: '23:04:06',
+        numeric: 33.444456,
         // bool1: 1,
         // bool2: 1,
       },
@@ -164,7 +165,7 @@ VALUES
   '{1,null,null}',
   '{"1","e",null}',
   1111.2222,
-  3333.4444,
+  99.99999,
   5555.6666,
   7777.8888,
   99999.12345
@@ -175,7 +176,7 @@ VALUES
   null,
   null,
   null,
-  null,
+  33.44446,
   null,
   null,
   null
@@ -222,6 +223,7 @@ DO UPDATE SET
         vc1: 'bbb',
         // dtz1: '2023-01-01T01:02:03.345',
         time1: '23:04:06',
+        numeric: 33.444456,
         // bool1: 1,
         // bool2: 1,
       },

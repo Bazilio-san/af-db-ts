@@ -8,7 +8,7 @@
       <env name="TZ" value="Europe/Moscow" />
     </envs>
     <scope-kind value="TEST_FILE" />
-    <test-file value="$PROJECT_DIR$/__tests__/db/pg/get-sql.spec.ts" />
+    <test-file value="$PROJECT_DIR$/__tests__/db/pg/pg-get-sql.spec.ts" />
     <method v="2" />
   </configuration>
 </component>

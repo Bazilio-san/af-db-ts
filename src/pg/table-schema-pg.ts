@@ -22,6 +22,7 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
                       character_maximum_length,
                       numeric_precision,
                       numeric_precision_radix,
+                      numeric_scale,
                       datetime_precision,
                       udt_name,
                       is_generated

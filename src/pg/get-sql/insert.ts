@@ -3,6 +3,7 @@ import { prepareSqlValuePg } from '../prepare-value';
 import { ITableSchemaPg } from '../../@types/i-pg';
 import { TDBRecord, TRecordSet } from '../../@types/i-common';
 import { schemaTable } from '../../utils/utils';
+import { NULL } from '../../common';
 
 export const getInsertSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   connectionId: string,
@@ -30,7 +31,7 @@ export const getInsertSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
       if (!fieldDef.isNullable && defVal != null) {
         return defVal;
       }
-      return 'NULL';
+      return NULL;
     });
     return preparedRecordValuesArray.join(',');
   });
