@@ -22,7 +22,7 @@ module.exports = {
     '/src/',
   ],
   globals: { 'ts-jest': { tsconfig: 'tsconfig.json' } },
-  // testSequencer: '<rootDir>/__tests__/test-sequencer.ts',
+  testSequencer: '<rootDir>/__tests__/test-sequencer.js',
   globalSetup: '<rootDir>/__tests__/global-setup.ts',
   globalTeardown: '<rootDir>/__tests__/global-teardown.ts',
   testTimeout: 100_000,
