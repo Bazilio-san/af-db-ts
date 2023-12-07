@@ -71,7 +71,7 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
     case 'real':
     case 'money': // VVQ
     case 'decimal': // VVQ
-    case 'double_precision': // VVQ
+    case 'double precision': // VVQ
       return prepareFloatNumber(value);
 
     case 'json':

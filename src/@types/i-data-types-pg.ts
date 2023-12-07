@@ -50,7 +50,7 @@ export type TDataTypePg =
   'bytea' | // VVQ
 
   'timestamptz' | // timestamp [(p)] with time zone
-  'timestamp with time zone]' |
+  'timestamp with time zone' |
   'timestamp' | // timestamp [(p)] [without time zone]
   'timestamp without time zone' |
 
@@ -103,11 +103,8 @@ export type TArrayTypesPg =
   '_timestamptz' |
 
   '_char' | // VVQ
-  '_oid' | // VVQ
-  '_abstime' | // VVQ
   '_bytea' | // VVQ
 
-  '_name' |
   '_bit' |
   '_inet' |
   '_macaddr' |
@@ -121,3 +118,7 @@ export type TArrayTypesPg =
   '_xml' |
   '_interval' |
   '_timetz'
+  // Не ясно, откуда взялись
+  // '_oid' |
+  // '_abstime' |
+  // '_name' /

@@ -6,7 +6,7 @@ import { IFieldDefPg, ITableSchemaPg, TColumnsSchemaPg, TUniqueConstraintsPg } f
 import { schemaTable } from '../utils/utils';
 import { TDBRecord } from '../@types/i-common';
 import { TDataTypePg } from '../@types/i-data-types-pg';
-import { getTypeByUdtNamePg } from './utils-pg';
+import { getNormalizedTypePg, getTypeByUdtNamePg } from './utils-pg';
 
 // commonSchemaAndTable: <schema>.<table> :  Staff.nnPersones-personGuid
 // schemaAndTablePg: "<schema>"."<table>" :  "Staff"."nnPersones-personGuid"
@@ -34,12 +34,7 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
   fields.forEach((fieldDef) => {
     const columnDefault = fieldDef.column_default != null ? fieldDef.column_default : undefined;
     const name = fieldDef.column_name;
-    let dataType: TDataTypePg = getTypeByUdtNamePg(fieldDef.udt_name);
-    let arrayType: TDataTypePg | undefined;
-    if (fieldDef.data_type === 'ARRAY') {
-      arrayType = dataType;
-      dataType = 'ARRAY';
-    }
+    const dataType: TDataTypePg = getNormalizedTypePg(fieldDef.data_type);
     const fieldSchema: IFieldDefPg = {
       name,
       isNullable: /yes/i.test(fieldDef.is_nullable || ''),
@@ -50,8 +45,7 @@ const getColumnsSchemaPg_ = async (connectionId: string, commonSchemaAndTable: s
       precision: fieldDef.numeric_precision,
       radix: fieldDef.numeric_precision_radix,
       dtPrecision: fieldDef.datetime_precision,
-      // Для dataType = ARRAY тут содержится тип элементов массива
-      arrayType,
+      arrayType: dataType === 'ARRAY' ? getTypeByUdtNamePg(fieldDef.udt_name) : undefined,
       readOnly: fieldDef.is_generated === 'ALWAYS', // boolean;
     };
     Object.entries(fieldSchema).forEach(([prop, value]) => {

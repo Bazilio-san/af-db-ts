@@ -1,6 +1,6 @@
 {
   "name": "af-db-ts",
-  "version": "2.0.64",
+  "version": "2.0.65",
   "description": "A highly specialized function library",
   "main": "./dist/cjs/src/index.js",
   "module": "./dist/esm/src/index.js",

@@ -124,6 +124,7 @@ export {
 export {
   getJsTypeByTypePg,
   getTypeByUdtNamePg,
+  getNormalizedTypePg,
 } from './pg/utils-pg';
 
 export { getInsertSqlPg } from './pg/get-sql/insert';

@@ -35,44 +35,63 @@ export const getJsTypeByTypePg = (dataType?: TDataTypePg, arrayType?: TDataTypeP
 };
 
 const udtNames2TypeMap: { [udtName: string]: TDataTypePg } = {
+  _bit: 'bit',
+  _bool: 'bool',
+  _box: 'box',
+  _bytea: 'bytea',
+  _char: 'char',
+  _circle: 'circle',
+  _date: 'date',
+  _float4: 'real',
+  _float8: 'double precision',
+  _inet: 'inet',
   _int2: 'smallint',
   _int4: 'int',
   _int8: 'bigint',
-  _float8: 'double precision',
-  _float4: 'real',
-  _numeric: 'numeric',
+  _interval: 'interval',
+  _lseg: 'lseg',
+  _macaddr: 'macaddr',
   _money: 'money',
+  _numeric: 'numeric',
+  _path: 'path',
+  _point: 'point',
+  _polygon: 'polygon',
   _text: 'text',
-  _varchar: 'varchar',
-  _bool: 'bool',
   _time: 'time',
-  _date: 'date',
   _timestamp: 'timestamp',
   _timestamptz: 'timestamptz',
-
-  _char: 'char',
-  _oid: 'oid',
-  _abstime: 'abstime',
-  _bytea: 'bytea',
-  _name: 'name',
-  _bit: 'bit',
-  _inet: 'inet',
-  _macaddr: 'macaddr',
-  _point: 'point',
-  _lseg: 'lseg',
-  _path: 'path',
-  _box: 'box',
-  _circle: 'circle',
-  _polygon: 'polygon',
-  _uuid: 'uuid',
-  _xml: 'xml',
-  _interval: 'interval',
   _timetz: 'timetz',
-
-
+  _uuid: 'uuid',
+  _varchar: 'varchar',
+  _xml: 'xml',
+  // _oid: 'oid',
+  // _abstime: 'abstime',
+  // _name: 'name',
 };
-
 export const getTypeByUdtNamePg = (udtName: TArrayTypesPg): TDataTypePg => {
   const dataType = udtNames2TypeMap[udtName];
   return dataType || 'varchar';
 };
+
+const typeNormalizationMap: { [pgDataType: string]: TDataTypePg } = {
+  bool: 'boolean',
+  int2: 'smallint',
+  integer: 'int',
+  int4: 'int',
+  int8: 'bigint',
+  serial2: 'smallserial',
+  serial4: 'serial',
+  serial8: 'bigserial',
+  decimal: 'numeric',
+  float4: 'real',
+  float8: 'double precision',
+  character: 'char',
+  'character varying': 'varchar',
+  'timestamp with time zone': 'timestamptz',
+  'timestamp without time zone': 'timestamp',
+  'time without time zone': 'time',
+  'time with time zone': 'timetz',
+  'bit varying': 'varbit',
+};
+
+export const getNormalizedTypePg = (pgDataType: TDataTypePg): TDataTypePg => typeNormalizationMap[pgDataType] || pgDataType;
