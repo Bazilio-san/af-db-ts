@@ -354,7 +354,9 @@ describe('prepare sql value PG', () => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'timestamp' as TDataTypePg };
       const dateStrOut = prepareSqlValuePg({ value, fieldDef });
-      test(`${value} --> ${dateStrOut}`, () => {
+      const { fromZone: f, setZone: s } = fDev.dateTimeOptions || {};
+      const v = value + (f ? ` / from: ${f}` : '') + (s ? ` / to: ${s}` : '');
+      test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
       });
     });
@@ -428,7 +430,9 @@ describe('prepare sql value PG', () => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'timestamptz' as TDataTypePg };
       const dateStrOut = prepareSqlValuePg({ value, fieldDef });
-      test(`${value} --> ${dateStrOut}`, () => {
+      const { fromZone: f, setZone: s } = fDev.dateTimeOptions || {};
+      const v = value + (f ? ` / from: ${f}` : '') + (s ? ` / to: ${s}` : '');
+      test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
       });
     });
@@ -465,7 +469,9 @@ describe('prepare sql value PG', () => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'date' as TDataTypePg };
       const dateStrOut = prepareSqlValuePg({ value, fieldDef });
-      test(`${value} --> ${dateStrOut}`, () => {
+      const { fromZone: f, setZone: s } = fDev.dateTimeOptions || {};
+      const v = value + (f ? ` / from: ${f}` : '') + (s ? ` / to: ${s}` : '');
+      test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
       });
     });
@@ -473,6 +479,7 @@ describe('prepare sql value PG', () => {
 
   describe('time', () => {
     const testArr: [any, string, IFieldDefPg?][] = [
+      ['22:59:59.1234', `'22:59:59.1234'::time`],
       ['2000-01-22T11:59:59.123', `'14:59:59.123'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
       ['2000-01-22T11:59:59.123', `'11:59:59.123'::time`],
       ['2000-01-22T22:59:59.123', `'01:59:59.123'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
@@ -480,20 +487,20 @@ describe('prepare sql value PG', () => {
       ['2000-01-22T22:59:59.123', `'22:59:59.123'::time`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
 
       ['2000-01-22T11:59:59.1', `'14:59:59.100'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
-      ['2000-01-22T11:59:59', `'11:59:59.000'::time`],
-      ['2000-01-22T22:59', `'01:59:00.000'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22T11:59:59', `'11:59:59'::time`],
+      ['2000-01-22T22:59', `'01:59:00'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
 
       ['2000-01-22 22:59:59.123', `'22:59:59.123'::time`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
       ['2000-01-22 11:59:59.1', `'14:59:59.100'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
-      ['2000-01-22 11:59:59', `'11:59:59.000'::time`],
-      ['2000-01-22 22:59', `'01:59:00.000'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22 11:59:59', `'11:59:59'::time`],
+      ['2000-01-22 22:59', `'01:59:00'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
 
-      ['2000-01-22', `'00:00:00.000'::time`],
+      ['2000-01-22', `'00:00:00'::time`],
 
       ['22:59:59.123', `'22:59:59.123'::time`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
       ['11:59:59.1', `'14:59:59.100'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
-      ['11:59:59', `'11:59:59.000'::time`],
-      ['22:59', `'01:59:00.000'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['11:59:59', `'11:59:59'::time`],
+      ['22:59', `'01:59:00'::time`, { dateTimeOptions: { fromZone: 'UTC' } }],
 
       [new Date(2023, 1, 2, 22, 11, 59, 123), `'22:11:59.123'::time`],
       [1675365119123, `'22:11:59.123'::time`],
@@ -507,7 +514,9 @@ describe('prepare sql value PG', () => {
       const [value, expected, fDev = {}] = caseValues;
       const fieldDef = { ...fDev, dataType: 'time' as TDataTypePg };
       const dateStrOut = prepareSqlValuePg({ value, fieldDef });
-      test(`${value} --> ${dateStrOut}`, () => {
+      const { fromZone: f, setZone: s } = fDev.dateTimeOptions || {};
+      const v = value + (f ? ` / from: ${f}` : '') + (s ? ` / to: ${s}` : '');
+      test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
       });
     });
@@ -519,23 +528,23 @@ describe('prepare sql value PG', () => {
       ['2000-01-22T11:59:59.123', `'11:59:59.123+03:00'::timetz`],
       ['2000-01-22T22:59:59.123', `'01:59:59.123+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
       ['2000-01-22T22:59:59.123', `'22:59:59.123+03:00'::timetz`],
-      ['2000-01-22T22:59:59.123', `'22:59:59.123+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+      ['2000-01-22T22:59:59.123', `'22:59:59.123Z'::timetz`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
 
       ['2000-01-22T11:59:59.1', `'14:59:59.100+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
-      ['2000-01-22T11:59:59', `'11:59:59.000+03:00'::timetz`],
-      ['2000-01-22T22:59', `'01:59:00.000+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22T11:59:59', `'11:59:59+03:00'::timetz`],
+      ['2000-01-22T22:59', `'01:59:00+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
 
-      ['2000-01-22 22:59:59.123', `'22:59:59.123+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+      ['2000-01-22 22:59:59.123', `'22:59:59.123Z'::timetz`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
       ['2000-01-22 11:59:59.1', `'14:59:59.100+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
-      ['2000-01-22 11:59:59', `'11:59:59.000+03:00'::timetz`],
-      ['2000-01-22 22:59', `'01:59:00.000+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['2000-01-22 11:59:59', `'11:59:59+03:00'::timetz`],
+      ['2000-01-22 22:59', `'01:59:00+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
 
-      ['2000-01-22', `'00:00:00.000+03:00'::timetz`],
+      ['2000-01-22', `'00:00:00+03:00'::timetz`],
 
-      ['22:59:59.123', `'22:59:59.123+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
+      ['22:59:59.123', `'22:59:59.123Z'::timetz`, { dateTimeOptions: { fromZone: 'UTC', setZone: 'UTC' } }],
       ['11:59:59.1', `'14:59:59.100+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
-      ['11:59:59', `'11:59:59.000+03:00'::timetz`],
-      ['22:59', `'01:59:00.000+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
+      ['11:59:59', `'11:59:59+03:00'::timetz`],
+      ['22:59', `'01:59:00+03:00'::timetz`, { dateTimeOptions: { fromZone: 'UTC' } }],
 
       [new Date(2023, 1, 2, 22, 11, 59, 123), `'22:11:59.123+03:00'::timetz`],
       [1675365119123, `'22:11:59.123+03:00'::timetz`],
@@ -547,9 +556,11 @@ describe('prepare sql value PG', () => {
     ];
     testArr.forEach((caseValues) => {
       const [value, expected, fDev = {}] = caseValues;
-      const fieldDef = { ...fDev, dataType: 'time' as TDataTypePg };
+      const fieldDef = { ...fDev, dataType: 'timetz' as TDataTypePg };
       const dateStrOut = prepareSqlValuePg({ value, fieldDef });
-      test(`${value} --> ${dateStrOut}`, () => {
+      const { fromZone: f, setZone: s } = fDev.dateTimeOptions || {};
+      const v = value + (f ? ` / from: ${f}` : '') + (s ? ` / to: ${s}` : '');
+      test(`${v} --> ${dateStrOut}`, () => {
         expect(dateStrOut).toBe(expected);
       });
     });

@@ -36,7 +36,7 @@
     "name": "i2",
     "precision": 32,
     "radix": 2,
-    "readOnly": false,
+    "readOnly": false
   },
   "si1": {
     "name": "si1",
@@ -77,7 +77,7 @@
     "name": "bool1",
     "isNullable": false,
     "hasDefault": true,
-    "dataType": "bool",
+    "dataType": "boolean",
     "readOnly": false
   },
   "arr_int": {
@@ -101,7 +101,56 @@
     "isNullable": true,
     "columnDefault": "false",
     "hasDefault": true,
-    "dataType": "bool",
+    "dataType": "boolean",
+    "readOnly": false
+  },
+  "money": {
+    "dataType": "money",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "money",
+    "readOnly": false
+  },
+  "numeric": {
+    "dataType": "numeric",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "numeric",
+    "precision": 7,
+    "radix": 10,
+    "readOnly": false
+  },
+  "real": {
+    "dataType": "real",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "real",
+    "precision": 24,
+    "radix": 2,
+    "readOnly": false
+  },
+  "bytea": {
+    "dataType": "bytea",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "bytea",
+    "readOnly": false
+  },
+  "decimal": {
+    "dataType": "numeric",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "decimal",
+    "radix": 10,
+    "readOnly": false
+  },
+  "double_precision": {
+    "dataType": "double precision",
+    "hasDefault": false,
+    "isNullable": true,
+    "name": "double_precision",
+    "precision": 53,
+    "radix": 2,
     "readOnly": false
   },
   "gen1": {

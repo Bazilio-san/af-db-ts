@@ -41,7 +41,7 @@ export const prepareSqlStringMs = (value: any, fieldDef: IFieldDefMs): string | 
 const prepareDateTimeOffset = (
   value: any,
   fieldDef: IFieldDef,
-): string | typeof NULL => getDatetimeWithPrecisionAndOffset(value, fieldDef);
+): string | typeof NULL => getDatetimeWithPrecisionAndOffset({ value, fieldDef });
 
 export const prepareSqlValueMs = (arg: { value: any, fieldDef: IFieldDefMs, }): string | typeof NULL => {
   const { value, fieldDef } = arg;

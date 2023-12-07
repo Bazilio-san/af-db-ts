@@ -34,12 +34,14 @@ export const prepareSqlStringPg = (value: any, fieldDef: IFieldDefPg): string | 
 const prepareDateTimeOffset = (
   value: any,
   fieldDef: IFieldDef,
-): string | typeof NULL => getDatetimeWithPrecisionAndOffset(value, fieldDef, 6);
+): string | typeof NULL => getDatetimeWithPrecisionAndOffset({ value, fieldDef, defaultDtPrecision: 6 });
 
-const prepareTimeOffset = (value: any, fieldDef: IFieldDefPg): string | typeof NULL => {
-  const { includeOffset = fieldDef.dataType === 'timetz' } = fieldDef.dateTimeOptions || {};
-  const fd: IFieldDefPg = { ...fieldDef, noQuotes: true, dateTimeOptions: { ...(fieldDef.dateTimeOptions || {}), includeOffset } };
-  const dts = getDatetimeWithPrecisionAndOffset(value, fd, 6);
+const prepareTimeOffset = (value: any, fieldDefOriginal: IFieldDefPg): string | typeof NULL => {
+  const fieldDef: IFieldDefPg = { ...fieldDefOriginal, noQuotes: true };
+  fieldDef.dateTimeOptions = fieldDef.dateTimeOptions || {};
+  const { includeOffset = fieldDef.dataType === 'timetz' } = fieldDef.dateTimeOptions;
+  fieldDef.dateTimeOptions.includeOffset = includeOffset;
+  const dts = getDatetimeWithPrecisionAndOffset({ value, fieldDef, defaultDtPrecision: 6, stripTrailingZeros: true });
   return dts === NULL ? NULL : `'${dts.substring(11, dts.length)}'::${fieldDef.dataType}`;
 };
 

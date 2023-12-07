@@ -81,7 +81,13 @@ export const dateTimeValue = (value: any, fieldDef: IFieldDef, fn: Function): st
   return q(v, fieldDef.noQuotes);
 };
 
-export const getDatetimeWithPrecisionAndOffset = (value: any, fieldDef: IFieldDef, defaultDtPrecision: number = 3): string | typeof NULL => {
+export const getDatetimeWithPrecisionAndOffset = (arg: {
+  value: any,
+  fieldDef: IFieldDef,
+  defaultDtPrecision?: number,
+  stripTrailingZeros?: boolean,
+}): string | typeof NULL => {
+  const { value, fieldDef, defaultDtPrecision = 3, stripTrailingZeros = false } = arg;
   const dt = getLuxonDT(value, fieldDef);
   if (!dt) {
     return NULL;
@@ -100,8 +106,15 @@ export const getDatetimeWithPrecisionAndOffset = (value: any, fieldDef: IFieldDe
     sss = `${isoZ.substring(20, 23)}0000`;
   }
   const dtPrecision = fieldDef.dtPrecision == null ? defaultDtPrecision : fieldDef.dtPrecision;
-  const dotMillis = !dtPrecision ? '' : `.${sss}`.substring(0, dtPrecision + 1);
-
+  let dotMillis = !dtPrecision ? '' : `.${sss}`.substring(0, dtPrecision + 1);
+  if (dotMillis && stripTrailingZeros) {
+    dotMillis = dotMillis.replace(/([^0])0+$/, '$1');
+    if (dotMillis === '.') {
+      dotMillis = '';
+    } else if (dotMillis.length < 4) {
+      dotMillis = (`${dotMillis}000`).substring(0, 4);
+    }
+  }
   const { includeOffset = true } = fieldDef.dateTimeOptions || {};
   const offset = includeOffset ? isoZ.substring(23, isoZ.length) : ''; // +03:00
 

@@ -58,6 +58,12 @@ describe('getTableSchemaPg()', () => {
       'bool2',
       'arr_int',
       'arr_str',
+      'decimal',
+      'numeric',
+      'money',
+      'real',
+      'double_precision',
+      'bytea',
       'gen1',
     ]);
   });
@@ -73,6 +79,12 @@ describe('getTableSchemaPg()', () => {
       'bool2',
       'arr_int',
       'arr_str',
+      'decimal',
+      'numeric',
+      'money',
+      'real',
+      'double_precision',
+      'bytea',
     ]);
   });
   test('serialsFields', async () => {
