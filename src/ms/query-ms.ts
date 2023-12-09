@@ -1,9 +1,10 @@
 import { IResult } from 'mssql';
 import * as sql from 'mssql';
+import { bg, magenta, rs } from 'af-color';
 import { logSqlError } from '../common';
 import { closeDbConnectionsMs, getPoolMs } from './pool-ms';
 
-export const queryMs = async <ColumnSetDescription = any>(
+export const queryMs = async <ColumnSetDescription = any> (
   connectionId: string,
   sqlText: string,
   throwError?: boolean,
@@ -19,7 +20,13 @@ export const queryMs = async <ColumnSetDescription = any>(
     // noinspection UnnecessaryLocalVariableJS
     const result = await request.query(sqlText);
     return result;
-  } catch (err) {
+  } catch (err: Error | any) {
+    const { lineNumber } = err || {};
+    if (lineNumber) {
+      const sqlTextLines = sqlText.replace(/\r\n/, '\n').split(/\n/);
+      sqlTextLines[lineNumber - 1] = bg.yellow + sqlTextLines[lineNumber - 1] + rs + magenta;
+      sqlText = sqlTextLines.join('\n');
+    }
     logSqlError(err, !throwError, sqlText, prefix);
   }
 };
