@@ -16,7 +16,9 @@ export const queryMs = async <ColumnSetDescription = any>(
       return;
     }
     const request = new sql.Request(pool);
-    return request.query(sqlText);
+    // noinspection UnnecessaryLocalVariableJS
+    const result = await request.query(sqlText);
+    return result;
   } catch (err) {
     logSqlError(err, !throwError, sqlText, prefix);
   }
