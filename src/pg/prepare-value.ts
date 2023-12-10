@@ -45,7 +45,7 @@ const prepareTimeOffset = (value: any, fieldDefOriginal: IFieldDefPg): string | 
   return dts === NULL ? NULL : `'${dts.substring(11, dts.length)}'::${fieldDef.dataType}`;
 };
 
-const prepareJsonPg = (value: any, dataType: 'json' | 'jsonb'): string | typeof NULL => {
+export const prepareJsonPg = (value: any, dataType: 'json' | 'jsonb'): string | typeof NULL => {
   const v = prepareJSON(value);
   if (v === NULL) {
     return NULL;

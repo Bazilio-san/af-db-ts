@@ -148,6 +148,8 @@ export {
 export {
   prepareSqlStringPg,
   prepareSqlValuePg,
+  prepareJsonPg,
+  quoteStringPg,
 } from './pg/prepare-value';
 
 export { queryPg } from './pg/query-pg';
