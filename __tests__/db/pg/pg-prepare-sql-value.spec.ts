@@ -642,6 +642,8 @@ describe('prepare sql value PG', () => {
 
       [[1, '2', 'a', '', null], `'{1,2,null,null,null}'`, { arrayType: 'int' }],
       [[1, '2', 'a', '', null], `'{"1","2","a","",null}'`, { arrayType: 'varchar' }],
+      [['aaa', `a"b"c'd'e\\f$$g`], `$s$\{"aaa","a\\"b\\"c'd'e\\\\f$$g"}$s$`, { arrayType: 'varchar' }],
+      [['aaa', `a"b"c'd'e\\f`], `$s$\{"aaa","a\\"b\\"c'd'e\\\\f"}$s$`, { arrayType: 'varchar' }],
       [[1, 0, '2', 'a', '', true, false, null], `'{true,false,false,false,false,true,false,null}'`, { arrayType: 'bool' }],
     ];
     testArr.forEach((caseValues) => {

@@ -1,19 +1,44 @@
 import * as sql from 'mssql';
 import { getBool } from 'af-tools-ts';
+import { DateTime } from 'luxon';
 import { NULL } from '../common';
 import { parseFloatNumber, parseIntNumberS, prepareBigIntNumber } from './utils-num';
 import { TDataTypeMs } from '../@types/i-data-types-ms';
 import { TDataTypePg } from '../@types/i-data-types-pg';
 import { prepareUUID } from './utils';
 
+const toDateTime = (v: any): DateTime | null => {
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return DateTime.fromJSDate(v);
+    // return DateTime.fromJSDate(v).toUTC().toISO({ includeOffset: true });
+  }
+  if (v.isLuxonDateTime) {
+    return v;
+  }
+  if (v._isAMomentObject) {
+    return DateTime.fromJSDate(v.toDate());
+  }
+  return null;
+};
+
 const elementString = (value: any[]): string[] => {
   // noinspection UnnecessaryLocalVariableJS
   const arr: string[] = value.map((v) => {
-    if (v === '') {
-      return '';
+    if (v == null) {
+      return null;
     }
-    return v == null ? null : v;
-  }).map((v) => (v == null ? NULL : `"${v}"`));
+    const type = typeof v;
+    if (type === 'string' || type === 'number' || type === 'boolean') {
+      return String(v);
+    }
+    if (type === 'object') {
+      v = toDateTime(v);
+      if (v?.isValid) {
+        return v.toUTC().toISO({ includeOffset: true });
+      }
+    }
+    return null;
+  }).map((v) => JSON.stringify(v));
   return arr;
 };
 
