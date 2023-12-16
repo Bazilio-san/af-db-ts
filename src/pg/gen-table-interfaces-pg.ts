@@ -6,6 +6,7 @@ import { IFieldDefPg } from '../@types/i-pg';
 import { getTableSchemaPg } from './table-schema-pg';
 import { closeAllPgConnectionsPg } from './pool-pg';
 import { getJsTypeByTypePg } from './utils-pg';
+import { toLower } from "lodash";
 
 // export const getJsTypeByUdtNamePg = (udtName?: TArrayTypesPg): string => { // VVR
 //   switch (udtName) {
@@ -35,7 +36,7 @@ import { getJsTypeByTypePg } from './utils-pg';
 const getFieldDefinition = (
   d: IFieldDefPg,
 ): string => {
-  const isOptional = d.isNullable || (d.hasDefault && !String(d.hasDefault).includes('nextval'));
+  const isOptional = d.isNullable || (d.hasDefault && !String(d.columnDefault).toLowerCase().includes('nextval'));
   return `${d.name}${isOptional ? '?' : ''}: ${getJsTypeByTypePg(d.dataType)}${d.isNullable ? ' | null' : ''}`;
 };
 const TABLE_INTERFACES_DIR = __dirname.replace(/\\/g, '/').replace(/\/dist\//, '/');
