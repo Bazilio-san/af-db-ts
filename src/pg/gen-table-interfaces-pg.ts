@@ -34,8 +34,10 @@ import { getJsTypeByTypePg } from './utils-pg';
 
 const getFieldDefinition = (
   d: IFieldDefPg,
-): string => `${d.name}${d.isNullable || d.hasDefault ? '?' : ''}: ${getJsTypeByTypePg(d.dataType)}${d.isNullable ? ' | null' : ''}`;
-
+): string => {
+  const isOptional = d.isNullable || (d.hasDefault && !String(d.hasDefault).includes('nextval'));
+  return `${d.name}${isOptional ? '?' : ''}: ${getJsTypeByTypePg(d.dataType)}${d.isNullable ? ' | null' : ''}`;
+};
 const TABLE_INTERFACES_DIR = __dirname.replace(/\\/g, '/').replace(/\/dist\//, '/');
 
 export const genTableInterfacePg = async (

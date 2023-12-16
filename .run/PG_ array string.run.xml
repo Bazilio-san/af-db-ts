@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PG: array string" type="JavaScriptTestRunnerJest" folderName="PG">
+    <node-interpreter value="project" />
+    <jest-package value="$PROJECT_DIR$/node_modules/jest" />
+    <working-dir value="$PROJECT_DIR$" />
+    <jest-options value="--runInBand --detectOpenHandles --forceExit" />
+    <envs>
+      <env name="TZ" value="Europe/Moscow" />
+    </envs>
+    <scope-kind value="TEST_FILE" />
+    <test-file value="$PROJECT_DIR$/__tests__/db/pg/array-string-escape/pg-array-string-escape.spec.ts" />
+    <method v="2" />
+  </configuration>
+</component>
