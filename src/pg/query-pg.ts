@@ -22,6 +22,6 @@ export const queryPg = async <R extends TDBRecord = any> (
     }
     return res;
   } catch (err) {
-    logSqlError(err, !throwError, sqlText, prefix);
+    logSqlError(err, throwError, sqlText, prefix);
   }
 };
