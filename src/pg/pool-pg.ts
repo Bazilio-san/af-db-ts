@@ -51,9 +51,9 @@ export const getDbConfigPg = <T> (connectionId: string, includeOptions?: boolean
 
 export const poolsCachePg: IConnectionPoolsPg = {};
 
-export const getPoolPg = async (connectionId: string): Promise<IPoolPg> => {
+export const getPoolPg = async (connectionId: string, throwError?: boolean): Promise<IPoolPg> => {
   if (!poolsCachePg[connectionId]) {
-    const poolConfig = getDbConfigPg<PoolConfig>(connectionId, true, true);
+    const poolConfig = getDbConfigPg<PoolConfig>(connectionId, true, throwError);
     const pool = new Pool(poolConfig) as IPoolPg;
     poolsCachePg[connectionId] = pool;
     pool.on('error', (err: Error, client: PoolClient) => {

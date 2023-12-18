@@ -12,9 +12,9 @@ export const queryPg = async <R extends TDBRecord = any> (
   prefix?: string,
 ):
   Promise<QueryResult<R> | undefined> => {
-  const pool: IPoolPg = await getPoolPg(connectionId);
-  let res: QueryResult;
   try {
+    const pool: IPoolPg = await getPoolPg(connectionId, throwError);
+    let res: QueryResult;
     if (Array.isArray(sqlValues)) {
       res = await pool.query(sqlText, sqlValues);
     } else {
