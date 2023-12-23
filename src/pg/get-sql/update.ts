@@ -41,6 +41,6 @@ export const getUpdateSqlPg = async <U extends TDBRecord = TDBRecord>(arg: {
   // noinspection UnnecessaryLocalVariableJS
   const updateSql = `${'UPDATE'} ${schemaTable.to.pg(commonSchemaAndTable)} SET
     ${sets}
-  WHERE ${where};`;
+  ${where ? `WHERE ${where}` : ''};`;
   return updateSql;
 };
