@@ -147,6 +147,15 @@ export const prepareSqlValuePg = (arg: { value: any, fieldDef: IFieldDefPg }): a
       v = `{${v}}`;
       return fieldDef.noQuotes ? v : quoteStringPg(v);
     }
+
+    case 'vector': {
+      v = arrayToJsonList(value, 'number');
+      if (v === NULL) {
+        return NULL;
+      }
+      v = `[${v}]`;
+      return fieldDef.noQuotes ? v : quoteStringPg(v);
+    }
     // 'USER_DEFINED'
     default:
       return prepareSqlStringPg(value, fieldDef);

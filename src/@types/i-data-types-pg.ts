@@ -54,6 +54,8 @@ export type TDataTypePg =
 
   'ARRAY' |
   'USER_DEFINED' |
+  'USER-DEFINED' |
+  'vector' |
 
   // Не задействованы
   'smallserial' |

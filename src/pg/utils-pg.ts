@@ -61,6 +61,7 @@ export const getJsTypeByTypePg = (dataType?: TDataTypePg, arrayType?: TDataTypeP
     case 'time with time zone':
       return 'string | Date | number';
 
+    case 'USER-DEFINED':
     case 'USER_DEFINED':
       return 'string';
 
@@ -90,6 +91,10 @@ export const getJsTypeByTypePg = (dataType?: TDataTypePg, arrayType?: TDataTypeP
       const jsType = getJsTypeByTypePg(arrayType);
       return `${jsType}[]`;
     }
+
+    case 'vector':
+      return `number[]`;
+
     default:
       return 'string';
   }
@@ -125,6 +130,7 @@ const udtNames2TypeMap: { [udtName: string]: TDataTypePg } = {
   _uuid: 'uuid',
   _varchar: 'varchar',
   _xml: 'xml',
+  vector: 'vector',
   // _oid: 'oid',
   // _abstime: 'abstime',
   // _name: 'name',
