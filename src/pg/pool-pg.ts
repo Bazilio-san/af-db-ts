@@ -1,9 +1,10 @@
+/* eslint-disable no-await-in-loop */
 import config from 'config';
 import { Pool, PoolClient, PoolConfig } from 'pg';
 import { echo } from 'af-echo-ts';
 import { cloneDeep } from 'af-tools-ts';
 import { logger } from '../logger-error';
-import { IDbOptionsPg, IDbsPg } from '../@types/i-config';
+import { IDbOptionsPg, IDbsPg, IRegisterTypeFn } from '../@types/i-config';
 import { IConnectionPoolsPg, IPoolClientPg, IPoolPg } from '../@types/i-pg';
 import { _3_HOURS } from '../common';
 
@@ -51,18 +52,21 @@ export const getDbConfigPg = <T> (connectionId: string, includeOptions?: boolean
 
 export const poolsCachePg: IConnectionPoolsPg = {};
 
-export const getPoolPg = async (connectionId: string, throwError?: boolean): Promise<IPoolPg> => {
+export const getPoolPg = async (connectionId: string, throwError?: boolean, registerTypesFunctions?: IRegisterTypeFn[]): Promise<IPoolPg> => {
   if (!poolsCachePg[connectionId]) {
-    const poolConfig = getDbConfigPg<PoolConfig>(connectionId, true, throwError);
+    const poolConfig = getDbConfigPg<PoolConfig & IDbOptionsPg>(connectionId, true, throwError) as PoolConfig & IDbOptionsPg;
     const pool = new Pool(poolConfig) as IPoolPg;
     poolsCachePg[connectionId] = pool;
     pool.on('error', (err: Error, client: PoolClient) => {
       client.release(true);
       logger.error(err);
     });
-    pool.on('connect', (client: PoolClient) => {
+    pool.on('connect', async (client: PoolClient) => {
       const { database, processID } = client as unknown as IPoolClientPg;
       echo.debug(`PG client [${connectionId}] connected! DB: "${database}" / processID: ${processID}`);
+      if (Array.isArray(registerTypesFunctions)) {
+        await Promise.all(registerTypesFunctions.map((fn) => fn(client)));
+      }
     });
     pool.on('remove', (client: PoolClient) => {
       const { database, processID } = client as unknown as IPoolClientPg;

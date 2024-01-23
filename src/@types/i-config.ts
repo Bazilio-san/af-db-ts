@@ -1,3 +1,6 @@
+import { TypeFormat, TypeId } from 'pg-types';
+import { PoolClient } from "pg";
+
 export interface IDBConfigCommon {
   dialect?: 'mssql' | 'pg',
   port: string | number | null | undefined,
@@ -35,6 +38,8 @@ export interface IDbOptionsMs {
   requestTimeout: number
   connectionTimeout: number
 }
+
+export type IRegisterTypeFn = (client: PoolClient) => Promise<void>;
 
 export interface IDbOptionsPg {
   // all valid client config options are also valid here

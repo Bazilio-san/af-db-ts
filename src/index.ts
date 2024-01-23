@@ -15,6 +15,7 @@ export {
   IDBConfigPg,
   IDbsMs,
   IDbsPg,
+  IRegisterTypeFn,
   IDbOptionsPg,
   IDbOptionsMs,
 } from './@types/i-config';
