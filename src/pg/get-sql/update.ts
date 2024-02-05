@@ -10,12 +10,14 @@ export const getUpdateSqlPg = async <U extends TDBRecord = TDBRecord>(arg: {
   record: U,
   customSets?: TDBRecord,
   updateIdentity?: string[],
+  returning?: string,
 }): Promise<string> => {
   const {
     connectionId,
     commonSchemaAndTable,
     record,
     customSets = {},
+    returning = '',
   } = arg;
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, commonSchemaAndTable);
   const { columnsSchema, pk, fieldsWoSerialsAndRO } = tableSchema;
@@ -41,6 +43,7 @@ export const getUpdateSqlPg = async <U extends TDBRecord = TDBRecord>(arg: {
   // noinspection UnnecessaryLocalVariableJS
   const updateSql = `${'UPDATE'} ${schemaTable.to.pg(commonSchemaAndTable)} SET
     ${sets}
-  ${where ? `WHERE ${where}` : ''};`;
+  ${where ? `WHERE ${where}` : ''}
+  ${returning};`;
   return updateSql;
 };
