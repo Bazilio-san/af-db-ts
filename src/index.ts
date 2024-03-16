@@ -31,6 +31,7 @@ export { setLogger } from './logger-error';
 export {
   schemaTable,
   prepareJSON,
+  prepareUUID,
   binToHexString,
   removePairBrackets,
   q,
@@ -92,6 +93,7 @@ export {
 export {
   prepareSqlValueMs,
   prepareSqlStringMs,
+  escapeStringMs,
 } from './ms/prepare-value';
 
 export { queryMs } from './ms/query-ms';
