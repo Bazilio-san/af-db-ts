@@ -7,6 +7,23 @@ timezone: Europe/Moscow
 
 db:
   mssql:
+    options:
+      options:
+        enableArithAbort: false
+      pool:
+        max: 100
+        min: 1
+        idleTimeoutMillis: 3600000
+        acquireTimeoutMillis: 3600000
+        createTimeoutMillis: 3600000
+        destroyTimeoutMillis: 3600000
+        reapIntervalMillis: 3600000
+        createRetryIntervalMillis: 3600000
+      trustServerCertificate: true
+      stream: false
+      parseJSON: false
+      requestTimeout: 3600000
+      connectionTimeout: 120000
     dbs:
       test:
         server: test
@@ -16,6 +33,12 @@ db:
         password: '***'
   postgres:
     dbs:
+      options:
+        connectionTimeoutMillis: 300_000
+        idleTimeoutMillis: 3600000
+        max: 10
+        statement_timeout: 3600000
+        query_timeout: 3600000
       test:
         host: test
         port: 5432
