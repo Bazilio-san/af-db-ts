@@ -11,6 +11,7 @@ export const getInsertSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   recordset: TRecordSet<U>,
   excludeFromInsert?: string[],
   addOutputInserted?: boolean,
+  isErrorOnConflict?: boolean,
 }): Promise<string> => {
   const { commonSchemaAndTable } = arg;
 
@@ -41,6 +42,6 @@ export const getInsertSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   const target = schemaTable.to.pg(commonSchemaAndTable);
   // noinspection UnnecessaryLocalVariableJS
   const insertSQL = `INSERT INTO ${target} (${insertFieldsList})
-                     VALUES ${values} ON CONFLICT DO NOTHING ${out};`;
+                     VALUES ${values}${arg.isErrorOnConflict ? '' : 'ON CONFLICT DO NOTHING'} ${out};`;
   return insertSQL;
 };
