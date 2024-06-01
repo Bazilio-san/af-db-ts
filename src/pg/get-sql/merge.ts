@@ -9,10 +9,11 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   commonSchemaAndTable: string,
   recordset: TRecordSet<U>,
   omitFields?: string[],
+  fieldsExcludedFromUpdatePart?: string[],
   noUpdateIfNull?: boolean,
   mergeCorrection?: (_sql: string) => string,
 }): Promise<string> => {
-  const { connectionId, commonSchemaAndTable, recordset, omitFields = [], noUpdateIfNull } = arg;
+  const { connectionId, commonSchemaAndTable, recordset, omitFields = [], noUpdateIfNull, fieldsExcludedFromUpdatePart = [] } = arg;
   if (!recordset?.length) {
     return '';
   }
@@ -40,7 +41,13 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
     return `(${preparedValues.join(', ')})`;
   }).join(',\n  ').trim();
 
-  const updateSetStr = mergeFieldsArr.map((f) => {
+  let updateFieldsArr: string[] = mergeFieldsArr;
+  if (fieldsExcludedFromUpdatePart?.length) {
+    const set = new Set(fieldsExcludedFromUpdatePart);
+    updateFieldsArr = mergeFieldsArr.filter((fieldName) => !set.has(fieldName));
+  }
+
+  const updateSetStr = updateFieldsArr.map((f) => {
     const vArr = [`EXCLUDED."${f}"`];
     if (noUpdateIfNull) {
       vArr.push(`${schemaTableStr}."${f}"`);
