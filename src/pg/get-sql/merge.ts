@@ -12,8 +12,17 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   fieldsExcludedFromUpdatePart?: string[],
   noUpdateIfNull?: boolean,
   mergeCorrection?: (_sql: string) => string,
+  returning?: string, // '*' | ' "anyFieldName1", "anyFieldName2"'
 }): Promise<string> => {
-  const { connectionId, commonSchemaAndTable, recordset, omitFields = [], noUpdateIfNull, fieldsExcludedFromUpdatePart = [] } = arg;
+  const {
+    connectionId,
+    commonSchemaAndTable,
+    recordset,
+    omitFields = [],
+    noUpdateIfNull,
+    fieldsExcludedFromUpdatePart = [],
+    returning,
+  } = arg;
   if (!recordset?.length) {
     return '';
   }
@@ -69,6 +78,7 @@ VALUES
 ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')})
 DO UPDATE SET
   ${updateSetStr}
+  ${returning ? `RETURNING ${returning}` : ''}
 ;`;
   if (typeof arg.mergeCorrection === 'function') {
     mergeSQL = arg.mergeCorrection(mergeSQL);
