@@ -1,12 +1,12 @@
 /* eslint-disable no-await-in-loop */
 import config from 'config';
 import { Pool, PoolClient, PoolConfig } from 'pg';
-import { echo } from 'af-echo-ts';
 import { cloneDeep } from 'af-tools-ts';
 import { logger } from '../logger-error';
 import { IDbOptionsPg, IDbsPg, IRegisterTypeFn } from '../@types/i-config';
 import { IConnectionPoolsPg, IPoolClientPg, IPoolPg } from '../@types/i-pg';
 import { _3_HOURS } from '../common';
+import { debugX } from '../debug';
 
 const cfg = cloneDeep(config.util.toObject(config)) as any;
 
@@ -63,14 +63,14 @@ export const getPoolPg = async (connectionId: string, throwError?: boolean, regi
     });
     pool.on('connect', async (client: PoolClient) => {
       const { database, processID } = client as unknown as IPoolClientPg;
-      echo.debug(`PG client [${connectionId}] connected! DB: "${database}" / processID: ${processID}`);
+      debugX(`PG client [${connectionId}] connected! DB: "${database}" / processID: ${processID}`);
       if (Array.isArray(registerTypesFunctions)) {
         await Promise.all(registerTypesFunctions.map((fn) => fn(client)));
       }
     });
     pool.on('remove', (client: PoolClient) => {
       const { database, processID } = client as unknown as IPoolClientPg;
-      echo.debug(`PG client [${connectionId}] removed. DB: "${database}" / processID: ${processID}`);
+      debugX(`PG client [${connectionId}] removed. DB: "${database}" / processID: ${processID}`);
     });
     await pool.connect();
   }
