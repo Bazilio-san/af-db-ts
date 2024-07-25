@@ -138,6 +138,8 @@ export { getUpdateSqlPg } from './pg/get-sql/update';
 
 export { insertPg, EUpdateLevel } from './pg/insert-pg';
 
+export { getResetSequenceSqlPg } from './pg/get-sql/reset-sequence';
+
 export { isTableOrViewExistsPg } from './pg/is-table-or-view-exists';
 
 export {
