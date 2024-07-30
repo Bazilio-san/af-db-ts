@@ -12,6 +12,6 @@ export const getResetSequenceSqlPg = async (arg: {
 
   return serialsFields.map((incFName) => {
     const sequenceName = `${table}_${incFName}_seq`;
-    return `SELECT setval('"${schema}"."${sequenceName}"', (SELECT MAX("${incFName}") FROM "${schema}"."${table}"));`;
+    return `SELECT setval('"${schema}"."${sequenceName}"', (SELECT COALESCE(MAX("${incFName}"), 1) FROM "${schema}"."${table}"));`;
   }).join('\n');
 };
