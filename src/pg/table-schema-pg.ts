@@ -152,10 +152,11 @@ export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTabl
     });
     const fieldsArray: string[] = Object.keys(columnsSchema);
     const readOnlyFields: string[] = Object.values(columnsSchema).filter((s) => s.readOnly).map((s) => s.name as string);
+    const fieldsWoRO: string[] = fieldsArray.filter((f) => !readOnlyFields.includes(f));
     const fieldsWoSerialsAndRO: string[] = fieldsArray.filter((f) => !serialsFields.includes(f) && !readOnlyFields.includes(f));
 
     tableSchema = {
-      columnsSchema, pk, uc, defaults, serialsFields, fieldsArray, fieldsWoSerialsAndRO, readOnlyFields,
+      columnsSchema, pk, uc, defaults, serialsFields, fieldsArray, fieldsWoRO, fieldsWoSerialsAndRO, readOnlyFields,
     };
     tableSchemaHash[commonSchemaAndTable] = tableSchema;
   } catch (err) {

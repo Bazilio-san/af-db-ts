@@ -23,6 +23,7 @@ export interface ITableSchemaPg {
   fieldsArray: TFieldName[], // массив имен всех полей
   serialsFields: TFieldName[], // массив имен полей типа identity
   readOnlyFields: TFieldName[], // массив имен полей ReadOnly
+  fieldsWoRO: TFieldName[], // массив имен полей без полей ReadOnly
   fieldsWoSerialsAndRO: TFieldName[], // массив имен полей без полей identity и ReadOnly
 }
 

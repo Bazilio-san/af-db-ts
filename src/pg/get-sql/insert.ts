@@ -12,13 +12,15 @@ export const getInsertSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   excludeFromInsert?: string[],
   addOutputInserted?: boolean,
   isErrorOnConflict?: boolean,
+  keepSerialFields?: boolean,
 }): Promise<string> => {
   const { commonSchemaAndTable } = arg;
 
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(arg.connectionId, commonSchemaAndTable);
-  const { columnsSchema, fieldsWoSerialsAndRO, defaults } = tableSchema;
+  const { columnsSchema, fieldsWoRO, fieldsWoSerialsAndRO, defaults } = tableSchema;
 
-  const insertFieldsArray = fieldsWoSerialsAndRO.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
+  const insertFieldsListPre = arg.keepSerialFields ? fieldsWoRO : fieldsWoSerialsAndRO;
+  const insertFieldsArray = insertFieldsListPre.filter((f) => (!(arg.excludeFromInsert || []).includes(f)));
   const insertFieldsList = insertFieldsArray.map((f) => `"${f}"`).join(', ');
 
   const preparedRowsArray = arg.recordset.map((record) => {

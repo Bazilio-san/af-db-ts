@@ -10,8 +10,13 @@ export const getResetSequenceSqlPg = async (arg: {
 
   const { serialsFields } = await getTableSchemaPg(arg.connectionId, commonSchemaAndTable);
 
-  return serialsFields.map((incFName) => {
-    const sequenceName = `${table}_${incFName}_seq`;
-    return `SELECT setval('"${schema}"."${sequenceName}"', (SELECT COALESCE(MAX("${incFName}"), 1) FROM "${schema}"."${table}"));`;
+  // eslint-disable-next-line arrow-body-style
+  return serialsFields.map((serialFieldName) => {
+    return `SELECT setval(
+                       pg_get_serial_sequence('"${schema}"."${table}"', '${serialFieldName}'),
+                       (SELECT COALESCE(MAX("${serialFieldName}"), 1) FROM "${schema}"."${table}")
+                   );`;
+    // const sequenceName = `${table}_${serialFieldName}_seq`;
+    // return `SELECT setval('"${schema}"."${sequenceName}"', (SELECT COALESCE(MAX("${serialFieldName}"), 1) FROM "${schema}"."${table}"));`;
   }).join('\n');
 };
