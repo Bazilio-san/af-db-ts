@@ -46,8 +46,9 @@ export const genTableInterfacePg = async (
   const tableSchema = await getTableSchemaPg(connectionId, commonSchemaAndTable);
   const interfaceName = `I${commonSchemaAndTable
     .replace('.', '_')
-    .split('_')
-    .map((word) => word[0].toUpperCase() + word.substring(1)).join('')}Record`;
+    .split(/_+/)
+    .map((word) => (word ? word[0].toUpperCase() + word.substring(1) : ''))
+    .join('')}Record`;
 
   const linesArr = Object.values(tableSchema.columnsSchema).map(getFieldDefinition);
   const content = `export interface ${interfaceName} {\n${linesArr.map((v) => `  ${v}`).join(',\n')},\n}\n`;

@@ -23,8 +23,8 @@ export const genTableInterfaceMs = async (
   const tableSchema = await getTableSchemaMs(connectionId, commonSchemaAndTable);
   const interfaceName = `I${schemaTable.to.common(commonSchemaAndTable)
     .replace('.', '_')
-    .split('_')
-    .map((word) => word[0].toUpperCase() + word.substring(1))
+    .split(/_+/)
+    .map((word) => (word ? word[0].toUpperCase() + word.substring(1) : ''))
     .join('')}Record`;
 
   const linesArr = Object.values(tableSchema.columnsSchema).map(getFieldDefinition);
