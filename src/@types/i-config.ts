@@ -1,7 +1,7 @@
-import { TypeFormat, TypeId } from 'pg-types';
-import { PoolClient } from "pg";
+import { PoolClient } from 'pg';
 
 export interface IDBConfigCommon {
+  label?: string,
   dialect?: 'mssql' | 'pg',
   port: string | number | null | undefined,
   database: string,
