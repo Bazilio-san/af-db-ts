@@ -12,7 +12,7 @@ export const isTableOrViewExistsPg = async (
     schemaOrFullName: string,
     tableOrViewName?: string,
   },
-  schemaOrFullName: string,
+  schemaOrFullName?: string,
   tableOrViewName?: string,
 ): Promise<boolean> => {
   let poolConfig: (PoolConfig & IDbOptionsPg) | undefined;
