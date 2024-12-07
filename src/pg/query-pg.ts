@@ -1,12 +1,20 @@
-import { QueryResult } from 'pg';
+import { PoolConfig, QueryResult } from 'pg';
 import { getPoolPg } from './pool-pg';
 import { logSqlError } from '../common';
 import { IPoolPg } from '../@types/i-pg';
 import { TDBRecord } from '../@types/i-common';
-import { IRegisterTypeFn } from '../@types/i-config';
+import { IDbOptionsPg, IRegisterTypeFn } from '../@types/i-config';
 
 export const queryPg = async <R extends TDBRecord = any> (
-  connectionId: string,
+  arg: string | {
+    connectionId: string,
+    poolConfig?: PoolConfig & IDbOptionsPg,
+    sqlText: string,
+    sqlValues?: any[],
+    throwError?: boolean,
+    prefix?: string,
+    registerTypesFunctions?: IRegisterTypeFn[],
+  },
   sqlText: string,
   sqlValues?: any[],
   throwError?: boolean,
@@ -14,8 +22,16 @@ export const queryPg = async <R extends TDBRecord = any> (
   registerTypesFunctions?: IRegisterTypeFn[],
 ):
   Promise<QueryResult<R> | undefined> => {
+  let poolConfig: (PoolConfig & IDbOptionsPg) | undefined;
+  let connectionId: string = '';
+  if (typeof arg === 'string') {
+    connectionId = arg;
+  } else {
+    // eslint-disable-next-line prefer-destructuring
+    ({ connectionId, poolConfig, sqlText, sqlValues, throwError, prefix, registerTypesFunctions } = arg);
+  }
   try {
-    const pool: IPoolPg = await getPoolPg(connectionId, throwError, registerTypesFunctions);
+    const pool: IPoolPg = await getPoolPg({ connectionId, poolConfig, throwError, registerTypesFunctions });
     let res: QueryResult;
     if (Array.isArray(sqlValues)) {
       res = await pool.query(sqlText, sqlValues);

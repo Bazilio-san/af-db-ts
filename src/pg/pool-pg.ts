@@ -52,9 +52,25 @@ export const getDbConfigPg = <T> (connectionId: string, includeOptions?: boolean
 
 export const poolsCachePg: IConnectionPoolsPg = {};
 
-export const getPoolPg = async (connectionId: string, throwError?: boolean, registerTypesFunctions?: IRegisterTypeFn[]): Promise<IPoolPg> => {
+export const getPoolPg = async (arg: {
+  connectionId: string,
+  poolConfig?: PoolConfig & IDbOptionsPg,
+  throwError?: boolean,
+  registerTypesFunctions?: IRegisterTypeFn[]
+} | string, throwError?: boolean, registerTypesFunctions?: IRegisterTypeFn[]): Promise<IPoolPg> => {
+  let poolConfig: (PoolConfig & IDbOptionsPg) | undefined;
+  let connectionId: string = '';
+  if (typeof arg === 'string') {
+    connectionId = arg;
+  } else {
+    // eslint-disable-next-line prefer-destructuring
+    ({ connectionId, poolConfig, throwError, registerTypesFunctions } = arg);
+  }
+
   if (!poolsCachePg[connectionId]) {
-    const poolConfig = getDbConfigPg<PoolConfig & IDbOptionsPg>(connectionId, true, throwError) as PoolConfig & IDbOptionsPg;
+    if (!poolConfig) {
+      poolConfig = getDbConfigPg<PoolConfig & IDbOptionsPg>(connectionId, true, throwError) as PoolConfig & IDbOptionsPg;
+    }
     const pool = new Pool(poolConfig) as IPoolPg;
     poolsCachePg[connectionId] = pool;
     pool.on('error', (err: Error, client: PoolClient) => {
