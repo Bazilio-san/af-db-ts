@@ -63,7 +63,6 @@ export const getPoolPg = async (arg: {
   if (typeof arg === 'string') {
     connectionId = arg;
   } else {
-    // eslint-disable-next-line prefer-destructuring
     ({ connectionId, poolConfig, throwError, registerTypesFunctions } = arg);
   }
 

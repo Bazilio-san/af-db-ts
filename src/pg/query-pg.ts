@@ -15,7 +15,7 @@ export const queryPg = async <R extends TDBRecord = any> (
     prefix?: string,
     registerTypesFunctions?: IRegisterTypeFn[],
   },
-  sqlText: string,
+  sqlText?: string,
   sqlValues?: any[],
   throwError?: boolean,
   prefix?: string,
@@ -27,16 +27,15 @@ export const queryPg = async <R extends TDBRecord = any> (
   if (typeof arg === 'string') {
     connectionId = arg;
   } else {
-    // eslint-disable-next-line prefer-destructuring
     ({ connectionId, poolConfig, sqlText, sqlValues, throwError, prefix, registerTypesFunctions } = arg);
   }
   try {
     const pool: IPoolPg = await getPoolPg({ connectionId, poolConfig, throwError, registerTypesFunctions });
     let res: QueryResult;
     if (Array.isArray(sqlValues)) {
-      res = await pool.query(sqlText, sqlValues);
+      res = await pool.query(sqlText || '', sqlValues);
     } else {
-      res = await pool.query(sqlText);
+      res = await pool.query(sqlText || '');
     }
     return res;
   } catch (err) {
