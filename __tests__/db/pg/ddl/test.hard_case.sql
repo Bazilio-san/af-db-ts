@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS test.hard_case
     constraint ux__test__hard_case__i5_i6 unique (i5, i6)
     );
 
+COMMENT ON COLUMN test.hard_case."ser1" is 'Автоинкрементное поле ser1';
+
 alter table test.hard_case
     owner to postgres;
 

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { genTableInterfacesPg } from '../../../src/pg/gen-table-interfaces-pg';
+import { genTableInterfacesPg } from '../../../src';
 
 const tables = [
   'test.hard_case',

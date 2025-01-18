@@ -162,4 +162,5 @@ export { queryPg } from './pg/query-pg';
 export {
   getFieldsAndValuesPg,
   getTableSchemaPg,
+  getSimpleTableDDL,
 } from './pg/table-schema-pg';

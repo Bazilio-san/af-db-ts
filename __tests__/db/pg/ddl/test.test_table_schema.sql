@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS test.table_schema
   constraint ux__test__fable_schema__vc_tz unique (vc1, dtz1)
 );
 
+COMMENT ON COLUMN test.table_schema."ser1" is 'Автоинкрементное поле ser1';
+
 alter table test.table_schema
   owner to postgres;
 

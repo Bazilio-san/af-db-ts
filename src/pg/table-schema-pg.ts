@@ -71,7 +71,7 @@ const getPrimaryKey = async (connectionId: string, commonSchemaAndTable: string)
                JOIN pg_attribute a
                     ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
       WHERE i.indrelid = '${schemaTablePg}'::regclass
-    AND i.indisprimary;`;
+        AND i.indisprimary;`;
   const result = await queryPg(connectionId, sql);
 
   return (result?.rows || []).map(({ f }) => f);
@@ -133,6 +133,31 @@ const getSerials = async (connectionId: string, commonSchemaAndTable: string): P
   return result?.rows?.[0]?.cols || [];
 };
 
+const getColumnCommentsPg = async (connectionId: string, commonSchemaAndTable: string): Promise<{ [columnName: string]: string }> => {
+  const [schema, table] = schemaTable.to.common(commonSchemaAndTable).split('.');
+  const sql = `
+      SELECT a.attname     as "columnName",
+             d.description as comment
+      FROM pg_class c
+               JOIN pg_namespace n ON c.relnamespace = n.oid
+               JOIN pg_attribute a ON a.attrelid = c.oid
+               LEFT JOIN pg_description d ON d.objoid = c.oid AND d.objsubid = a.attnum
+      WHERE c.relname = '${table}'
+        AND n.nspname = '${schema}'
+        AND a.attnum > 0;
+  `;
+  const result = await queryPg(connectionId, sql);
+  const comments: { [columnName: string]: string } = {};
+
+  (result?.rows || []).forEach(({ columnName, comment }) => {
+    if (comment) {
+      comments[columnName] = comment;
+    }
+  });
+
+  return comments;
+};
+
 export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTable: string): Promise<ITableSchemaPg> => {
   let tableSchema = tableSchemaHash[commonSchemaAndTable];
   if (tableSchema) {
@@ -143,6 +168,13 @@ export const getTableSchemaPg = async (connectionId: string, commonSchemaAndTabl
     const pk = await getPrimaryKey(connectionId, commonSchemaAndTable);
     const uc = await getUniqueConstraints(connectionId, commonSchemaAndTable);
     const serialsFields = await getSerials(connectionId, commonSchemaAndTable);
+    const comments = await getColumnCommentsPg(connectionId, commonSchemaAndTable);
+
+    // Добавляем комментарии в columnsSchema
+    Object.keys(columnsSchema).forEach((columnName) => {
+      columnsSchema[columnName].comment = comments[columnName] || null;
+    });
+
     const defaults: { [fieldName: string]: string } = {};
     Object.values(columnsSchema).forEach((fieldDef) => {
       const { name: f = '', columnDefault, hasDefault } = fieldDef;
@@ -197,4 +229,24 @@ export const getFieldsAndValuesPg = <U extends TDBRecord = TDBRecord> (record: U
   return {
     fields, fieldsList, values, positionsList, setFields, upsertFields,
   };
+};
+
+export const getSimpleTableDDL = async (connectionId: string, commonSchemaAndTable: string): Promise<string> => {
+  const tableSchema = await getTableSchemaPg(connectionId, commonSchemaAndTable); // Предполагаем существование этой функции
+  const schemaTablePg = schemaTable.to.pg(commonSchemaAndTable);
+  const { columnsSchema } = tableSchema;
+
+  const lines: string[] = [`create table ${schemaTablePg}`];
+  lines.push('(');
+
+  Object.values(columnsSchema).forEach((column) => {
+    const fieldLine = `  "${column.name}" ${column.dataType}${column.isNullable ? '' : ' not null'}`;
+    const withComment = column.comment ? `${fieldLine}, -- ${column.comment}` : `${fieldLine},`;
+    lines.push(withComment);
+  });
+
+  // Удаляем запятую в конце списка полей (заменяем запятую последней строки)
+  lines[lines.length - 1] = lines[lines.length - 1].replace(/,$/, '');
+  lines.push(');');
+  return lines.join('\n');
 };

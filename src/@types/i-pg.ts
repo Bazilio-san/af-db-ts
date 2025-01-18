@@ -5,6 +5,7 @@ import { TDataTypePg } from './i-data-types-pg';
 export interface IFieldDefPg extends IFieldDef {
   dataType?: TDataTypePg,
   arrayType?: TDataTypePg,
+  comment?: string | null,
 }
 
 export interface TColumnsSchemaPg {

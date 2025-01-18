@@ -2,7 +2,7 @@
 
 import * as path from 'path';
 import fs from 'fs';
-import { genTableInterfacePg, getTableSchemaPg, ITableSchemaPg, queryPg } from '../../../src';
+import { genTableInterfacePg, getSimpleTableDDL, getTableSchemaPg, ITableSchemaPg, queryPg } from '../../../src';
 import columnsSchema from './ddl/column-schema-for-test-table-schema-pg.json';
 
 const connectionId = 'test';
@@ -17,6 +17,8 @@ beforeAll(async () => {
     path.normalize(path.join(process.cwd(), '__tests__/db/pg/@gen-types')),
   );
   tableSchema = await getTableSchemaPg(connectionId, 'test.table_schema');
+  const ddl = await getSimpleTableDDL(connectionId, 'test.table_schema');
+  console.log(ddl);
 });
 
 describe('getTableSchemaPg()', () => {

@@ -5,7 +5,8 @@
     "hasDefault": false,
     "isNullable": true,
     "name": "arr_int",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "arr_str": {
     "arrayType": "varchar",
@@ -13,7 +14,8 @@
     "hasDefault": false,
     "isNullable": true,
     "name": "arr_str",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "bool1": {
     "columnDefault": "true",
@@ -21,7 +23,8 @@
     "hasDefault": true,
     "isNullable": false,
     "name": "bool1",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "bool2": {
     "columnDefault": "false",
@@ -29,14 +32,16 @@
     "hasDefault": true,
     "isNullable": true,
     "name": "bool2",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "bytea": {
     "dataType": "bytea",
     "hasDefault": false,
     "isNullable": true,
     "name": "bytea",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "decimal": {
     "dataType": "numeric",
@@ -44,7 +49,8 @@
     "isNullable": true,
     "name": "decimal",
     "radix": 10,
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "double_precision": {
     "dataType": "double precision",
@@ -53,7 +59,8 @@
     "name": "double_precision",
     "precision": 53,
     "radix": 2,
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "dtz1": {
     "columnDefault": "CURRENT_TIMESTAMP",
@@ -62,7 +69,8 @@
     "hasDefault": true,
     "isNullable": false,
     "name": "dtz1",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "gen1": {
     "dataType": "numeric",
@@ -70,7 +78,8 @@
     "isNullable": true,
     "name": "gen1",
     "radix": 10,
-    "readOnly": true
+    "readOnly": true,
+    "comment": null
   },
   "i1": {
     "columnDefault": "25",
@@ -81,7 +90,8 @@
     "precision": 32,
     "radix": 2,
     "readOnly": false,
-    "scale": 0
+    "scale": 0,
+    "comment": null
   },
   "i2": {
     "dataType": "int",
@@ -91,14 +101,16 @@
     "precision": 32,
     "radix": 2,
     "readOnly": false,
-    "scale": 0
+    "scale": 0,
+    "comment": null
   },
   "money": {
     "dataType": "money",
     "hasDefault": false,
     "isNullable": true,
     "name": "money",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "numeric": {
     "dataType": "numeric",
@@ -108,7 +120,8 @@
     "precision": 7,
     "radix": 10,
     "readOnly": false,
-    "scale": 5
+    "scale": 5,
+    "comment": null
   },
   "real": {
     "dataType": "real",
@@ -117,7 +130,8 @@
     "name": "real",
     "precision": 24,
     "radix": 2,
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "ser1": {
     "columnDefault": "nextval('test.table_schema_ser1_seq'::regclass)",
@@ -128,7 +142,8 @@
     "precision": 32,
     "radix": 2,
     "readOnly": false,
-    "scale": 0
+    "scale": 0,
+    "comment": null
   },
   "ser2": {
     "columnDefault": "nextval('test.table_schema_ser2_seq'::regclass)",
@@ -139,7 +154,8 @@
     "precision": 32,
     "radix": 2,
     "readOnly": false,
-    "scale": 0
+    "scale": 0,
+    "comment": null
   },
   "si1": {
     "dataType": "smallint",
@@ -149,7 +165,8 @@
     "precision": 16,
     "radix": 2,
     "readOnly": false,
-    "scale": 0
+    "scale": 0,
+    "comment": null
   },
   "time1": {
     "dataType": "time",
@@ -157,7 +174,8 @@
     "hasDefault": false,
     "isNullable": false,
     "name": "time1",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   },
   "vc1": {
     "dataType": "varchar",
@@ -165,6 +183,7 @@
     "isNullable": false,
     "length": 10,
     "name": "vc1",
-    "readOnly": false
+    "readOnly": false,
+    "comment": null
   }
 }
