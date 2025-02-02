@@ -1,4 +1,6 @@
 import { PoolClient } from 'pg';
+import { IOptions } from 'mssql';
+import { ConnectionAuthentication } from 'tedious';
 
 export interface IDBConfigCommon {
   label?: string,
@@ -11,6 +13,8 @@ export interface IDBConfigCommon {
 
 export interface IDBConfigMs extends IDBConfigCommon {
   server: string,
+  options?: IOptions | undefined;
+  authentication?: ConnectionAuthentication | undefined;
 }
 
 export interface IDBConfigPg extends IDBConfigCommon {
