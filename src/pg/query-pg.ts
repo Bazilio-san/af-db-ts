@@ -9,6 +9,7 @@ export const queryPg = async <R extends TDBRecord = any> (
   arg: string | {
     connectionId: string,
     poolConfig?: PoolConfig & IDbOptionsPg,
+    client?: IPoolPg,
     sqlText: string,
     sqlValues?: any[],
     throwError?: boolean,
@@ -24,13 +25,14 @@ export const queryPg = async <R extends TDBRecord = any> (
   Promise<QueryResult<R> | undefined> => {
   let poolConfig: (PoolConfig & IDbOptionsPg) | undefined;
   let connectionId: string = '';
+  let pool: IPoolPg | undefined;
   if (typeof arg === 'string') {
     connectionId = arg;
   } else {
-    ({ connectionId, poolConfig, sqlText, sqlValues, throwError, prefix, registerTypesFunctions } = arg);
+    ({ connectionId, poolConfig, client: pool, sqlText, sqlValues, throwError, prefix, registerTypesFunctions } = arg);
   }
   try {
-    const pool: IPoolPg = await getPoolPg({ connectionId, poolConfig, throwError, registerTypesFunctions });
+    pool = pool || (await getPoolPg({ connectionId, poolConfig, throwError, registerTypesFunctions }));
     let res: QueryResult;
     if (Array.isArray(sqlValues)) {
       res = await pool.query(sqlText || '', sqlValues);
