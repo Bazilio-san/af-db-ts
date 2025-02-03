@@ -1,21 +1,12 @@
 import { PoolConfig, QueryResult } from 'pg';
 import { getPoolPg } from './pool-pg';
 import { logSqlError } from '../common';
-import { IPoolPg } from '../@types/i-pg';
+import { IPoolPg, IQueryPgArgs } from '../@types/i-pg';
 import { TDBRecord } from '../@types/i-common';
 import { IDbOptionsPg, IRegisterTypeFn } from '../@types/i-config';
 
 export const queryPg = async <R extends TDBRecord = any> (
-  arg: string | {
-    connectionId: string,
-    poolConfig?: PoolConfig & IDbOptionsPg,
-    client?: IPoolPg,
-    sqlText: string,
-    sqlValues?: any[],
-    throwError?: boolean,
-    prefix?: string,
-    registerTypesFunctions?: IRegisterTypeFn[],
-  },
+  arg: string | IQueryPgArgs,
   sqlText?: string,
   sqlValues?: any[],
   throwError?: boolean,

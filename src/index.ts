@@ -115,6 +115,7 @@ export {
   IPoolPg,
   IConnectionPoolsPg,
   IPoolClientPg,
+  IQueryPgArgs,
 } from './@types/i-pg';
 
 export { TDataTypePg } from './@types/i-data-types-pg';

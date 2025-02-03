@@ -1,6 +1,7 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient, PoolConfig } from 'pg';
 import { IFieldDef, TFieldName } from './i-common';
 import { TDataTypePg } from './i-data-types-pg';
+import { IDbOptionsPg, IRegisterTypeFn } from './i-config';
 
 export interface IFieldDefPg extends IFieldDef {
   dataType?: TDataTypePg,
@@ -41,4 +42,15 @@ export interface IPoolPg extends Pool {
 
 export interface IConnectionPoolsPg {
   [connectionId: string]: IPoolPg
+}
+
+export interface IQueryPgArgs {
+  connectionId: string,
+  poolConfig?: PoolConfig & IDbOptionsPg,
+  client?: IPoolPg,
+  sqlText: string,
+  sqlValues?: any[],
+  throwError?: boolean,
+  prefix?: string,
+  registerTypesFunctions?: IRegisterTypeFn[],
 }
