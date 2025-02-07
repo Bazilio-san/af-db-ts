@@ -13,6 +13,8 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   noUpdateIfNull?: boolean,
   mergeCorrection?: (_sql: string) => string,
   returning?: string, // '*' | ' "anyFieldName1", "anyFieldName2"'
+  conflictFields?: string[],
+  updateFields?: string[],
 }): Promise<string> => {
   const {
     connectionId,
@@ -29,6 +31,8 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   const schemaTableStr = schemaTable.to.pg(commonSchemaAndTable);
   const tableSchema: ITableSchemaPg = await getTableSchemaPg(connectionId, commonSchemaAndTable);
   const { columnsSchema, pk, fieldsWoSerialsAndRO, defaults } = tableSchema;
+
+  const conflictFields = arg.conflictFields || pk;
 
   let mergeFieldsArr: string[] = fieldsWoSerialsAndRO;
   if (omitFields.length) {
@@ -50,7 +54,7 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
     return `(${preparedValues.join(', ')})`;
   }).join(',\n  ').trim();
 
-  let updateFieldsArr: string[] = mergeFieldsArr;
+  let updateFieldsArr: string[] = arg.updateFields || mergeFieldsArr;
   if (fieldsExcludedFromUpdatePart?.length) {
     const set = new Set(fieldsExcludedFromUpdatePart);
     updateFieldsArr = mergeFieldsArr.filter((fieldName) => !set.has(fieldName));
@@ -75,7 +79,7 @@ INSERT INTO ${schemaTableStr} (
 )
 VALUES
   ${mergeValues}
-ON CONFLICT (${pk.map((f) => `"${f}"`).join(', ')})
+ON CONFLICT (${conflictFields.map((f) => `"${f}"`).join(', ')})
 DO UPDATE SET
   ${updateSetStr}
   ${returning ? `RETURNING ${returning}` : ''}
