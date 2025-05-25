@@ -42,6 +42,7 @@ export const genTableInterfacePg = async (
   connectionId: string,
   commonSchemaAndTable: string,
   tableInterfacesDir: string = TABLE_INTERFACES_DIR,
+  isSortFields: boolean = false,
 ): Promise<void> => {
   const tableSchema = await getTableSchemaPg(connectionId, commonSchemaAndTable);
   const interfaceName = `I${commonSchemaAndTable
@@ -50,7 +51,10 @@ export const genTableInterfacePg = async (
     .map((word) => (word ? word[0].toUpperCase() + word.substring(1) : ''))
     .join('')}Record`;
 
-  const linesArr = Object.values(tableSchema.columnsSchema).map(getFieldDefinition);
+  let linesArr: string[] = Object.values(tableSchema.columnsSchema).map(getFieldDefinition);
+  if (isSortFields) {
+    linesArr = linesArr.sort();
+  }
   const content = `export interface ${interfaceName} {\n${linesArr.map((v) => `  ${v}`).join(',\n')},\n}\n`;
 
   const fileName = `${commonSchemaAndTable.replace('.', '-').toLowerCase()}.ts`;
@@ -63,10 +67,11 @@ export const genTableInterfacesPg = async (
   connectionId: string,
   tables: string[],
   tableInterfacesDir: string = TABLE_INTERFACES_DIR,
+  isSortFields: boolean = false,
 ): Promise<void> => {
   for (let i = 0; i < tables.length; i++) {
     const commonSchemaAndTable = tables[i];
-    await genTableInterfacePg(connectionId, commonSchemaAndTable, tableInterfacesDir);
+    await genTableInterfacePg(connectionId, commonSchemaAndTable, tableInterfacesDir, isSortFields);
   }
   echo.g(`Generated ${tables.length} table interfaces in folder '.${
     tableInterfacesDir.replace(process.cwd().replace(/\\/g, '/'), '')}/'`);
