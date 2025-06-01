@@ -65,14 +65,13 @@ export const genTableInterfacePg = async (
 };
 
 export const genTableInterfacesPg = async (
-  connectionId: string,
-  tables: string[],
+  connectionIdsAndTables: [string, string][],
   tableInterfacesDir: string = TABLE_INTERFACES_DIR,
   isSortFields: boolean = false,
 ): Promise<void> => {
   const interfaceFileNames: string[] = [];
-  for (let i = 0; i < tables.length; i++) {
-    const commonSchemaAndTable = tables[i];
+  for (let i = 0; i < connectionIdsAndTables.length; i++) {
+    const [connectionId, commonSchemaAndTable] = connectionIdsAndTables[i];
     const interfaceFileName = await genTableInterfacePg(connectionId, commonSchemaAndTable, tableInterfacesDir, isSortFields);
     interfaceFileNames.push(interfaceFileName);
   }
@@ -80,7 +79,7 @@ export const genTableInterfacesPg = async (
   const indexFileContent = interfaceFileNames.map((v) => `export * from './${v}';`).join('\n');
   fs.writeFileSync(indexFilePath, indexFileContent);
 
-  echo.g(`Generated ${tables.length} table interfaces in folder '.${
+  echo.g(`Generated ${connectionIdsAndTables.length} table interfaces in folder '.${
     tableInterfacesDir.replace(process.cwd().replace(/\\/g, '/'), '')}/'`);
   await closeAllPgConnectionsPg();
   process.exit(0);

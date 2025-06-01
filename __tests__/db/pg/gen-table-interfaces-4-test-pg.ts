@@ -10,7 +10,6 @@ const tables = [
 ];
 
 genTableInterfacesPg(
-  'test',
-  tables,
+  tables.map((schemaAndTable) => ['test', schemaAndTable]),
   path.normalize(path.join(process.cwd(), '__tests__/db/pg/@gen-types')),
 ).then(() => 0);
