@@ -43,7 +43,7 @@ export const genTableInterfacePg = async (
   commonSchemaAndTable: string,
   tableInterfacesDir: string = TABLE_INTERFACES_DIR,
   isSortFields: boolean = false,
-): Promise<void> => {
+): Promise<string> => {
   const tableSchema = await getTableSchemaPg(connectionId, commonSchemaAndTable);
   const interfaceName = `I${commonSchemaAndTable
     .replace('.', '_')
@@ -61,6 +61,7 @@ export const genTableInterfacePg = async (
   const filePath = path.resolve(path.join(tableInterfacesDir, fileName));
 
   fs.writeFileSync(filePath, content);
+  return fileName;
 };
 
 export const genTableInterfacesPg = async (
@@ -69,10 +70,16 @@ export const genTableInterfacesPg = async (
   tableInterfacesDir: string = TABLE_INTERFACES_DIR,
   isSortFields: boolean = false,
 ): Promise<void> => {
+  const interfaceFileNames: string[] = [];
   for (let i = 0; i < tables.length; i++) {
     const commonSchemaAndTable = tables[i];
-    await genTableInterfacePg(connectionId, commonSchemaAndTable, tableInterfacesDir, isSortFields);
+    const interfaceFileName = await genTableInterfacePg(connectionId, commonSchemaAndTable, tableInterfacesDir, isSortFields);
+    interfaceFileNames.push(interfaceFileName);
   }
+  const indexFilePath = path.resolve(path.join(tableInterfacesDir, 'index.d.ts'));
+  const indexFileContent = interfaceFileNames.map((v) => `export * from './${v}';`).join('\n');
+  fs.writeFileSync(indexFilePath, indexFileContent);
+
   echo.g(`Generated ${tables.length} table interfaces in folder '.${
     tableInterfacesDir.replace(process.cwd().replace(/\\/g, '/'), '')}/'`);
   await closeAllPgConnectionsPg();
