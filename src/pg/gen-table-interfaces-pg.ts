@@ -77,7 +77,7 @@ export const genTableInterfacesPg = async (
   }
   const indexFilePath = path.resolve(path.join(tableInterfacesDir, 'index.d.ts'));
   const indexFileContent = interfaceFileNames.map((v) => `export * from './${v}';`).join('\n');
-  fs.writeFileSync(indexFilePath, indexFileContent);
+  fs.writeFileSync(indexFilePath, `${indexFileContent}\n`);
 
   echo.g(`Generated ${connectionIdsAndTables.length} table interfaces in folder '.${
     tableInterfacesDir.replace(process.cwd().replace(/\\/g, '/'), '')}/'`);
