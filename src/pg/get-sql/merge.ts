@@ -8,13 +8,27 @@ export const getMergeSqlPg = async <U extends TDBRecord = TDBRecord> (arg: {
   connectionId: string,
   commonSchemaAndTable: string,
   recordset: TRecordSet<U>,
+  /**
+   * Поля массива conflictFields будут указаны в части ON CONFLICT (<conflictFields>)
+   * Если conflictFields НЕ ПЕРЕДАН, то в части ON CONFLICT будут перечислены поля, входящие в Primary Kеy.
+   */
+  conflictFields?: string[],
+  /**
+   * omitFields: Эти поля будут исключены и из INSERT части и из UPDATE части.
+   * За исключением случая, когда передан массив updateFields, на него omitFields не влияет
+   */
   omitFields?: string[],
+  /**
+   * Если массив полей updateFields указан, то именно эти поля будут участвовать в части DO UPDATE
+   * За вычитом полей в fieldsExcludedFromUpdatePart
+   * Если updateFields НЕ УКАЗАН, то в UPDATE части будут присутсьвовать все поля,
+   * за минусом автоинкрементных, RO, omitFields и fieldsExcludedFromUpdatePart
+   */
+  updateFields?: string[],
   fieldsExcludedFromUpdatePart?: string[],
   noUpdateIfNull?: boolean,
   mergeCorrection?: (_sql: string) => string,
   returning?: string, // '*' | ' "anyFieldName1", "anyFieldName2"'
-  conflictFields?: string[],
-  updateFields?: string[],
 }): Promise<string> => {
   const {
     connectionId,
