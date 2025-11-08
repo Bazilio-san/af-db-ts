@@ -9,6 +9,7 @@ export interface IDBConfigCommon {
   database: string,
   user: string,
   password: string,
+  usedExtensions?: string[],
 }
 
 export interface IDBConfigMs extends IDBConfigCommon {
