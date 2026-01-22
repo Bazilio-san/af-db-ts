@@ -26,3 +26,4 @@ local*.*
 /package-lock.json
 /**/.env*
 **/dist
+/.npmrc
