@@ -11,14 +11,14 @@ const queryTest = (sql: string) => queryPg(connectionId, sql);
 describe('Array string escape', () => {
   describe('arrayToJsonList()', () => {
     const testArr: [any[], string][] = [
-      [[1, 0, true, false], `"1","0","true","false"`],
-      [[{ a: 'w' }, [1, 'r']], `null,null`],
+      [[1, 0, true, false], '"1","0","true","false"'],
+      [[{ a: 'w' }, [1, 'r']], 'null,null'],
       [[
         new Date(1702621900066),
         moment(1702621900066),
         DateTime.fromMillis(1702621900066),
-      ], `"2023-12-15T06:31:40.066Z","2023-12-15T06:31:40.066Z","2023-12-15T06:31:40.066Z"`],
-      [[1, `a"b"c'd'e\\f$$g`], `"1","a\\"b\\"c'd'e\\\\f$$g"`],
+      ], '"2023-12-15T06:31:40.066Z","2023-12-15T06:31:40.066Z","2023-12-15T06:31:40.066Z"'],
+      [[1, 'a"b"c\'d\'e\\f$$g'], '"1","a\\"b\\"c\'d\'e\\\\f$$g"'],
       // [[`a"b"c'd'e\\f$$g`], `$s$\{"aaa","a\\"b\\"c'd'e\\\\f$$g"}$s$`],
     ];
     testArr.forEach((caseValues) => {
@@ -31,7 +31,7 @@ describe('Array string escape', () => {
     });
   });
   describe('complex test', () => {
-    test(`test`, async () => {
+    test('test', async () => {
       const dropTableSql = `---
         DROP TABLE IF EXISTS ${commonSchemaAndTable};`;
       const truncateTableSQL = `---
@@ -55,12 +55,12 @@ describe('Array string escape', () => {
             new Date(1702621900066),
             moment(1702621900066),
             DateTime.fromMillis(1702621900066),
-            `a"b"c'd'e\\f$$g`,
+            'a"b"c\'d\'e\\f$$g',
           ],
         },
         {
           id: 2,
-          ct: [`ООО "Бодрый Бобёр"`],
+          ct: ['ООО "Бодрый Бобёр"'],
         },
       ];
       const expected = [
@@ -70,7 +70,7 @@ describe('Array string escape', () => {
         '2023-12-15T06:31:40.066Z',
         '2023-12-15T06:31:40.066Z',
         '2023-12-15T06:31:40.066Z',
-        `a"b"c'd'e\\f$$g`,
+        'a"b"c\'d\'e\\f$$g',
       ];
       const insertSql = await getInsertSqlPg({ connectionId, commonSchemaAndTable, recordset });
       await queryTest(insertSql);
@@ -81,7 +81,7 @@ describe('Array string escape', () => {
         expect(v).toBe(expected[index]);
       });
       const val2 = (res?.rows || [])[1]?.ct?.[0];
-      expect(val2).toBe(`ООО "Бодрый Бобёр"`);
+      expect(val2).toBe('ООО "Бодрый Бобёр"');
     });
   });
 });

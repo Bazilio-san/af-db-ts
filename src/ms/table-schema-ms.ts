@@ -107,7 +107,7 @@ const getColumnsSchemaMs_ = async (
     WHERE TABLE_NAME = '${table}' AND TABLE_SCHEMA = '${schema}';
   `;
 
-  let res = await queryMs(connectionId, sqlText, true, `getRecordSchemaMs SQL ERROR`);
+  let res = await queryMs(connectionId, sqlText, true, 'getRecordSchemaMs SQL ERROR');
   const columnsSchema: TColumnsSchemaMs = {};
   (res?.recordset || []).forEach((fieldDef) => {
     const name = fieldDef.COLUMN_NAME;

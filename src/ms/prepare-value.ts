@@ -16,7 +16,7 @@ export const escapeStringMs = (value: any, escapeOnlySingleQuotes: boolean = fal
     return NULL;
   }
   let v = String(value);
-  v = v.replace(/'/g, `''`);
+  v = v.replace(/'/g, '\'\'');
   if (!escapeOnlySingleQuotes) {
     v = v.replace(/%/g, '%%');
   }

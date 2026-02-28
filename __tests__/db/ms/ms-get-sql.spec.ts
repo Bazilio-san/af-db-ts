@@ -121,7 +121,7 @@ describe('Sql Ms', () => {
       time1: '23:04:06',
       bool1: 1,
     };
-    const customSets: TDBRecord = { i2: `i2 + 134` };
+    const customSets: TDBRecord = { i2: 'i2 + 134' };
 
     const arg = {
       connectionId,

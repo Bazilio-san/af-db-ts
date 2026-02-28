@@ -93,7 +93,7 @@ export const getJsTypeByTypePg = (dataType?: TDataTypePg, arrayType?: TDataTypeP
     }
 
     case 'vector':
-      return `number[]`;
+      return 'number[]';
 
     default:
       return 'string';

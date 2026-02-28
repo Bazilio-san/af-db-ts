@@ -84,7 +84,7 @@ export const prepareBigIntNumber = (value: any): string | typeof NULL => {
   if (typeof value === 'bigint') {
     return `${value}`;
   }
-  let bi: BigInt;
+  let bi: bigint;
   try {
     if (typeof value === 'number') {
       const v = Math.floor(value);

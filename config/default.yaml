@@ -45,3 +45,17 @@ db:
         database: test
         user: test
         password: '***'
+#      example_with_ssh:
+#        host: 127.0.0.1
+#        port: 5432
+#        database: mydb
+#        user: dbuser
+#        password: '***'
+#        ssh:
+#          host: ssh-server.example.com
+#          port: 22
+#          username: sshuser
+#          privateKey: /path/to/openssh/private/key
+#          # OR: password: '***'
+#          # dstHost: 127.0.0.1
+#          # dstPort: 5432

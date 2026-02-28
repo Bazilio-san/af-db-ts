@@ -42,7 +42,7 @@ describe('getTableSchemaMs()', () => {
       dt2: 'getdate()',
       dtz: 'getdate()',
       i1: '123',
-      vc1: `'aaa'`,
+      vc1: '\'aaa\'',
     });
   });
 

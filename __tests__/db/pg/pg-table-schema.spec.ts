@@ -18,6 +18,7 @@ beforeAll(async () => {
   );
   tableSchema = await getTableSchemaPg(connectionId, 'test.table_schema');
   const ddl = await getSimpleTableDDL(connectionId, 'test.table_schema');
+   
   console.log(ddl);
 });
 

@@ -10,7 +10,7 @@ export const getResetSequenceSqlPg = async (arg: {
 
   const { serialsFields } = await getTableSchemaPg(arg.connectionId, commonSchemaAndTable);
 
-  // eslint-disable-next-line arrow-body-style
+   
   return serialsFields.map((serialFieldName) => {
     return `SELECT setval(
                        pg_get_serial_sequence('"${schema}"."${table}"', '${serialFieldName}'),

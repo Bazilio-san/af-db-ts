@@ -81,7 +81,7 @@ export const getPoolConnectionMs = async (connectionId: string, options: TGetPoo
     if (pool?.connecting) {
       const startTs = Date.now();
       while (pool?.connecting && (Date.now() - startTs < (dbConfig.connectionTimeout || defaultOptions.connectionTimeout))) {
-        // eslint-disable-next-line no-await-in-loop
+         
         await sleep(100);
       }
       if (pool?.connected) {
@@ -139,7 +139,7 @@ export const closeDbConnectionsMs = async (poolsToClose: ConnectionPool | Connec
       }
       if (pool && pool.close) {
         try {
-          // eslint-disable-next-line no-await-in-loop
+           
           await pool.close();
           if (!noEcho && connectionId) {
             const msg = `pool "${connectionId}" closed`;

@@ -126,7 +126,7 @@ WHERE "i1" = 111 AND "si1" = 11;
       bool1: 1,
       bool2: 1,
     };
-    const customSets: TDBRecord = { bool1: `NOT bool1` };
+    const customSets: TDBRecord = { bool1: 'NOT bool1' };
 
     const arg = {
       connectionId,

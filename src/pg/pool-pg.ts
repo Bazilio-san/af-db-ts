@@ -1,9 +1,13 @@
-/* eslint-disable no-await-in-loop */
+ 
+import fs from 'fs';
 import config from 'config';
+import { Server } from 'net';
+import { Client as SshClient } from 'ssh2';
 import { Pool, PoolClient, PoolConfig } from 'pg';
+import { createTunnel } from 'tunnel-ssh';
 import { cloneDeep } from 'af-tools-ts';
 import { logger } from '../logger-error';
-import { IDbOptionsPg, IDbsPg, IRegisterTypeFn } from '../@types/i-config';
+import { IDBConfigPg, IDbOptionsPg, IDbsPg, IRegisterTypeFn, ISshTunnelConfig } from '../@types/i-config';
 import { IConnectionPoolsPg, IPoolClientPg, IPoolPg } from '../@types/i-pg';
 import { _3_HOURS } from '../common';
 import { debugX } from '../debug';
@@ -39,7 +43,7 @@ const defaultOptions: IDbOptionsPg = {
 
 dbOptions = config.util.extendDeep(defaultOptions, dbOptions);
 
-export const getDbConfigPg = <T> (connectionId: string, includeOptions?: boolean, throwError?: boolean): T | undefined => {
+export const getDbConfigPg = <T = IDBConfigPg> (connectionId: string, includeOptions?: boolean, throwError?: boolean): T | undefined => {
   const namedDbConfig = dbs[connectionId];
   if (!namedDbConfig) {
     if (throwError) {
@@ -47,10 +51,49 @@ export const getDbConfigPg = <T> (connectionId: string, includeOptions?: boolean
     }
     return undefined;
   }
-  return includeOptions ? config.util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig;
+  return (includeOptions ? config.util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig) as T;
 };
 
 export const poolsCachePg: IConnectionPoolsPg = {};
+
+export interface ISshTunnelEntry {
+  server: Server,
+  client: SshClient,
+}
+
+export const sshTunnelsCachePg: { [connectionId: string]: ISshTunnelEntry } = {};
+
+const createSshTunnel = async (connectionId: string, sshConfig: ISshTunnelConfig, pgHost: string, pgPort: number): Promise<{ host: string, port: number }> => {
+  const sshOptions: Record<string, any> = {
+    host: sshConfig.host,
+    port: sshConfig.port || 22,
+    username: sshConfig.username,
+  };
+  if (sshConfig.privateKey) {
+    sshOptions.privateKey = fs.readFileSync(sshConfig.privateKey);
+  } else if (sshConfig.password) {
+    sshOptions.password = sshConfig.password;
+  }
+
+  const dstHost = sshConfig.dstHost || pgHost;
+  const dstPort = sshConfig.dstPort || pgPort;
+
+  const [server, client] = await createTunnel(
+    { autoClose: false, reconnectOnError: false },
+    { port: 0 },
+    sshOptions,
+    { srcAddr: '127.0.0.1', srcPort: 0, dstAddr: dstHost, dstPort },
+  );
+
+  sshTunnelsCachePg[connectionId] = { server, client };
+
+  const addr = server.address();
+  const localPort = typeof addr === 'object' && addr ? addr.port : 0;
+
+  debugX(`SSH tunnel [${connectionId}] created: 127.0.0.1:${localPort} -> ${dstHost}:${dstPort} via ${sshConfig.host}:${sshConfig.port || 22}`);
+
+  return { host: '127.0.0.1', port: localPort };
+};
 
 export const getPoolPg = async (arg: {
   connectionId: string,
@@ -70,6 +113,16 @@ export const getPoolPg = async (arg: {
     if (!poolConfig) {
       poolConfig = getDbConfigPg<PoolConfig & IDbOptionsPg>(connectionId, true, throwError) as PoolConfig & IDbOptionsPg;
     }
+
+    // Извлечь и удалить ssh-конфиг из poolConfig (pg.Pool его не знает)
+    const sshConfig = (poolConfig as any)?.ssh as ISshTunnelConfig | undefined;
+    if (sshConfig) {
+      delete (poolConfig as any).ssh;
+      const tunnelAddr = await createSshTunnel(connectionId, sshConfig, poolConfig.host || '127.0.0.1', poolConfig.port || 5432);
+      poolConfig.host = tunnelAddr.host;
+      poolConfig.port = tunnelAddr.port;
+    }
+
     const pool = new Pool(poolConfig) as IPoolPg;
     poolsCachePg[connectionId] = pool;
     pool.on('error', (err: Error, client: PoolClient) => {
@@ -104,6 +157,24 @@ export const closePoolPg = async (connectionId: string): Promise<boolean> => {
     .filter((client: IPoolClientPg) => client?._connected && typeof client?.end === 'function')
     .map((client: IPoolClientPg) => client.end());
   await Promise.all(fns);
+
+  // Закрыть SSH-туннель, если он был создан для этого connectionId
+  const tunnel = sshTunnelsCachePg[connectionId];
+  if (tunnel) {
+    try {
+      tunnel.client.end();
+    } catch (e) {
+      // ignore
+    }
+    try {
+      tunnel.server.close();
+    } catch (e) {
+      // ignore
+    }
+    delete sshTunnelsCachePg[connectionId];
+    debugX(`SSH tunnel [${connectionId}] closed`);
+  }
+
   return true;
 };
 

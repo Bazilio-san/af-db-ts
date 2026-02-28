@@ -18,9 +18,20 @@ export interface IDBConfigMs extends IDBConfigCommon {
   authentication?: ConnectionAuthentication | undefined;
 }
 
+export interface ISshTunnelConfig {
+  host: string,
+  port?: number, // default 22
+  username: string,
+  password?: string,
+  privateKey?: string, // путь к файлу ключа OpenSSH
+  dstHost?: string, // адрес PG с точки зрения SSH-сервера (default: берётся из host PG-конфига)
+  dstPort?: number, // порт PG с точки зрения SSH-сервера (default: берётся из port PG-конфига)
+}
+
 export interface IDBConfigPg extends IDBConfigCommon {
   host: string,
   port: number,
+  ssh?: ISshTunnelConfig,
 }
 
 export interface IDbOptionsMs {

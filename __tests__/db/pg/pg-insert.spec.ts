@@ -26,7 +26,7 @@ beforeAll(async () => {
 
 describe('insertPg()', () => {
   // only_one_serial
-  test(`11 - Вставка новой записи в only_one_serial`, async () => {
+  test('11 - Вставка новой записи в only_one_serial', async () => {
     const record: ITestOnlyOneSerialRecord = {
       i1: 3,
       i2: 3,
@@ -36,7 +36,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i2).toEqual(3);
   });
 
-  test(`12 - Вставка существующей записи в only_one_serial не должна состояться`, async () => {
+  test('12 - Вставка существующей записи в only_one_serial не должна состояться', async () => {
     const record: ITestOnlyOneSerialRecord = {
       ser1: 3,
       i1: 4,
@@ -49,7 +49,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.jb).toEqual(null);
   });
 
-  test(`13 - Игнорирование нового значения serial при вставка записи в only_one_serial быть должно (J)`, async () => {
+  test('13 - Игнорирование нового значения serial при вставка записи в only_one_serial быть должно (J)', async () => {
     const record: ITestOnlyOneSerialRecord = {
       ser1: 8,
       i1: 4,
@@ -61,7 +61,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i2).toEqual(4);
   });
 
-  test(`14 - Вставка записи с объектом в поле json и jsonb`, async () => {
+  test('14 - Вставка записи с объектом в поле json и jsonb', async () => {
     const record: ITestOnlyOneSerialRecord = {
       i1: 5,
       j: { a: 'a value' },
@@ -73,7 +73,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.jb).toEqual({ b: 'b value' });
   });
 
-  test(`15 - Вставка записи с массивом объектов в поле json и jsonb`, async () => {
+  test('15 - Вставка записи с массивом объектов в поле json и jsonb', async () => {
     const record: ITestOnlyOneSerialRecord = {
       i1: 6,
       j: [{ a: 'a value' }, { b: 'b value' }],
@@ -85,7 +85,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.jb).toEqual([{ a: 'a value' }, { b: 'b value' }]);
   });
 
-  test(`16 - Вставка записи с number в поле json и jsonb`, async () => {
+  test('16 - Вставка записи с number в поле json и jsonb', async () => {
     const record: ITestOnlyOneSerialRecord = {
       i1: 7,
       j: 77,
@@ -98,7 +98,7 @@ describe('insertPg()', () => {
   });
 
   // only_one_uniq
-  test(`21 - Вставка новой записи в only_one_uniq`, async () => {
+  test('21 - Вставка новой записи в only_one_uniq', async () => {
     const record: ITestOnlyOneUniqRecord = {
       i1: 3,
       i2: 3,
@@ -112,7 +112,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(null);
   });
 
-  test(`22 - Вставка существующей записи в only_one_uniq не должна состояться`, async () => {
+  test('22 - Вставка существующей записи в only_one_uniq не должна состояться', async () => {
     const record: ITestOnlyOneUniqRecord = {
       i1: 3,
       i2: 3,
@@ -127,7 +127,7 @@ describe('insertPg()', () => {
   });
 
   // serial_and_uniq
-  test(`31 - Вставка новой записи в serial_and_uniq`, async () => {
+  test('31 - Вставка новой записи в serial_and_uniq', async () => {
     const record: ITestSerialAndUniqRecord = {
       i1: 3,
       i2: 3,
@@ -142,7 +142,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(null);
   });
 
-  test(`32 - Вставка записи в serial_and_uniq c cуществующим serial не должна состояться`, async () => {
+  test('32 - Вставка записи в serial_and_uniq c cуществующим serial не должна состояться', async () => {
     const record: ITestSerialAndUniqRecord = {
       ser1: 3,
       i1: 4,
@@ -158,7 +158,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(null);
   });
 
-  test(`33 - Вставка записи в serial_and_uniq c cуществующим uniq не должна состояться`, async () => {
+  test('33 - Вставка записи в serial_and_uniq c cуществующим uniq не должна состояться', async () => {
     const record: ITestSerialAndUniqRecord = {
       i1: 3,
       i2: 3,
@@ -173,7 +173,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(null);
   });
 
-  test(`34 - Игнорирование нового значения serial при вставка записи в serial_and_uniq быть должно (J)`, async () => {
+  test('34 - Игнорирование нового значения serial при вставка записи в serial_and_uniq быть должно (J)', async () => {
     const record: ITestSerialAndUniqRecord = {
       ser1: 8,
       i1: 4,
@@ -190,7 +190,7 @@ describe('insertPg()', () => {
   });
 
   // hard_case
-  test(`41 - Вставка записи в hard_case c cуществующим serial не должна состояться`, async () => {
+  test('41 - Вставка записи в hard_case c cуществующим serial не должна состояться', async () => {
     const record: ITestHardCaseRecord = {
       ser1: 1,
       i1: 5,
@@ -206,7 +206,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(2);
   });
 
-  test(`42 - Вставка записи в hard_case c cуществующим serial не должна состояться. Вернется запись для первого сериала`, async () => {
+  test('42 - Вставка записи в hard_case c cуществующим serial не должна состояться. Вернется запись для первого сериала', async () => {
     const record: ITestHardCaseRecord = {
       ser1: 1,
       ser2: 2,
@@ -223,7 +223,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(2);
   });
 
-  test(`43 - Вставка записи в hard_case c cуществующим serial-2 не должна состояться.`, async () => {
+  test('43 - Вставка записи в hard_case c cуществующим serial-2 не должна состояться.', async () => {
     const record: ITestHardCaseRecord = {
       ser2: 2,
       i1: 5,
@@ -239,7 +239,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(3);
   });
 
-  test(`44 - Вставка записи в hard_case c cуществующим pk не должна состояться.`, async () => {
+  test('44 - Вставка записи в hard_case c cуществующим pk не должна состояться.', async () => {
     const record: ITestHardCaseRecord = {
       i1: 2,
       i2: 2,
@@ -256,7 +256,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(3);
   });
 
-  test(`45 - Вставка записи в hard_case c cуществующим ux_i3_i4 не должна состояться.`, async () => {
+  test('45 - Вставка записи в hard_case c cуществующим ux_i3_i4 не должна состояться.', async () => {
     const record: ITestHardCaseRecord = {
       i1: 999,
       i2: 999,
@@ -273,7 +273,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(3);
   });
 
-  test(`46 - Вставка записи в hard_case c cуществующим uix_i7_i8 не должна состояться.`, async () => {
+  test('46 - Вставка записи в hard_case c cуществующим uix_i7_i8 не должна состояться.', async () => {
     const record: ITestHardCaseRecord = {
       i1: 5,
       i2: 5,
@@ -292,7 +292,7 @@ describe('insertPg()', () => {
     expect(rowInserted?.i4).toEqual(3);
   });
 
-  test(`47 - Вставка новой записи в hard_case и возврат из view`, async () => {
+  test('47 - Вставка новой записи в hard_case и возврат из view', async () => {
     const record: ITestHardCaseRecord = {
       i1: 6,
       i2: 6,

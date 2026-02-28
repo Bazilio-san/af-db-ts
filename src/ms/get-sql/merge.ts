@@ -51,7 +51,7 @@ export const getMergeSqlMs = async <U extends TDBRecord = TDBRecord> (arg: {
 
   const { mergeIdentity = pk } = arg;
   if (!mergeIdentity?.length) {
-    throw new Error(`The list of fields by which the uniqueness of a record is assessed is empty!`);
+    throw new Error('The list of fields by which the uniqueness of a record is assessed is empty!');
   }
   const onClause = mergeIdentity.map((f) => (`target.[${f}] = source.[${f}]`)).join(' AND ');
 
@@ -109,7 +109,7 @@ SELECT @u = COUNT(*) FROM @t WHERE act != 'INSERT';
 SELECT @total as total, @i as inserted, @u as updated;
 `;
   } else {
-    mergeSQL += `;\n`;
+    mergeSQL += ';\n';
   }
   if (typeof arg.mergeCorrection === 'function') {
     mergeSQL = arg.mergeCorrection(mergeSQL);

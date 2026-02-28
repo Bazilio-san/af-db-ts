@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+ 
 import * as path from 'path';
 import * as fs from 'fs';
 import { echo } from 'af-echo-ts';

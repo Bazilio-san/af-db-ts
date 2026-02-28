@@ -18,6 +18,7 @@ export {
   IRegisterTypeFn,
   IDbOptionsPg,
   IDbOptionsMs,
+  ISshTunnelConfig,
 } from './@types/i-config';
 
 export {
@@ -145,6 +146,7 @@ export { isTableOrViewExistsPg } from './pg/is-table-or-view-exists';
 
 export {
   poolsCachePg,
+  sshTunnelsCachePg,
   getPoolPg,
   closePoolPg,
   getDbConfigPg,
