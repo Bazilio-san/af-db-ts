@@ -67,6 +67,32 @@ describe('Pool: no deprecation warning with registerTypesFunctions', () => {
     }
   });
 
+  test('параллельные запросы выполняются одновременно на разных клиентах', async () => {
+    const pool = await getPoolPg({
+      connectionId,
+      registerTypesFunctions: [fakeRegisterType],
+    });
+
+    const SLEEP_SEC = 0.5;
+    const PARALLEL_COUNT = 3;
+
+    const start = Date.now();
+    const results = await Promise.all(
+      Array.from({ length: PARALLEL_COUNT }, (_, i) => pool.query(`SELECT pg_sleep(${SLEEP_SEC}), ${i + 1} AS idx`)),
+    );
+    const elapsed = Date.now() - start;
+
+    // Все запросы вернули корректные результаты
+    for (let i = 0; i < PARALLEL_COUNT; i++) {
+      expect(results[i].rows[0].idx).toEqual(i + 1);
+    }
+
+    // При параллельном выполнении общее время ~ SLEEP_SEC, а не SLEEP_SEC * PARALLEL_COUNT.
+    // Допускаем запас на накладные расходы, но не более чем время двух последовательных запросов.
+    const maxExpected = SLEEP_SEC * 2 * 1000;
+    expect(elapsed).toBeLessThan(maxExpected);
+  });
+
   test('getPoolPg возвращает работающий пул и корректно закрывается', async () => {
     const pool = await getPoolPg({
       connectionId,
