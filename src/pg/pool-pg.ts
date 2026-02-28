@@ -142,8 +142,10 @@ export const getPoolPg = async (arg: {
 
     const pool = new Pool(poolOptions) as IPoolPg;
     poolsCachePg[connectionId] = pool;
-    pool.on('error', (err: Error, client: PoolClient) => {
-      client.release(true);
+    // Событие 'error' пула эмитится из makeIdleListener в pg-pool,
+    // который уже удалил клиент из пула (pool._remove) и вызвал client.end().
+    // Повторный вызов client.release() здесь приводил к throwOnDoubleRelease().
+    pool.on('error', (err: Error, _client: PoolClient) => {
       logger.error(err);
     });
     pool.on('connect', (client: PoolClient) => {
