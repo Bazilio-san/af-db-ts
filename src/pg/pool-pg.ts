@@ -1,6 +1,7 @@
- 
+
 import fs from 'fs';
 import config from 'config';
+import { Util } from 'config/lib/util.js';
 import { Server } from 'net';
 import { Client as SshClient } from 'ssh2';
 import { Pool, PoolClient, PoolConfig } from 'pg';
@@ -41,7 +42,7 @@ const defaultOptions: IDbOptionsPg = {
   query_timeout: _3_HOURS, // number of milliseconds until the request call times out, no timeout by default
 };
 
-dbOptions = config.util.extendDeep(defaultOptions, dbOptions);
+dbOptions = Util.extendDeep(defaultOptions, dbOptions);
 
 export const getDbConfigPg = <T = IDBConfigPg> (connectionId: string, includeOptions?: boolean, throwError?: boolean): T | undefined => {
   const namedDbConfig = dbs[connectionId];
@@ -51,7 +52,7 @@ export const getDbConfigPg = <T = IDBConfigPg> (connectionId: string, includeOpt
     }
     return undefined;
   }
-  return (includeOptions ? config.util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig) as T;
+  return (includeOptions ? Util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig) as T;
 };
 
 export const poolsCachePg: IConnectionPoolsPg = {};
@@ -163,12 +164,12 @@ export const closePoolPg = async (connectionId: string): Promise<boolean> => {
   if (tunnel) {
     try {
       tunnel.client.end();
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
     try {
       tunnel.server.close();
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
     delete sshTunnelsCachePg[connectionId];

@@ -62,7 +62,7 @@ export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TDataTypeP
         arr = value.map((v) => (v == null ? NULL : getBool(v)));
         break;
       case sql.Bit:
-        // eslint-disable-next-line no-nested-ternary
+         
         arr = value.map((v) => (v == null ? NULL : (getBool(v) ? 1 : 0)));
         break;
       case 'tinyint':
@@ -148,7 +148,7 @@ export const arrayToJsonList = (value: any, arrayType?: TDataTypeMs | TDataTypeP
       default: {
         try {
           return JSON.stringify(value.map((v) => (v == null ? null : v))).replace(/^\[(.+?)]$/, '$1');
-        } catch (err) {
+        } catch (_err) {
           return NULL;
         }
       }

@@ -11,7 +11,7 @@ export const parseFloatNumber = (value: any): number | null => {
   if (typeof value === 'object') {
     try {
       value = JSON.stringify(value);
-    } catch (err) {
+    } catch (_err) {
       //
     }
   }
@@ -95,7 +95,7 @@ export const prepareBigIntNumber = (value: any): string | typeof NULL => {
       const v = value.replace(/^\++/, '').split(/[^\d-]/)[0].trim();
       return v ? `${BigInt(v)}` : NULL;
     }
-  } catch (err) {
+  } catch (_err) {
     //
   }
   return NULL;

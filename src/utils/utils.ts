@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax */
+ 
 
 import { NULL } from '../common';
 
@@ -46,7 +46,7 @@ export const prepareJSON = (value: any): string | typeof NULL => {
   }
   try {
     value = JSON.stringify(value);
-  } catch (err) {
+  } catch (_err) {
     return NULL;
   }
   return value;

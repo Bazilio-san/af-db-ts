@@ -1,9 +1,10 @@
 import config from 'config';
+import { Util } from 'config/lib/util.js';
 import { echo } from 'af-echo-ts';
 import * as sql from 'mssql';
 import { ConnectionPool } from 'mssql';
 import { cloneDeep, sleep } from 'af-tools-ts';
-import { IDbOptionsMs, IDbsMs } from '../@types/i-config';
+import { IDBConfigMs, IDbOptionsMs, IDbsMs } from '../@types/i-config';
 import { logSqlError, _3_HOURS, _1_HOUR } from '../common';
 import { IConnectionPoolsMs, TGetPoolConnectionOptionsMs } from '../@types/i-ms';
 
@@ -39,9 +40,9 @@ const defaultOptions: IDbOptionsMs = {
   connectionTimeout: 2 * 60_000, // 2 min
 };
 
-dbOptions = config.util.extendDeep(defaultOptions, dbOptions);
+dbOptions = Util.extendDeep(defaultOptions, dbOptions);
 
-export const getDbConfigMs = <T> (connectionId: string, includeOptions?: boolean, throwError?: boolean): T | undefined => {
+export const getDbConfigMs = <T = IDBConfigMs> (connectionId: string, includeOptions?: boolean, throwError?: boolean): T | undefined => {
   const namedDbConfig = dbs[connectionId];
   if (!namedDbConfig) {
     if (throwError) {
@@ -49,7 +50,7 @@ export const getDbConfigMs = <T> (connectionId: string, includeOptions?: boolean
     }
     return undefined;
   }
-  return includeOptions ? config.util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig;
+  return (includeOptions ? Util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig) as T;
 };
 
 export const poolsCacheMs: IConnectionPoolsMs = {};
@@ -81,7 +82,7 @@ export const getPoolConnectionMs = async (connectionId: string, options: TGetPoo
     if (pool?.connecting) {
       const startTs = Date.now();
       while (pool?.connecting && (Date.now() - startTs < (dbConfig.connectionTimeout || defaultOptions.connectionTimeout))) {
-         
+
         await sleep(100);
       }
       if (pool?.connected) {
@@ -139,7 +140,7 @@ export const closeDbConnectionsMs = async (poolsToClose: ConnectionPool | Connec
       }
       if (pool && pool.close) {
         try {
-           
+
           await pool.close();
           if (!noEcho && connectionId) {
             const msg = `pool "${connectionId}" closed`;
@@ -149,7 +150,7 @@ export const closeDbConnectionsMs = async (poolsToClose: ConnectionPool | Connec
               echo.info(msg);
             }
           }
-        } catch (err) {
+        } catch (_err) {
           //
         }
       }

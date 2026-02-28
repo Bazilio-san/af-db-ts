@@ -11,8 +11,8 @@
     "test_": "mocha --require @babel/register 'test/**/**spec.js'",
     "clean": "shx rm -rf dist/*",
     "build": "tsc -b tsconfig.json tsconfig.esm.json tsconfig.types.json",
-    "lint": "eslint . --ext .ts ",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "jest --config jest.config.js",
     "release": "npm run lint:fix && npm run clean && npm run build && npm run test",
     "cb": "npm run clean && npm run build"
