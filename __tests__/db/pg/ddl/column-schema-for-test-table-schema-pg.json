@@ -143,7 +143,7 @@
     "radix": 2,
     "readOnly": false,
     "scale": 0,
-    "comment": null
+    "comment": "Автоинкрементное поле ser1"
   },
   "ser2": {
     "columnDefault": "nextval('test.table_schema_ser2_seq'::regclass)",
