@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Edit",
+      "MultiEdit",
+      "Read",
+      "Write",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.idea/**)",
+      "Read(./.run/**)",
+      "Read(./_misc/**)",
+      "Read(./**/_tmp/**)",
+      "Read(./**/*.private.*)",
+      "Read(./**/*local.*)",
+      "Read(./**/*local-*)"
+    ]
+  },
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "120000",
+    "BASH_MAX_TIMEOUT_MS": "600000",
+    "BASH_MAX_OUTPUT_LENGTH": "5000000",
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "true",
+    "DISABLE_COST_WARNINGS": "0",
+    "DISABLE_TELEMETRY": "0"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/eslint-fix.cjs"
+          }
+        ]
+      }
+    ]
+  },
+  "hasCompletedOnboarding": true,
+  "hasTrustDialogAccepted": true,
+  "hasCompletedProjectOnboarding": true,
+  "shiftEnterKeyBindingInstalled": true
+}
