@@ -124,24 +124,40 @@ export const getPoolPg = async (arg: {
       poolConfig.port = tunnelAddr.port;
     }
 
-    const pool = new Pool(poolConfig) as IPoolPg;
+    // Используем опцию verify для регистрации типов на каждом новом клиенте.
+    // pg-pool вызывает verify ПЕРЕД тем как отдать клиент потребителю,
+    // что исключает гонку между registerTypesFunctions и пользовательскими запросами.
+    // Ранее registerTypesFunctions вызывались в async-обработчике события 'connect',
+    // но pg-pool эмитит 'connect' синхронно и сразу отдаёт клиент — это приводило к
+    // DeprecationWarning в pg >= 8.19 ("client.query() when already executing a query").
+    const poolOptions: PoolConfig & IDbOptionsPg & { verify?: (client: PoolClient, done: (err?: Error) => void) => void } = { ...poolConfig };
+    if (Array.isArray(registerTypesFunctions) && registerTypesFunctions.length > 0) {
+      const fns = registerTypesFunctions;
+      poolOptions.verify = (client: PoolClient, done: (err?: Error) => void) => {
+        Promise.all(fns.map((fn) => fn(client)))
+          .then(() => done())
+          .catch((err) => done(err));
+      };
+    }
+
+    const pool = new Pool(poolOptions) as IPoolPg;
     poolsCachePg[connectionId] = pool;
     pool.on('error', (err: Error, client: PoolClient) => {
       client.release(true);
       logger.error(err);
     });
-    pool.on('connect', async (client: PoolClient) => {
+    pool.on('connect', (client: PoolClient) => {
       const { database, processID } = client as unknown as IPoolClientPg;
       debugX(`PG client [${connectionId}] connected! DB: "${database}" / processID: ${processID}`);
-      if (Array.isArray(registerTypesFunctions)) {
-        await Promise.all(registerTypesFunctions.map((fn) => fn(client)));
-      }
     });
     pool.on('remove', (client: PoolClient) => {
       const { database, processID } = client as unknown as IPoolClientPg;
       debugX(`PG client [${connectionId}] removed. DB: "${database}" / processID: ${processID}`);
     });
-    await pool.connect();
+    // Eager-connect: создаём первое соединение сразу для раннего обнаружения ошибок.
+    // Ранее pool.connect() вызывался без сохранения клиента, что приводило к утечке.
+    const initialClient = await pool.connect();
+    initialClient.release();
   }
   return poolsCachePg[connectionId];
 };
