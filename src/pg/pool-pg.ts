@@ -52,7 +52,7 @@ export const getDbConfigPg = <T = IDBConfigPg> (connectionId: string, includeOpt
     }
     return undefined;
   }
-  return (includeOptions ? Util.extendDeep(dbOptions, namedDbConfig) : namedDbConfig) as T;
+  return (includeOptions ? Util.extendDeep({}, dbOptions, namedDbConfig) : namedDbConfig) as T;
 };
 
 export const poolsCachePg: IConnectionPoolsPg = {};
@@ -96,6 +96,28 @@ const createSshTunnel = async (connectionId: string, sshConfig: ISshTunnelConfig
   return { host: '127.0.0.1', port: localPort };
 };
 
+const openingPools = new Map<string, Promise<IPoolPg>>();
+const closingPools = new Map<string, Promise<boolean>>();
+
+const closeTunnelPg = (connectionId: string) => {
+  // Закрыть SSH-туннель, если он был создан для этого connectionId
+  const tunnel = sshTunnelsCachePg[connectionId];
+  if (tunnel) {
+    try {
+      tunnel.client.end();
+    } catch (_e) {
+      // ignore
+    }
+    try {
+      tunnel.server.close();
+    } catch (_e) {
+      // ignore
+    }
+    delete sshTunnelsCachePg[connectionId];
+    debugX(`SSH tunnel [${connectionId}] closed`);
+  }
+};
+
 export const getPoolPg = async (arg: {
   connectionId: string,
   poolConfig?: PoolConfig & IDbOptionsPg,
@@ -110,11 +132,23 @@ export const getPoolPg = async (arg: {
     ({ connectionId, poolConfig, throwError, registerTypesFunctions } = arg);
   }
 
-  if (!poolsCachePg[connectionId]) {
+  if (closingPools.has(connectionId)) {
+    await closingPools.get(connectionId);
+    return getPoolPg(arg, throwError, registerTypesFunctions);
+  }
+  if (poolsCachePg[connectionId]) {
+    return poolsCachePg[connectionId];
+  }
+  const pending = openingPools.get(connectionId);
+  if (pending) {
+    return pending;
+  }
+  const opening = (async () => {
     if (!poolConfig) {
       poolConfig = getDbConfigPg<PoolConfig & IDbOptionsPg>(connectionId, true, throwError) as PoolConfig & IDbOptionsPg;
     }
 
+    poolConfig = { ...poolConfig };
     // Извлечь и удалить ssh-конфиг из poolConfig (pg.Pool его не знает)
     const sshConfig = (poolConfig as any)?.ssh as ISshTunnelConfig | undefined;
     if (sshConfig) {
@@ -141,7 +175,6 @@ export const getPoolPg = async (arg: {
     }
 
     const pool = new Pool(poolOptions) as IPoolPg;
-    poolsCachePg[connectionId] = pool;
     // Событие 'error' пула эмитится из makeIdleListener в pg-pool,
     // который уже удалил клиент из пула (pool._remove) и вызвал client.end().
     // Повторный вызов client.release() здесь приводил к throwOnDoubleRelease().
@@ -158,43 +191,48 @@ export const getPoolPg = async (arg: {
     });
     // Eager-connect: создаём первое соединение сразу для раннего обнаружения ошибок.
     // Ранее pool.connect() вызывался без сохранения клиента, что приводило к утечке.
-    const initialClient = await pool.connect();
-    initialClient.release();
-  }
-  return poolsCachePg[connectionId];
+    try {
+      const initialClient = await pool.connect();
+      initialClient.release();
+    } catch (error) {
+      await pool.end();
+      closeTunnelPg(connectionId);
+      throw error;
+    }
+    poolsCachePg[connectionId] = pool;
+    return pool;
+  })().finally(() => { openingPools.delete(connectionId); });
+  openingPools.set(connectionId, opening);
+  return opening;
 };
 
 export const closePoolPg = async (connectionId: string): Promise<boolean> => {
   if (!connectionId) {
     return false;
   }
-  const pool = poolsCachePg[connectionId];
-  if (!pool) {
+  const pending = closingPools.get(connectionId);
+  if (pending) {
+    return pending;
+  }
+  const closing = (async () => {
+    const opening = openingPools.get(connectionId);
+    if (opening) {
+      await opening.catch(() => undefined);
+    }
+    const pool = poolsCachePg[connectionId];
+    delete poolsCachePg[connectionId];
+    try {
+      await pool?.end();
+    } finally {
+      closeTunnelPg(connectionId);
+    }
     return true;
-  }
-  const fns = (pool._clients || [])
-    .filter((client: IPoolClientPg) => client?._connected && typeof client?.end === 'function')
-    .map((client: IPoolClientPg) => client.end());
-  await Promise.all(fns);
-
-  // Закрыть SSH-туннель, если он был создан для этого connectionId
-  const tunnel = sshTunnelsCachePg[connectionId];
-  if (tunnel) {
-    try {
-      tunnel.client.end();
-    } catch (_e) {
-      // ignore
-    }
-    try {
-      tunnel.server.close();
-    } catch (_e) {
-      // ignore
-    }
-    delete sshTunnelsCachePg[connectionId];
-    debugX(`SSH tunnel [${connectionId}] closed`);
-  }
-
-  return true;
+  })().finally(() => { closingPools.delete(connectionId); });
+  closingPools.set(connectionId, closing);
+  return closing;
 };
 
-export const closeAllPgConnectionsPg = async () => Promise.all(Object.keys(poolsCachePg).map((connectionId) => closePoolPg(connectionId)));
+export const closeAllPgConnectionsPg = async () => {
+  const ids = new Set([...Object.keys(poolsCachePg), ...openingPools.keys(), ...closingPools.keys()]);
+  return Promise.all(Array.from(ids, closePoolPg));
+};
